@@ -4,7 +4,7 @@
 
 ### IMPORTANT
 
-This is a work in progress. _Please contribute!_
+This is a work in progress. Currently not available in npm, needs to be installed manually. _Please contribute!_
 
 ### Features
 * Power status
