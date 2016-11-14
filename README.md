@@ -11,6 +11,7 @@ This is a work in progress. Currently not available in npm, needs to be installe
 * Turn on / off
 * Mute Status
 * Mute / Unmute
+* Volume control (currently as light bulb)
 
 ## Installation
 
