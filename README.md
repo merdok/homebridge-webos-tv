@@ -9,8 +9,8 @@ This is a work in progress. Currently not available in npm, needs to be installe
 ### Features
 * Power status
 * Turn on / off
-* Mute Status
-* Mute / Unmute
+* Mute Status (currently as light bulb)
+* Mute / Unmute (currently as light bulb)
 * Volume control (currently as light bulb)
 
 ## Installation
