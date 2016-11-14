@@ -54,6 +54,7 @@ function webos3Accessory(log, config, api) {
 
   this.service = new Service.Switch(this.name, "powerState");
   this.muteService = new Service.Switch(this.name, "muteState");
+  this.volumeService = new Service.Lightbulb(this.name, "volumeState");
 
   this.service
     .getCharacteristic(Characteristic.On)
@@ -64,6 +65,11 @@ function webos3Accessory(log, config, api) {
     .getCharacteristic(Characteristic.On)
     .on('get', this.getMuteState.bind(this))
     .on('set', this.setMuteState.bind(this));
+  
+  	this.volumeService
+		.addCharacteristic(new Characteristic.Brightness())
+		.on('get', this.getVolume.bind(this))
+		.on('set', this.setVolume.bind(this));
   
 }
 
@@ -130,9 +136,24 @@ webos3Accessory.prototype.setMuteState = function(state, callback) {
     return callback(null, true);
 }
 
+webos3Accessory.prototype.getVolume = function(callback) {
+    var self = this;
+    lgtv.request('ssap://audio/getVolume', function (err, res) {
+      if (!res) return callback(null, false);
+      self.log('webOS3 TV volume: ' + res.volume);   
+      callback(null, parseInt(res.volume));
+    });
+}
+
+webos3Accessory.prototype.setVolume = function(level, callback) {
+    lgtv.request('ssap://audio/setVolume', {volume: level});  
+    return callback(null, level);
+}
+
 webos3Accessory.prototype.getServices = function() {
   return [
     this.service,
-    this.muteService
+    this.muteService,
+    this.volumeService
   ]
 }
