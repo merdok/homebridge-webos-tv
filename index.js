@@ -115,7 +115,7 @@ webos3Accessory.prototype.setState = function(state, callback) {
         return callback(null, true);
       })
     } else {
-      return callback(new Error('LGTv2 is not connected'))
+      return callback(new Error('webOS3 is not connected'))
     }
   }
 }
