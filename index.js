@@ -100,7 +100,7 @@ webos3Accessory.prototype.setState = function(state, callback) {
       wol.wake(this.mac, function(error) {
         if (error) return callback(new Error('webOS3 wake on lan error'));
         this.checkCount = 0;
-        setTimeout(self.checkWakeOnLan.bind(self, callback), 7000);
+        setTimeout(self.checkWakeOnLan.bind(self, callback), 5000);
       })
     } else {
       return callback(null, true);
