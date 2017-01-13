@@ -72,9 +72,15 @@ function webos3Accessory(log, config, api) {
   
 }
 
+webos3Accessory.prototype.checkTVState = function(callback) {
+  this.log('webOS3 TV state: %s', this.connected ? "On" : "Off");
+  return callback(null, this.connected);
+}
+
 webos3Accessory.prototype.getState = function(callback) {
-   this.log('webOS3 TV state: %s', this.connected ? "On" : "Off");
-   return callback(null, this.connected);
+  lgtv.connect(this.url);
+  var self = this;
+  setTimeout(self.checkTVState.bind(self, callback), 500);
 }
 
 webos3Accessory.prototype.checkWakeOnLan = function(callback) {
