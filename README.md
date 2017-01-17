@@ -1,6 +1,7 @@
 # homebridge-webos3
 
 `homebridge-webos3` is a plugin for HomeBridge which allows you to control your webOS3 TV! It should also work with webOS2 TVs.
+The idea is that the TV should be controlled completely from the native HomeKit iOS app, that is why volume appears as a light bulb.
 
 ### IMPORTANT
 
