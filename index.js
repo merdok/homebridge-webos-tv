@@ -52,10 +52,10 @@ function webos3Accessory(log, config, api) {
     self.connected = false;
   });
 
-  this.service = new Service.Switch(this.name, "powerService");
+  this.powerService = new Service.Switch(this.name, "powerService");
   this.volumeService = new Service.Lightbulb(this.name, "volumeService");
 
-  this.service
+  this.powerService
     .getCharacteristic(Characteristic.On)
     .on('get', this.getState.bind(this))
     .on('set', this.setState.bind(this));
@@ -183,7 +183,7 @@ webos3Accessory.prototype.setVolume = function(level, callback) {
 
 webos3Accessory.prototype.getServices = function() {
   return [
-    this.service,
+    this.powerService,
     this.volumeService
   ]
 }
