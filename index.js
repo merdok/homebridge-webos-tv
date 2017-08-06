@@ -21,7 +21,7 @@ function webos3Accessory(log, config, api) {
     url: this.url,
     timeout: 5000,
     reconnect: 3000,
-    keyFile: '/tmp/webos_key_'
+    keyFile: keyFile: config['keyFile']
   });
   
   var self = this;
