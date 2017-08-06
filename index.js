@@ -14,6 +14,7 @@ function webos3Accessory(log, config, api) {
   this.name = config['name'];
   this.mac = config['mac'];
   this.url = 'ws://' + this.ip + ':3000';
+  this.keyFile = config['keyFile'];
   this.connected = false;
   this.checkCount = 0;
 
@@ -21,7 +22,7 @@ function webos3Accessory(log, config, api) {
     url: this.url,
     timeout: 5000,
     reconnect: 3000,
-    keyFile: keyFile: config['keyFile']
+    keyFile: this.keyFile
   });
   
   var self = this;
