@@ -45,6 +45,18 @@ Add the accessory in `config.json` in your home directory inside `.homebridge`.
 
 You also need to enable "mobile tv on" on your tv for the turn on feature to work correctly.
 
+### Configuration fields
+- `accessory` [required]
+Should always be "webos3"
+- `name` [required]
+Name of your accessory
+- `ip` [required]
+ip address of your tv
+- `mac` [required]
+Mac address of your tv
+- `keyFile` [optional]
+Location to store permission token for your tv
+
 ## Special thanks
 [lgtv2](https://github.com/hobbyquaker/lgtv2) - the Node.js remote control module for LG WebOS smart TVs.
 
