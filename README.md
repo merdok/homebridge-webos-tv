@@ -24,7 +24,10 @@ Install homebridge:
 sudo npm install -g homebridge
 ```
 
-Copy over this package contents to your node_modules directory. 
+Install homebridge-webos3:
+```sh
+sudo npm install -g homebridge-webos3
+```
 
 ## Configuration
 
