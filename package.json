@@ -17,8 +17,9 @@
   "author": "merdok",
   "license": "MIT",
   "dependencies": {
-    "lgtv2": "^1.2.0",
-    "wake_on_lan": "0.0.4"
+    "lgtv2": "^1.4.0",
+    "wake_on_lan": "^0.0.4",
+    "ping": "^0.2.2"
   },
   "repository": {
     "type": "git",

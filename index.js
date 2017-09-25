@@ -1,5 +1,6 @@
 var lgtv, Service, Characteristic;
 var wol = require('wake_on_lan');
+var ping = require('ping');
 
 module.exports = function(homebridge) {
   Service = homebridge.hap.Service;
@@ -74,8 +75,16 @@ function webos3Accessory(log, config, api) {
 }
 
 webos3Accessory.prototype.checkTVState = function(callback) {
-  this.log('webOS3 TV state: %s', this.connected ? "On" : "Off");
-  return callback(null, this.connected);
+  var self = this;
+  ping.sys.probe(this.ip, function(isAlive) {
+    if (!isAlive) {
+      self.connected = false;
+    } else {
+      self.connected = true;
+    }
+    self.log('webOS3 TV state: %s', self.connected ? "On" : "Off");
+    return callback(null, self.connected);
+  });
 }
 
 webos3Accessory.prototype.getState = function(callback) {
