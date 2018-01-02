@@ -100,7 +100,7 @@ webos3Accessory.prototype.checkTVState = function(callback) {
       self.connected = true;
     }
     self.log('webOS3 TV state: %s', self.connected ? "On" : "Off");
-    return callback(null, self.connected);
+    callback(null, self.connected);
   });
 }
 
@@ -109,15 +109,14 @@ webos3Accessory.prototype.checkMuteState = function(callback) {
     if (self.connected) {
       lgtv.request('ssap://audio/getStatus', function (err, res) {
         if (!res || err){
-          self.connected = false ;
-          lgtv.disconnect();
-          return callback(null, false);
+          callback(new Error('webOS3 TV muted - error while getting current mute state'));
+        }else{
+          self.log('webOS3 TV muted: %s', res.mute ? "Yes" : "No");   
+          callback(null, !res.mute);
         }
-        self.log('webOS3 TV muted: %s', res.mute ? "Yes" : "No");   
-       return callback(null, !res.mute);
       });
     }else{
-      return callback(null, false);
+      callback(null, false);
     }
 }
 
@@ -126,38 +125,36 @@ webos3Accessory.prototype.checkVolumeLevel = function(callback) {
     if (self.connected) {
       lgtv.request('ssap://audio/getVolume', function (err, res) {
         if (!res || err){
-          self.connected = false ;
-          lgtv.disconnect();
-          return callback(null, false);
+          callback(new Error('webOS3 TV volume - error while getting current volume'));
+        }else{
+          self.log('webOS3 TV volume: ' + res.volume);   
+          callback(null, parseInt(res.volume));
         }
-        self.log('webOS3 TV volume: ' + res.volume);   
-       return callback(null, parseInt(res.volume));
       });
     }else{
-      return callback(null, false);
+      callback(null, false);
     }
 }
 
 webos3Accessory.prototype.checkWakeOnLan = function(callback) {
   if (this.connected) {
     this.checkCount = 0;
-    return callback(null, true);
+    callback(null, true);
   } else {
     if (this.checkCount < 3) {
       this.checkCount++;
       lgtv.connect(this.url);
       setTimeout(this.checkWakeOnLan.bind(this, callback), 5000);
     } else {
-      return callback(new Error('webOS3 wake timeout'));
       this.checkCount = 0;
+      callback(new Error('webOS3 wake timeout'));
     }
   }
 }
 
 webos3Accessory.prototype.getState = function(callback) {
   lgtv.connect(this.url);
-  var self = this;
-  setTimeout(self.checkTVState.bind(self, callback), 450);
+  this.checkTVState.call(this, callback);
 }
 
 webos3Accessory.prototype.setState = function(state, callback) {
@@ -170,7 +167,7 @@ webos3Accessory.prototype.setState = function(state, callback) {
         setTimeout(self.checkWakeOnLan.bind(self, callback), 5000);
       })
     } else {
-      return callback(null, true);
+      callback(null, true);
     }
   } else {
     if (this.connected) {
@@ -180,43 +177,41 @@ webos3Accessory.prototype.setState = function(state, callback) {
         lgtv.disconnect();
         self.connected = false ;
         self.volumeService.getCharacteristic(Characteristic.On).updateValue(false);
-        return callback(null, true);
+        callback(null, true);
       })
     } else {
-      return callback(new Error('webOS3 is not connected'))
+      callback(new Error('webOS3 is not connected'))
     }
   }
 }
 
 
 webos3Accessory.prototype.getMuteState = function(callback) {
-    var self = this;
-    setTimeout(self.checkMuteState.bind(self, callback), 460);
+    setTimeout(this.checkMuteState.bind(this, callback), 50);
 }
 
 webos3Accessory.prototype.setMuteState = function(state, callback) {
     var self = this;
     if (self.connected) {
       lgtv.request('ssap://audio/setMute', {mute: !state});  
-      return callback(null, true);
+      callback(null, true);
     }else {
-      return callback(new Error('webOS3 is not connected'))
+      callback(new Error('webOS3 is not connected'))
     }
 }
 
 
 webos3Accessory.prototype.getVolume = function(callback) {
-    var self = this;
-    setTimeout(self.checkVolumeLevel.bind(self, callback), 470);
+    setTimeout(this.checkVolumeLevel.bind(this, callback), 50);
 }
 
 webos3Accessory.prototype.setVolume = function(level, callback) {
     var self = this;
     if (self.connected) {
       lgtv.request('ssap://audio/setVolume', {volume: level});  
-      return callback(null, level);
+      callback(null, level);
      }else {
-      return callback(new Error('webOS3 is not connected'))
+      callback(new Error('webOS3 is not connected'))
     }
 }
 
