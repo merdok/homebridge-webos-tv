@@ -14,9 +14,14 @@ function webos3Accessory(log, config, api) {
   this.ip = config['ip'];
   this.name = config['name'];
   this.mac = config['mac'];
-  this.url = 'ws://' + this.ip + ':3000';
   this.keyFile = config['keyFile'];
+  this.volumeControl = config['volumeControl'];
+  if(this.volumeControl == undefined){
+    this.volumeControl = true;
+  }
   
+  this.url = 'ws://' + this.ip + ':3000';
+  this.enabledServices = [];
   this.connected = false;
   this.checkCount = 0;
 
@@ -57,6 +62,7 @@ function webos3Accessory(log, config, api) {
 
   this.powerService = new Service.Switch(this.name, "powerService");
   this.volumeService = new Service.Lightbulb(this.name, "volumeService");
+  this.informationService = new Service.AccessoryInformation();
 
   this.powerService
     .getCharacteristic(Characteristic.On)
@@ -69,15 +75,19 @@ function webos3Accessory(log, config, api) {
     .on('set', this.setMuteState.bind(this));
   
   this.volumeService
-     .addCharacteristic(new Characteristic.Brightness())
-     .on('get', this.getVolume.bind(this))
-     .on('set', this.setVolume.bind(this));
+    .addCharacteristic(new Characteristic.Brightness())
+    .on('get', this.getVolume.bind(this))
+    .on('set', this.setVolume.bind(this));
   
-  this.informationService = new Service.AccessoryInformation()
+  this.informationService
     .setCharacteristic(Characteristic.Manufacturer, 'LG Electronics Inc.')
     .setCharacteristic(Characteristic.Model, 'webOS 3.x TV')
     .setCharacteristic(Characteristic.SerialNumber, '-')
     .setCharacteristic(Characteristic.FirmwareRevision, '0.8.5');
+  
+  this.enabledServices.push(this.powerService);
+  if(this.volumeControl) this.enabledServices.push(this.volumeService);
+  this.enabledServices.push(this.informationService);
   
 }
 
@@ -212,11 +222,6 @@ webos3Accessory.prototype.setVolume = function(level, callback) {
 
 
 webos3Accessory.prototype.getServices = function() {
-  return [
-    this.powerService,
-    this.volumeService,
-    this.informationService
-  ]
+  return this.enabledServices;
 }
-
 
