@@ -59,6 +59,8 @@ ip address of your tv
 Mac address of your tv
 - `keyFile` [optional]
 Location to store permission token for your tv
+- `volumeControl` [optional]
+Wheter the volume service is enabled. Default: true
 
 ## Special thanks
 [lgtv2](https://github.com/hobbyquaker/lgtv2) - the Node.js remote control module for LG WebOS smart TVs.
