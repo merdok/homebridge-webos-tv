@@ -16,6 +16,7 @@ function webos3Accessory(log, config, api) {
   this.mac = config['mac'];
   this.url = 'ws://' + this.ip + ':3000';
   this.keyFile = config['keyFile'];
+  
   this.connected = false;
   this.checkCount = 0;
 
@@ -71,6 +72,12 @@ function webos3Accessory(log, config, api) {
      .addCharacteristic(new Characteristic.Brightness())
      .on('get', this.getVolume.bind(this))
      .on('set', this.setVolume.bind(this));
+  
+  this.informationService = new Service.AccessoryInformation()
+    .setCharacteristic(Characteristic.Manufacturer, 'LG Electronics Inc.')
+    .setCharacteristic(Characteristic.Model, 'webOS 3.x TV')
+    .setCharacteristic(Characteristic.SerialNumber, '-')
+    .setCharacteristic(Characteristic.FirmwareRevision, '0.8.5');
   
 }
 
@@ -162,8 +169,7 @@ webos3Accessory.prototype.setState = function(state, callback) {
         if (err) return callback(null, false);
         lgtv.disconnect();
         self.connected = false ;
-        var muteChar = self.volumeService.getCharacteristic(Characteristic.On);
-        muteChar.updateValue(false);
+        self.volumeService.getCharacteristic(Characteristic.On).updateValue(false);
         return callback(null, true);
       })
     } else {
@@ -208,7 +214,9 @@ webos3Accessory.prototype.setVolume = function(level, callback) {
 webos3Accessory.prototype.getServices = function() {
   return [
     this.powerService,
-    this.volumeService
+    this.volumeService,
+    this.informationService
   ]
 }
+
 
