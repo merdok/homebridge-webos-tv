@@ -19,11 +19,18 @@ function webos3Accessory(log, config, api) {
   if(this.volumeControl == undefined){
     this.volumeControl = true;
   }
+  this.pollingEnabled = config["pollingEnabled"];
+  if(this.pollingEnabled == undefined){
+    this.pollingEnabled = false;
+  }
+  this.alivePollingInterval = config["pollingInterval"] || 5;
+  this.alivePollingInterval = this.alivePollingInterval * 1000; 
   
   this.url = 'ws://' + this.ip + ':3000';
   this.enabledServices = [];
   this.connected = false;
   this.checkCount = 0;
+  this.checkAliveInterval = null;
 
   lgtv = require('lgtv2')({
     url: this.url,
@@ -37,16 +44,23 @@ function webos3Accessory(log, config, api) {
   lgtv.on('connect', function() {
     self.log('webOS3 connected to TV');
     self.connected = true;
+    if(!self.checkAliveInterval && self.pollingEnabled) {
+      self.checkAliveInterval = setInterval(self.checkTVState.bind(self, self.pollCallback.bind(self)), self.alivePollingInterval);
+    }
   });
   
   lgtv.on('close', function() {
     self.log('webOS3 disconnected from TV');
     self.connected = false;
+    //if(self.checkAliveInterval) {
+    //  clearInterval(self.checkAliveInterval);
+    //  self.checkAliveInterval = undefined;
+    //}
   });
   
   lgtv.on('error', function(error) {
     self.log('webOS3 error %s', error);
-    self.connected = false;
+    //self.connected = false;
     //setTimeout(lgtv.connect(this.url), 5000);
   });
   
@@ -89,6 +103,16 @@ function webos3Accessory(log, config, api) {
   if(this.volumeControl) this.enabledServices.push(this.volumeService);
   this.enabledServices.push(this.informationService);
   
+}
+
+webos3Accessory.prototype.pollCallback = function(error, status) {
+  var self = this;
+  if (!status) {
+    self.powerService.getCharacteristic(Characteristic.On).updateValue(status);
+    self.volumeService.getCharacteristic(Characteristic.On).updateValue(status);
+  } else {
+    self.powerService.getCharacteristic(Characteristic.On).updateValue(status);
+  }
 }
 
 webos3Accessory.prototype.checkTVState = function(callback) {
@@ -194,7 +218,7 @@ webos3Accessory.prototype.setMuteState = function(state, callback) {
     var self = this;
     if (self.connected) {
       lgtv.request('ssap://audio/setMute', {mute: !state});  
-      callback(null, true);
+      callback(null, state);
     }else {
       callback(new Error('webOS3 is not connected'))
     }
