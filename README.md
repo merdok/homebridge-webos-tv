@@ -62,9 +62,9 @@ Location to store permission token for your tv
 - `pollingEnabled` [optional]
 Wheter the TV state background polling is enabled. Useful for more accurate TV state awareness and HomeKit automation. Default: false
 - `pollingInterval` [optional]
-The TV state background polling interval in seconds. Default: 5
+The TV state background polling interval in seconds. **Default: 5**
 - `volumeControl` [optional]
-Wheter the volume service is enabled. Default: true
+Wheter the volume service is enabled. **Default: true**
 
 ## Special thanks
 [lgtv2](https://github.com/hobbyquaker/lgtv2) - the Node.js remote control module for LG WebOS smart TVs.
