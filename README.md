@@ -40,7 +40,8 @@ Add the accessory in `config.json` in your home directory inside `.homebridge`.
       "accessory": "webos3",
       "name": "My webOS tv",
       "ip": "192.168.0.40",
-      "mac": "ab:cd:ef:fe:dc:ba"
+      "mac": "ab:cd:ef:fe:dc:ba",
+      "pollingEnabled": true
     }
   ]  
 }
