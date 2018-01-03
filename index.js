@@ -83,7 +83,7 @@ function webos3Accessory(log, config, api) {
     .setCharacteristic(Characteristic.Manufacturer, 'LG Electronics Inc.')
     .setCharacteristic(Characteristic.Model, 'webOS 3.x TV')
     .setCharacteristic(Characteristic.SerialNumber, '-')
-    .setCharacteristic(Characteristic.FirmwareRevision, '0.8.5');
+    .setCharacteristic(Characteristic.FirmwareRevision, '0.8.6');
   
   this.enabledServices.push(this.powerService);
   if(this.volumeControl) this.enabledServices.push(this.volumeService);
