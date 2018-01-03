@@ -59,6 +59,10 @@ ip address of your tv
 Mac address of your tv
 - `keyFile` [optional]
 Location to store permission token for your tv
+- `pollingEnabled` [optional]
+Wheter the TV state background polling is enabled. Useful for HomeKit automation. Default: false
+- `pollingInterval` [optional]
+The TV state background polling interval in seconds. Default: 5
 - `volumeControl` [optional]
 Wheter the volume service is enabled. Default: true
 
