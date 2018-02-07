@@ -1,6 +1,6 @@
 var lgtv, Service, Characteristic;
 var wol = require('wake_on_lan');
-var ping = require('ping');
+var tcpp = require('tcp-ping');
 
 module.exports = function(homebridge) {
   Service = homebridge.hap.Service;
@@ -19,12 +19,17 @@ function webos3Accessory(log, config, api) {
   if(this.volumeControl == undefined){
     this.volumeControl = true;
   }
-  this.pollingEnabled = config["pollingEnabled"];
+  this.pollingEnabled = config['pollingEnabled'];
   if(this.pollingEnabled == undefined){
     this.pollingEnabled = false;
   }
-  this.alivePollingInterval = config["pollingInterval"] || 5;
+  this.alivePollingInterval = config['pollingInterval'] || 5;
   this.alivePollingInterval = this.alivePollingInterval * 1000; 
+  this.externalInput = config['externalInput'];
+  if(this.externalInput == undefined){
+    this.externalInput = false;
+  }
+  this.externalSource = config['externalSource'] || 'HDMI_1';
   
   this.url = 'ws://' + this.ip + ':3000';
   this.enabledServices = [];
@@ -74,8 +79,9 @@ function webos3Accessory(log, config, api) {
     self.connected = false;
   });
 
-  this.powerService = new Service.Switch(this.name, "powerService");
-  this.volumeService = new Service.Lightbulb(this.name, "volumeService");
+  this.powerService = new Service.Switch(this.name + " Power", "powerService");
+  this.volumeService = new Service.Lightbulb(this.name + " Volume" , "volumeService");
+  this.externalInputService = new Service.Switch(this.name + " Input: " +  this.externalSource, "externalInputService");
   this.informationService = new Service.AccessoryInformation();
 
   this.powerService
@@ -93,14 +99,20 @@ function webos3Accessory(log, config, api) {
     .on('get', this.getVolume.bind(this))
     .on('set', this.setVolume.bind(this));
   
+   this.externalInputService
+    .getCharacteristic(Characteristic.On)
+    .on('get', this.getExternalInputState.bind(this))
+    .on('set', this.setExternalInputState.bind(this));
+  
   this.informationService
     .setCharacteristic(Characteristic.Manufacturer, 'LG Electronics Inc.')
     .setCharacteristic(Characteristic.Model, 'webOS 3.x TV')
     .setCharacteristic(Characteristic.SerialNumber, '-')
-    .setCharacteristic(Characteristic.FirmwareRevision, '0.8.8');
+    .setCharacteristic(Characteristic.FirmwareRevision, '0.9.0');
   
   this.enabledServices.push(this.powerService);
   if(this.volumeControl) this.enabledServices.push(this.volumeService);
+  if(this.externalInput) this.enabledServices.push(this.externalInputService);
   this.enabledServices.push(this.informationService);
   
 }
@@ -117,7 +129,7 @@ webos3Accessory.prototype.pollCallback = function(error, status) {
 
 webos3Accessory.prototype.checkTVState = function(callback) {
   var self = this;
-  ping.sys.probe(this.ip, function(isAlive) {
+  tcpp.probe(this.ip, 3000, function(err, isAlive) {
     if (!isAlive) {
       self.connected = false;
     } else {
@@ -133,7 +145,7 @@ webos3Accessory.prototype.checkMuteState = function(callback) {
     if (self.connected) {
       lgtv.request('ssap://audio/getStatus', function (err, res) {
         if (!res || err){
-          callback(new Error('webOS3 TV muted - error while getting current mute state'));
+          callback(new Error('webOS3 TV mute check - error while getting current mute state'));
         }else{
           self.log('webOS3 TV muted: %s', res.mute ? "Yes" : "No");   
           callback(null, !res.mute);
@@ -153,6 +165,26 @@ webos3Accessory.prototype.checkVolumeLevel = function(callback) {
         }else{
           self.log('webOS3 TV volume: ' + res.volume);   
           callback(null, parseInt(res.volume));
+        }
+      });
+    }else{
+      callback(null, false);
+    }
+}
+
+webos3Accessory.prototype.checkExternalInput = function(callback) {
+    var self = this;
+    if (self.connected) {
+      lgtv.request('ssap://com.webos.applicationManager/getForegroundAppInfo', function (err, res) {
+        if (!res || err){
+          callback(new Error('webOS3 TV external input - error while getting external input info'));
+        }else{
+          self.log('webOS3 TV current appId: %s', res.appId); 
+          if(res.appId === 'com.webos.app.livetv'){
+            callback(null, false);
+          }else {
+            callback(null, true);
+          }
         }
       });
     }else{
@@ -201,6 +233,7 @@ webos3Accessory.prototype.setState = function(state, callback) {
         lgtv.disconnect();
         self.connected = false ;
         self.volumeService.getCharacteristic(Characteristic.On).updateValue(false);
+        self.externalInputService.getCharacteristic(Characteristic.On).updateValue(false);
         callback(null, true);
       })
     } else {
@@ -239,8 +272,31 @@ webos3Accessory.prototype.setVolume = function(level, callback) {
     }
 }
 
+webos3Accessory.prototype.getExternalInputState = function(callback) {
+  if(this.connected == false){
+     callback(null, false);
+  }else {
+    setTimeout(this.checkExternalInput.bind(this, callback), 50);
+  }
+}
+
+webos3Accessory.prototype.setExternalInputState = function(state, callback) {
+    var self = this;
+    if (self.connected) {
+      if(state){
+        lgtv.request('ssap://tv/switchInput', {inputId: this.externalSource}); 
+      }else {
+       lgtv.request('ssap://system.launcher/launch', {id: "com.webos.app.livetv"});  
+      }
+      callback(null, state);
+    }else {
+      callback(new Error('webOS3 is not connected'))
+    }
+}
+
 
 webos3Accessory.prototype.getServices = function() {
   return this.enabledServices;
 }
+
 
