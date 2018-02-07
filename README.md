@@ -1,7 +1,7 @@
 # homebridge-webos3
 
-`homebridge-webos3` is a plugin for HomeBridge which allows you to control your webOS3 TV! It should also work with webOS2 TVs.
-The idea is that the TV should be controlled completely from the native HomeKit iOS app and Siri, that is why volume appears as a light bulb.
+`homebridge-webos3` is a plugin for HomeBridge which allows you to control your webOS TV! It should work with all TVs that support webOS2 and never.
+The idea is that the TV should be controlled completely from the native HomeKit iOS app and Siri, that is why volume appears as a light bulb or external input as a switch.
 
 ### IMPORTANT
 
@@ -13,6 +13,7 @@ This is a work in progress. Please contribute!_
 * Mute Status (currently as light bulb)
 * Mute / Unmute (currently as light bulb)
 * Volume control (currently as light bulb)
+* External input (switch between and external source and live tv)
 
 ## Installation
 
@@ -41,7 +42,9 @@ Add the accessory in `config.json` in your home directory inside `.homebridge`.
       "name": "My webOS tv",
       "ip": "192.168.0.40",
       "mac": "ab:cd:ef:fe:dc:ba",
-      "pollingEnabled": true
+      "pollingEnabled": true,
+      "externalInput": true,
+      "externalSource": "HDMI_2"
     }
   ]  
 }
@@ -66,6 +69,10 @@ Wheter the TV state background polling is enabled. Useful for more accurate TV s
 The TV state background polling interval in seconds. **Default: 5**
 - `volumeControl` [optional]
 Wheter the volume service is enabled. **Default: true**
+- `externalInput` [optional]
+Wheter the external input service is enabled. This allows to switch live tv with an external source of your choice. **Default: false**
+- `externalSource` [optional]
+The external source for toggling. Available sources: HDMI_1, HDMI_2, HDMI_3, COMP_1, AV_1. **Default: HDMI_1**
 
 ## Special thanks
 [lgtv2](https://github.com/hobbyquaker/lgtv2) - the Node.js remote control module for LG WebOS smart TVs.
