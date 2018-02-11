@@ -42,6 +42,7 @@ Add the accessory in `config.json` in your home directory inside `.homebridge`.
       "name": "My webOS tv",
       "ip": "192.168.0.40",
       "mac": "ab:cd:ef:fe:dc:ba",
+      "keyFile": "/home/pi/.homebridge/lgtvKeyFile",
       "pollingEnabled": true,
       "externalInput": true,
       "externalSource": "HDMI_2"
@@ -62,7 +63,7 @@ ip address of your tv
 - `mac` [required]
 Mac address of your tv
 - `keyFile` [optional]
-Location to store permission token for your tv
+Path of the file to store permission token for your tv. If the file doesn't exist it'll be created. Don't specify a directory or you'll get an `EISDIR` error. 
 - `pollingEnabled` [optional]
 Wheter the TV state background polling is enabled. Useful for more accurate TV state awareness and HomeKit automation. **Default: false**
 - `pollingInterval` [optional]
