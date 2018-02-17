@@ -13,7 +13,8 @@ This is a work in progress. Please contribute!_
 * Mute Status (currently as light bulb)
 * Mute / Unmute (currently as light bulb)
 * Volume control (currently as light bulb)
-* External input (switch between and external source and live tv)
+* External input (switch between an external source of your choice and live tv)
+* Open app (switch between an app of your choice and live tv)
 
 ## Installation
 
@@ -44,8 +45,8 @@ Add the accessory in `config.json` in your home directory inside `.homebridge`.
       "mac": "ab:cd:ef:fe:dc:ba",
       "keyFile": "/home/pi/.homebridge/lgtvKeyFile",
       "pollingEnabled": true,
-      "externalInput": true,
-      "externalSource": "HDMI_2"
+      "externalSourceSwitch": "HDMI_2",
+      "appSwitch": "com.webos.app.tvguide"
     }
   ]  
 }
@@ -70,10 +71,10 @@ Wheter the TV state background polling is enabled. Useful for more accurate TV s
 The TV state background polling interval in seconds. **Default: 5**
 - `volumeControl` [optional]
 Wheter the volume service is enabled. **Default: true**
-- `externalInput` [optional]
-Wheter the external input service is enabled. This allows to switch live tv with an external source of your choice. **Default: false**
-- `externalSource` [optional]
-The external source for toggling. Available sources: HDMI_1, HDMI_2, HDMI_3, COMP_1, AV_1. **Default: HDMI_1**
+- `externalSourceSwitch` [optional] 
+Wheter the external source switch service is enabled. This allows to switch live tv with an external source of your choice. To enable set the desired source as the value. Available sources: HDMI_1, HDMI_2, HDMI_3, COMP_1, AV_1. **Default: "" (disabled)**
+- `appSwitch` [optional] 
+Wheter the app switch service is enabled. This allows to switch live tv with an app of your choice. To enable set the desired app ID as the value. To get the app ID simply open an app on your TV and check the homebridge console. The app ID of the opened app will be printed.  **Default: "" (disabled)**
 
 ## Special thanks
 [lgtv2](https://github.com/hobbyquaker/lgtv2) - the Node.js remote control module for LG WebOS smart TVs.
