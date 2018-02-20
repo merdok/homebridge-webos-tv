@@ -44,21 +44,21 @@ function webos3Accessory(log, config, api) {
   });
   
   lgtv.on('connect', () => {
-    this.log('webOS - connected to TV');
+    this.log.info('webOS - connected to TV');
     this.connected = true;
     if(!this.checkAliveInterval && this.pollingEnabled) {
       this.checkAliveInterval = setInterval(this.checkTVState.bind(this, this.pollCallback.bind(this)), this.alivePollingInterval);
     }
     lgtv.subscribe('ssap://com.webos.applicationManager/getForegroundAppInfo', (err, res) => {
       if (res && res.appId){
-        this.log('webOS - current appId: %s', res.appId);
+        this.log.debug('webOS - current appId: %s', res.appId);
       }
      });
      this.updateAccessoryStatus();
   });
   
   lgtv.on('close', () => {
-    this.log('webOS - disconnected from TV');
+    this.info('webOS - disconnected from TV');
     this.connected = false;
     //if(this.checkAliveInterval) {
     //  clearInterval(this.checkAliveInterval);
@@ -67,18 +67,18 @@ function webos3Accessory(log, config, api) {
   });
   
   lgtv.on('error', (error) => {
-    this.log('webOS - error %s', error);
+    this.log.error('webOS - %s', error);
     //this.connected = false;
     //setTimeout(lgtv.connect(this.url), 5000);
   });
   
   lgtv.on('prompt', () => {
-    this.log('webOS - prompt for confirmation');
+    this.log.info('webOS - prompt for confirmation');
     this.connected = false;
   });
   
   lgtv.on('connecting', () => {
-    this.log('webOS - connecting to TV');
+    this.log.debug('webOS - connecting to TV');
     this.connected = false;
   });
   
@@ -161,7 +161,7 @@ webos3Accessory.prototype.checkTVState = function(callback) {
     } else {
       this.connected = true;
     }
-    this.log('webOS - TV state: %s', this.connected ? "On" : "Off");
+    this.log.info('webOS - TV state: %s', this.connected ? "On" : "Off");
     callback(null, this.connected);
   });
 }
@@ -172,7 +172,7 @@ webos3Accessory.prototype.checkMuteState = function(callback) {
         if (!res || err){
           callback(new Error('webOS - TV mute check - error while getting current mute state'));
         }else{
-          this.log('webOS - TV muted: %s', res.mute ? "Yes" : "No");   
+          this.log.info('webOS - TV muted: %s', res.mute ? "Yes" : "No");
           callback(null, !res.mute);
         }
       });
@@ -187,7 +187,7 @@ webos3Accessory.prototype.checkVolumeLevel = function(callback) {
         if (!res || err){
           callback(new Error('webOS - TV volume - error while getting current volume'));
         }else{
-          this.log('webOS - TV volume: ' + res.volume);   
+          this.log.info('webOS - TV volume: ' + res.volume);
           callback(null, parseInt(res.volume));
         }
       });
@@ -202,7 +202,7 @@ webos3Accessory.prototype.checkExternalInput = function(callback) {
         if (!res || err){
           callback(new Error('webOS - external input - error while getting external input info'));
         }else{
-          this.log('webOS - TV current appId: %s', res.appId); 
+          this.log.info('webOS - TV current appId: %s', res.appId);
           if(res.appId.includes('com.webos.app.externalinput')){
             callback(null, true);
           }else {
@@ -221,7 +221,7 @@ webos3Accessory.prototype.checkForegroundApp = function(callback) {
         if (!res || err){
           callback(new Error('webOS - external input - error while getting external input info'));
         }else{
-          this.log('webOS - TV current appId: %s', res.appId); 
+          this.log.info('webOS - TV current appId: %s', res.appId);
           if(res.appId === this.appSwitch){
             callback(null, true);
           }else {
