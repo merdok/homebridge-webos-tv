@@ -58,7 +58,7 @@ function webos3Accessory(log, config, api) {
     });
 
     lgtv.on('close', () => {
-        this.info('webOS - disconnected from TV');
+        this.log.info('webOS - disconnected from TV');
         this.connected = false;
         //if(this.checkAliveInterval) {
         //  clearInterval(this.checkAliveInterval);
