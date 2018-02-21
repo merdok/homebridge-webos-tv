@@ -51,7 +51,7 @@ function webos3Accessory(log, config, api) {
         }
         lgtv.subscribe('ssap://com.webos.applicationManager/getForegroundAppInfo', (err, res) => {
             if (res && res.appId) {
-                this.log.debug('webOS - current appId: %s', res.appId);
+                this.log.info('webOS - current appId: %s', res.appId);
             }
         });
         this.updateAccessoryStatus();
@@ -161,7 +161,7 @@ webos3Accessory.prototype.checkTVState = function (callback) {
         } else {
             this.connected = true;
         }
-        this.log.info('webOS - TV state: %s', this.connected ? "On" : "Off");
+        this.log.debug('webOS - TV state: %s', this.connected ? "On" : "Off");
         callback(null, this.connected);
     });
 };
