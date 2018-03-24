@@ -193,8 +193,8 @@ webos3Accessory.prototype.setAppSwitchManually = function (error, value, appId) 
 					this.appSwitchService[i].getCharacteristic(Characteristic.On).updateValue(value);
 				});
 			}else {
-				this.appSwitch.forEach((value, i) => {
-					if(appId === value){
+				this.appSwitch.forEach((tmpVal, i) => {
+					if(appId === tmpVal){
 						this.appSwitchService[i].getCharacteristic(Characteristic.On).updateValue(value);
 					}else {
 						this.appSwitchService[i].getCharacteristic(Characteristic.On).updateValue(false);
@@ -208,8 +208,8 @@ webos3Accessory.prototype.setAppSwitchManually = function (error, value, appId) 
 };
 
 webos3Accessory.prototype.updateAccessoryStatus = function () {
-    if (this.volumeService) this.checkMuteState(this.setMuteStateManually);
-	if (this.appSwitchService) this.checkForegroundApp(this.setAppSwitchManually);
+    if (this.volumeService) this.checkMuteState(this.setMuteStateManually.bind(this));
+	if (this.appSwitchService) this.checkForegroundApp(this.setAppSwitchManually.bind(this));
 };
 
 webos3Accessory.prototype.pollCallback = function (error, status) {
@@ -294,7 +294,9 @@ webos3Accessory.prototype.checkForegroundApp = function (callback, appId) {
                 callback(new Error('webOS - current app - error while getting current app info'));
             } else {
                 this.log.debug('webOS - TV current appId: %s', res.appId);
-                if (res.appId === appId) {
+				if (appId == undefined || appId == null) { // if appId undefined or null then i am checking which app is currently running; if set then continue normally
+                    callback(null, true, res.appId);
+                } else if (res.appId === appId) {
                     callback(null, true, appId);
                 } else {
                     callback(null, false, appId);
@@ -309,7 +311,6 @@ webos3Accessory.prototype.checkForegroundApp = function (callback, appId) {
 webos3Accessory.prototype.checkWakeOnLan = function (callback) {
     if (this.connected) {
         this.checkCount = 0;
-		this.updateAccessoryStatus();
         callback(null, true);
     } else {
         if (this.checkCount < 3) {
@@ -404,10 +405,9 @@ webos3Accessory.prototype.setAppSwitchState = function (state, callback, appId) 
     } else {
 		
 		if (state) {
-			this.log.info('webOS - Trying to launch app but TV is off, attempting to power on the TV');
+			this.log.info('webOS - Trying to launch %s but TV is off, attempting to power on the TV', appId);
 			this.powerOnTvWithCallback(() => {
 				lgtv.request('ssap://system.launcher/launch', {id: appId});
-				this.updateAccessoryStatus();
 				callback(null, true);
 			});
         }
