@@ -221,6 +221,30 @@ webos3Accessory.prototype.pollCallback = function (error, status) {
     }
 };
 
+webos3Accessory.prototype.powerOnTvWithCallback = function (callback) {
+	wol.wake(this.mac, (error) => {
+		if (error) {
+			this.log.info('webOS - wake on lan error');
+			return;
+		}
+		let x = 0;
+		let appLaunchInterval = setInterval(() => {
+			if(this.connected){
+				setTimeout(callback.bind(this), 1000);
+				clearInterval(appLaunchInterval);  
+				return;
+			}
+			
+			lgtv.connect(this.url);	
+
+			if (x++ === 7) {
+			   clearInterval(appLaunchInterval);
+			   return;
+			}
+		}, 2000);
+	});
+};
+
 webos3Accessory.prototype.checkTVState = function (callback) {
     tcpp.probe(this.ip, 3000, (err, isAlive) => {
         if (!isAlive) {
@@ -285,6 +309,7 @@ webos3Accessory.prototype.checkForegroundApp = function (callback, appId) {
 webos3Accessory.prototype.checkWakeOnLan = function (callback) {
     if (this.connected) {
         this.checkCount = 0;
+		this.updateAccessoryStatus();
         callback(null, true);
     } else {
         if (this.checkCount < 3) {
@@ -377,7 +402,17 @@ webos3Accessory.prototype.setAppSwitchState = function (state, callback, appId) 
         }
         callback(null, state);
     } else {
-        callback(new Error('webOS - is not connected'))
+		
+		if (state) {
+			this.log.info('webOS - Trying to launch app but TV is off, attempting to power on the TV');
+			this.powerOnTvWithCallback(() => {
+				lgtv.request('ssap://system.launcher/launch', {id: appId});
+				this.updateAccessoryStatus();
+				callback(null, true);
+			});
+        }
+		
+      //  callback(new Error('webOS - is not connected'))
     }
 };
 
