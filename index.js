@@ -28,7 +28,6 @@ function webos3Accessory(log, config, api) {
     }
     this.alivePollingInterval = config['pollingInterval'] || 5;
     this.alivePollingInterval = this.alivePollingInterval * 1000;
-    this.externalSourceSwitch = config['externalSourceSwitch'];
     this.appSwitch = config['appSwitch'];
 
     this.url = 'ws://' + this.ip + ':3000';
@@ -85,11 +84,9 @@ function webos3Accessory(log, config, api) {
 
     this.powerService = new Service.Switch(this.name + " Power", "powerService");
     this.volumeService = new Service.Lightbulb(this.name + " Volume", "volumeService");
-    this.externalSourceSwitchService = new Service.Switch(this.name + " Input: " + this.externalSourceSwitch, "externalSourceSwitchService");
-
-	
     this.informationService = new Service.AccessoryInformation();
 
+	
     this.powerService
         .getCharacteristic(Characteristic.On)
         .on('get', this.getState.bind(this))
@@ -105,28 +102,24 @@ function webos3Accessory(log, config, api) {
         .on('get', this.getVolume.bind(this))
         .on('set', this.setVolume.bind(this));
 
-    this.externalSourceSwitchService
-        .getCharacteristic(Characteristic.On)
-        .on('get', this.getExternalSourceSwitchState.bind(this))
-        .on('set', this.setExternalSourceSwitchState.bind(this));
-		
-
     this.informationService
         .setCharacteristic(Characteristic.Manufacturer, 'LG Electronics Inc.')
         .setCharacteristic(Characteristic.Model, 'webOS TV')
         .setCharacteristic(Characteristic.SerialNumber, '-')
         .setCharacteristic(Characteristic.FirmwareRevision, '0.9.2');
 
+		
     this.enabledServices.push(this.powerService);
     if (this.volumeControl) this.enabledServices.push(this.volumeService);
-    if (this.externalSourceSwitch && this.externalSourceSwitch.length > 0) this.enabledServices.push(this.externalSourceSwitchService);
     this.enabledServices.push(this.informationService);
+	
 	
 	this.prepareAppSwitchService();
 
 }
 
 // SETUP COMPLEX SERVICES
+
 webos3Accessory.prototype.prepareAppSwitchService = function () {
 	
 	if(this.appSwitch == undefined ||  this.appSwitch == null || this.appSwitch.length <= 0){
@@ -138,6 +131,7 @@ webos3Accessory.prototype.prepareAppSwitchService = function () {
 	if(isArray){
 		this.appSwitchService = new Array();
 		this.appSwitch.forEach((value, i) => {
+			this.appSwitch[i] = str = this.appSwitch[i].replace(/\s/g, '');
 			this.appSwitchService[i] = new Service.Switch(this.name + " App: " + value, "appSwitchService" + i);
 		});
 	}else{
@@ -181,10 +175,6 @@ webos3Accessory.prototype.setMuteStateManuallyCallback = function (error, value)
     if (this.volumeControl) this.volumeService.getCharacteristic(Characteristic.On).updateValue(value);
 };
 
-webos3Accessory.prototype.setExternalSourceSwitchManuallyCallback = function (error, value) {
-    if (this.externalSourceSwitch && this.externalSourceSwitch.length > 0) this.externalSourceSwitchService.getCharacteristic(Characteristic.On).updateValue(value);
-};
-
 webos3Accessory.prototype.setAppSwitchManually = function (error, value, appId) {
 	if(this.appSwitchService){
 		if(Array.isArray(this.appSwitch)){
@@ -208,8 +198,7 @@ webos3Accessory.prototype.setAppSwitchManually = function (error, value, appId) 
 };
 
 webos3Accessory.prototype.updateAccessoryStatus = function () {
-    if (this.volumeControl) this.checkMuteState(this.setMuteStateManuallyCallback.bind(this));
-    if (this.externalSourceSwitch && this.externalSourceSwitch.length > 0) this.checkExternalInput(this.setExternalSourceSwitchManuallyCallback.bind(this));
+    if (this.volumeControl) this.checkMuteState(this.setMuteStateManuallyCallback);
 	this.checkForegroundApp(this.setAppSwitchManually);
 };
 
@@ -264,32 +253,13 @@ webos3Accessory.prototype.checkVolumeLevel = function (callback) {
     }
 };
 
-webos3Accessory.prototype.checkExternalInput = function (callback) {
-    if (this.connected) {
-        lgtv.request('ssap://com.webos.applicationManager/getForegroundAppInfo', (err, res) => {
-            if (!res || err) {
-                callback(new Error('webOS - external input - error while getting external input info'));
-            } else {
-                this.log.debug('webOS - TV current appId: %s', res.appId);
-                if (res.appId.includes('com.webos.app.externalinput')) {
-                    callback(null, true);
-                } else {
-                    callback(null, false);
-                }
-            }
-        });
-    } else {
-        callback(null, false);
-    }
-};
-
 webos3Accessory.prototype.checkForegroundApp = function (callback, appId) {
     if (this.connected) {
         lgtv.request('ssap://com.webos.applicationManager/getForegroundAppInfo', (err, res) => {
             if (!res || err) {
-                callback(new Error('webOS - external input - error while getting external input info'));
+                callback(new Error('webOS - current app - error while getting current app info'));
             } else {
-                this.log.info('webOS - TV current appId: %s', res.appId);
+                this.log.debug('webOS - TV current appId: %s', res.appId);
                 if (res.appId === appId) {
                     callback(null, true, appId);
                 } else {
@@ -342,7 +312,6 @@ webos3Accessory.prototype.setState = function (state, callback) {
                 lgtv.disconnect();
                 this.connected = false;
                 this.volumeService.getCharacteristic(Characteristic.On).updateValue(false);
-                this.externalSourceSwitchService.getCharacteristic(Characteristic.On).updateValue(false);
 				this.setAppSwitchManually(null, false, null);
                 callback(null, true);
             })
@@ -380,28 +349,6 @@ webos3Accessory.prototype.setVolume = function (level, callback) {
     }
 };
 
-webos3Accessory.prototype.getExternalSourceSwitchState = function (callback) {
-    if (!this.connected) {
-        callback(null, false);
-    } else {
-        setTimeout(this.checkExternalInput.bind(this, callback), 50);
-    }
-};
-
-webos3Accessory.prototype.setExternalSourceSwitchState = function (state, callback) {
-    if (this.connected) {
-        if (state) {
-            lgtv.request('ssap://tv/switchInput', {inputId: this.externalSourceSwitch});
-            this.setAppSwitchManually(null, false, null);
-        } else {
-            lgtv.request('ssap://system.launcher/launch', {id: "com.webos.app.livetv"});
-        }
-        callback(null, state);
-    } else {
-        callback(new Error('webOS - is not connected'))
-    }
-};
-
 webos3Accessory.prototype.getAppSwitchState = function (callback, appId) {
     if (!this.connected) {
         callback(null, false);
@@ -414,7 +361,6 @@ webos3Accessory.prototype.setAppSwitchState = function (state, callback, appId) 
     if (this.connected) {
         if (state) {
             lgtv.request('ssap://system.launcher/launch', {id: appId});
-            this.setExternalSourceSwitchManuallyCallback(null, false);
 			this.setAppSwitchManually(null, true, appId);
         } else {
             lgtv.request('ssap://system.launcher/launch', {id: "com.webos.app.livetv"});
