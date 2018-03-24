@@ -13,8 +13,7 @@ This is a work in progress. Please contribute!_
 * Mute Status (currently as light bulb)
 * Mute / Unmute (currently as light bulb)
 * Volume control (currently as light bulb)
-* External input (switch between an external source of your choice and live tv)
-* Open app (switch between an app of your choice and live tv)
+* Open apps (switch between apps of your choice and live tv)
 
 ## Installation
 
@@ -45,8 +44,13 @@ Add the accessory in `config.json` in your home directory inside `.homebridge`.
       "mac": "ab:cd:ef:fe:dc:ba",
       "keyFile": "/home/pi/.homebridge/lgtvKeyFile",
       "pollingEnabled": true,
-      "externalSourceSwitch": "HDMI_2",
-      "appSwitch": "com.webos.app.tvguide"
+      "appSwitch":[
+         "com.webos.app.tvguide",
+         "youtube.leanback.v4",
+         "com.webos.app.hdmi2",
+         "com.webos.app.externalinput.component"
+      ]
+
     }
   ]  
 }
@@ -71,10 +75,12 @@ Wheter the TV state background polling is enabled. Useful for more accurate TV s
 The TV state background polling interval in seconds. **Default: 5**
 - `volumeControl` [optional]
 Wheter the volume service is enabled. **Default: true**
-- `externalSourceSwitch` [optional] 
-Wheter the external source switch service is enabled. This allows to switch live tv with an external source of your choice. To enable set the desired source as the value. Available sources: HDMI_1, HDMI_2, HDMI_3, COMP_1, AV_1. **Default: "" (disabled)**
 - `appSwitch` [optional] 
-Wheter the app switch service is enabled. This allows to switch live tv with an app of your choice. To enable set the desired app ID as the value. To get the app ID simply open an app on your TV and check the homebridge console. The app ID of the opened app will be printed.  **Default: "" (disabled)**
+Wheter the app switch service is enabled. This allows to switch live tv with apps of your choice. To get the app ID simply open an app on your TV and check the homebridge console. The app ID of the opened app will be printed. **Default: "" (disabled)**
+  - For a *single switch*  set the desired app ID as the value
+  - For *multiple switches* set an array of app IDs as the value
+  - External sources are also apps and can be used as app switches, available sources: *com.webos.app.hdmi1, com.webos.app.hdmi2, com.webos.app.hdmi3, com.webos.app.externalinput.component, com.webos.app.externalinput.av1*
+  - Apps can also be started when the TV is off, in that case an attempt to power on the TV and switch to the chosen app will be made
 
 ## Special thanks
 [lgtv2](https://github.com/hobbyquaker/lgtv2) - the Node.js remote control module for LG WebOS smart TVs.
