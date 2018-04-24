@@ -56,7 +56,9 @@ Add the accessory in `config.json` in your home directory inside `.homebridge`.
 }
 ```
 
-You also need to enable "mobile tv on" on your tv for the turn on feature to work correctly.
+You also need to enable **mobile tv on** on your tv for the turn on feature to work correctly.
+
+On newer TVs **LG Connect Apps** under the network settings needs to be enabled.
 
 ### Configuration fields
 - `accessory` [required]
