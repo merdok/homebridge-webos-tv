@@ -406,10 +406,12 @@ webos3Accessory.prototype.setAppSwitchState = function (state, callback, appId) 
 		
 		if (state) {
 			this.log.info('webOS - Trying to launch %s but TV is off, attempting to power on the TV', appId);
-			this.powerOnTvWithCallback(() => {
-				lgtv.request('ssap://system.launcher/launch', {id: appId});
-				callback(null, true);
-			});
+			if(this.powerSwitch) {
+				this.powerOnTvWithCallback(() => {
+					lgtv.request('ssap://system.launcher/launch', {id: appId});
+					callback(null, true);
+				});	
+			}
         }
 		
       //  callback(new Error('webOS - is not connected'))
