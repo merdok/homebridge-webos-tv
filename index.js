@@ -19,9 +19,11 @@ function webos3Accessory(log, config, api) {
     this.mac = config['mac'];
     this.keyFile = config['keyFile'];
     this.volumeControl = config['volumeControl'];
+    
     if (this.volumeControl == undefined) {
         this.volumeControl = true;
     }
+    
     this.pollingEnabled = config['pollingEnabled'];
     if (this.pollingEnabled == undefined) {
         this.pollingEnabled = false;
@@ -82,14 +84,22 @@ function webos3Accessory(log, config, api) {
         this.connected = false;
     });
 
-    this.powerService = new Service.Switch(this.name + " Power", "powerService");
-    this.informationService = new Service.AccessoryInformation();
-
+    this.powerSwitch = config['powerSwitch'];
+    if (this.powerSwitch == undefined) {
+        this.powerSwitch = true;
+    }
 	
-    this.powerService
-        .getCharacteristic(Characteristic.On)
-        .on('get', this.getState.bind(this))
-        .on('set', this.setState.bind(this));
+    if(this.powerSwitch) {
+        this.powerService = new Service.Switch(this.name + " Power", "powerService");
+	this.powerService
+	    .getCharacteristic(Characteristic.On)
+            .on('get', this.getState.bind(this))
+            .on('set', this.setState.bind(this));
+	    
+	this.enabledServices.push(this.powerService);
+    }
+    
+    this.informationService = new Service.AccessoryInformation();
 
     this.informationService
         .setCharacteristic(Characteristic.Manufacturer, 'LG Electronics Inc.')
@@ -97,8 +107,6 @@ function webos3Accessory(log, config, api) {
         .setCharacteristic(Characteristic.SerialNumber, '-')
         .setCharacteristic(Characteristic.FirmwareRevision, '0.9.3');
 
-		
-    this.enabledServices.push(this.powerService);
     this.enabledServices.push(this.informationService);
 	
 	this.prepareVolumeService();
