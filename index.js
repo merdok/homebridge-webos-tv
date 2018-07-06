@@ -19,9 +19,11 @@ function webos3Accessory(log, config, api) {
     this.mac = config['mac'];
     this.keyFile = config['keyFile'];
     this.volumeControl = config['volumeControl'];
+    
     if (this.volumeControl == undefined) {
         this.volumeControl = true;
     }
+    
     this.pollingEnabled = config['pollingEnabled'];
     if (this.pollingEnabled == undefined) {
         this.pollingEnabled = false;
@@ -82,14 +84,22 @@ function webos3Accessory(log, config, api) {
         this.connected = false;
     });
 
-    this.powerService = new Service.Switch(this.name + " Power", "powerService");
-    this.informationService = new Service.AccessoryInformation();
-
+    this.powerSwitch = config['powerSwitch'];
+    if (this.powerSwitch == undefined) {
+        this.powerSwitch = true;
+    }
 	
-    this.powerService
-        .getCharacteristic(Characteristic.On)
-        .on('get', this.getState.bind(this))
-        .on('set', this.setState.bind(this));
+    if(this.powerSwitch) {
+        this.powerService = new Service.Switch(this.name + " Power", "powerService");
+	this.powerService
+	    .getCharacteristic(Characteristic.On)
+            .on('get', this.getState.bind(this))
+            .on('set', this.setState.bind(this));
+	    
+	this.enabledServices.push(this.powerService);
+    }
+    
+    this.informationService = new Service.AccessoryInformation();
 
     this.informationService
         .setCharacteristic(Characteristic.Manufacturer, 'LG Electronics Inc.')
@@ -97,8 +107,6 @@ function webos3Accessory(log, config, api) {
         .setCharacteristic(Characteristic.SerialNumber, '-')
         .setCharacteristic(Characteristic.FirmwareRevision, '0.9.3');
 
-		
-    this.enabledServices.push(this.powerService);
     this.enabledServices.push(this.informationService);
 	
 	this.prepareVolumeService();
@@ -214,10 +222,10 @@ webos3Accessory.prototype.updateAccessoryStatus = function () {
 
 webos3Accessory.prototype.pollCallback = function (error, status) {
     if (!status) {
-        this.powerService.getCharacteristic(Characteristic.On).updateValue(status);
+        if (this.powerSwitch) this.powerService.getCharacteristic(Characteristic.On).updateValue(status);
         if (this.volumeService) this.volumeService.getCharacteristic(Characteristic.On).updateValue(status);
     } else {
-        this.powerService.getCharacteristic(Characteristic.On).updateValue(status);
+        if (this.powerSwitch) this.powerService.getCharacteristic(Characteristic.On).updateValue(status);
     }
 };
 
@@ -406,10 +414,12 @@ webos3Accessory.prototype.setAppSwitchState = function (state, callback, appId) 
 		
 		if (state) {
 			this.log.info('webOS - Trying to launch %s but TV is off, attempting to power on the TV', appId);
-			this.powerOnTvWithCallback(() => {
-				lgtv.request('ssap://system.launcher/launch', {id: appId});
-				callback(null, true);
-			});
+			if(this.powerSwitch) {
+				this.powerOnTvWithCallback(() => {
+					lgtv.request('ssap://system.launcher/launch', {id: appId});
+					callback(null, true);
+				});	
+			}
         }
 		
       //  callback(new Error('webOS - is not connected'))

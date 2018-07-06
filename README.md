@@ -44,6 +44,7 @@ Add the accessory in `config.json` in your home directory inside `.homebridge`.
       "mac": "ab:cd:ef:fe:dc:ba",
       "keyFile": "/home/pi/.homebridge/lgtvKeyFile",
       "pollingEnabled": true,
+      "powerSwitch": true,
       "appSwitch":[
          "com.webos.app.tvguide",
          "youtube.leanback.v4",
