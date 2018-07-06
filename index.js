@@ -222,10 +222,10 @@ webos3Accessory.prototype.updateAccessoryStatus = function () {
 
 webos3Accessory.prototype.pollCallback = function (error, status) {
     if (!status) {
-        this.powerService.getCharacteristic(Characteristic.On).updateValue(status);
+        if (this.powerSwitch) this.powerService.getCharacteristic(Characteristic.On).updateValue(status);
         if (this.volumeService) this.volumeService.getCharacteristic(Characteristic.On).updateValue(status);
     } else {
-        this.powerService.getCharacteristic(Characteristic.On).updateValue(status);
+        if (this.powerSwitch) this.powerService.getCharacteristic(Characteristic.On).updateValue(status);
     }
 };
 
