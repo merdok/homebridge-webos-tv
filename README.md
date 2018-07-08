@@ -10,9 +10,9 @@ This is a work in progress. Please contribute!_
 ### Features
 * Power status
 * Turn on / off
-* Mute Status (currently as light bulb)
-* Mute / Unmute (currently as light bulb)
-* Volume control (currently as light bulb)
+* Mute Status (as light bulb)
+* Mute / Unmute (as light bulb)
+* Volume control (as light bulb and switches)
 * Open apps (switch between apps of your choice and live tv)
 
 ## Installation
