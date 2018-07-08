@@ -123,6 +123,7 @@ webos3Accessory.prototype.prepareVolumeService = function() {
         return;
     }
 
+    // slider/lightbulb
     this.volumeService = new Service.Lightbulb(this.name + " Volume", "volumeService");
 
     this.volumeService
@@ -136,6 +137,31 @@ webos3Accessory.prototype.prepareVolumeService = function() {
         .on('set', this.setVolume.bind(this));
 
     this.enabledServices.push(this.volumeService);
+
+    // up/down switches
+    this.volumeUpService = new Service.Switch(this.name + " Volume Up", "volumeUpService");
+
+    this.volumeUpService
+        .getCharacteristic(Characteristic.On)
+        .on('get', this.getVolumeSwitch.bind(this))
+        .on('set', (state, callback) => {
+            this.setVolumeSwitch(state, callback, true);
+        });
+
+
+    this.enabledServices.push(this.volumeUpService);
+
+    this.volumeDownService = new Service.Switch(this.name + " Volume Down", "volumeDownService");
+
+    this.volumeDownService
+        .getCharacteristic(Characteristic.On)
+        .on('get', this.getVolumeSwitch.bind(this))
+        .on('set', (state, callback) => {
+            this.setVolumeSwitch(state, callback, false);
+        });
+
+
+    this.enabledServices.push(this.volumeDownService);
 
 };
 
@@ -428,6 +454,34 @@ webos3Accessory.prototype.setVolume = function(level, callback) {
             volume: level
         });
         callback(null, level);
+    } else {
+        callback(new Error('webOS - is not connected'))
+    }
+};
+
+webos3Accessory.prototype.getVolumeSwitch = function(callback) {
+    callback(null, false);
+};
+
+webos3Accessory.prototype.setVolumeSwitch = function(state, callback, isUp) {
+    if (this.connected) {
+        let volLevel = this.volumeService.getCharacteristic(Characteristic.Brightness).value;
+        if (isUp) {
+            if (volLevel < this.volumeLimit) {
+                this.lgtv.request('ssap://audio/volumeUp');
+                volLevel++;
+            }
+        } else {
+            this.lgtv.request('ssap://audio/volumeDown');
+            volLevel--;
+        }
+        setTimeout(() => {
+            this.volumeUpService.getCharacteristic(Characteristic.On).updateValue(false);
+            this.volumeDownService.getCharacteristic(Characteristic.On).updateValue(false);
+            this.setMuteStateManually(null, true);
+            this.volumeService.getCharacteristic(Characteristic.Brightness).updateValue(volLevel);
+        }, 10);
+        callback();
     } else {
         callback(new Error('webOS - is not connected'))
     }
