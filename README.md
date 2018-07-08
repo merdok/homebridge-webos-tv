@@ -76,9 +76,11 @@ Wheter the TV state background polling is enabled. Useful for more accurate TV s
 - `pollingInterval` [optional]
 The TV state background polling interval in seconds. **Default: 5**
 - `volumeControl` [optional]
-Wheter the volume service is enabled. **Default: true**
+Wheter the volume control service is enabled. **Default: true**
 - `volumeLimit` [optional]
 The max allowed volume which can be set using the volume service. Range 1-100. **Default: 100**
+- `channelControl` [optional]
+Wheter the channel control service is enabled. **Default: true**
 - `appSwitch` [optional] 
 Wheter the app switch service is enabled. This allows to switch live tv with apps of your choice. To get the app ID simply open an app on your TV and check the homebridge console. The app ID of the opened app will be printed. **Default: "" (disabled)**
   - For a *single switch*  set the desired app ID as the value
