@@ -8,11 +8,11 @@ module.exports = function(homebridge) {
     Service = homebridge.hap.Service;
     Characteristic = homebridge.hap.Characteristic;
 
-    homebridge.registerAccessory('homebridge-webos3', 'webos3', webos3Accessory);
+    homebridge.registerAccessory('homebridge-webos-tv', 'webostv', webosTvAccessory);
 };
 
 // MAIN SETUP
-function webos3Accessory(log, config, api) {
+function webosTvAccessory(log, config, api) {
     this.log = log;
     this.ip = config['ip'];
     this.name = config['name'];
@@ -117,7 +117,7 @@ function webos3Accessory(log, config, api) {
 
 // SETUP COMPLEX SERVICES
 
-webos3Accessory.prototype.prepareVolumeService = function() {
+webosTvAccessory.prototype.prepareVolumeService = function() {
 
     if (!this.volumeControl) {
         return;
@@ -165,7 +165,7 @@ webos3Accessory.prototype.prepareVolumeService = function() {
 
 };
 
-webos3Accessory.prototype.prepareAppSwitchService = function() {
+webosTvAccessory.prototype.prepareAppSwitchService = function() {
 
     if (this.appSwitch == undefined || this.appSwitch == null || this.appSwitch.length <= 0) {
         return;
@@ -215,7 +215,7 @@ webos3Accessory.prototype.prepareAppSwitchService = function() {
 
 };
 
-webos3Accessory.prototype.prepareChannelService = function() {
+webosTvAccessory.prototype.prepareChannelService = function() {
 
     if (!this.channelControl) {
         return;
@@ -248,11 +248,11 @@ webos3Accessory.prototype.prepareChannelService = function() {
 };
 
 // HELPER METHODS
-webos3Accessory.prototype.setMuteStateManually = function(error, value) {
+webosTvAccessory.prototype.setMuteStateManually = function(error, value) {
     if (this.volumeService) this.volumeService.getCharacteristic(Characteristic.On).updateValue(value);
 };
 
-webos3Accessory.prototype.setAppSwitchManually = function(error, value, appId) {
+webosTvAccessory.prototype.setAppSwitchManually = function(error, value, appId) {
     if (this.appSwitchService) {
         if (Array.isArray(this.appSwitch)) {
             if (appId == undefined || appId == null || appId.length <= 0) {
@@ -274,12 +274,12 @@ webos3Accessory.prototype.setAppSwitchManually = function(error, value, appId) {
     }
 };
 
-webos3Accessory.prototype.updateAccessoryStatus = function() {
+webosTvAccessory.prototype.updateAccessoryStatus = function() {
     if (this.volumeService) this.checkMuteState(this.setMuteStateManually.bind(this));
     if (this.appSwitchService) this.checkForegroundApp(this.setAppSwitchManually.bind(this));
 };
 
-webos3Accessory.prototype.pollCallback = function(error, status) {
+webosTvAccessory.prototype.pollCallback = function(error, status) {
     if (!status) {
         this.powerService.getCharacteristic(Characteristic.On).updateValue(status);
         if (this.volumeService) this.volumeService.getCharacteristic(Characteristic.On).updateValue(status);
@@ -288,7 +288,7 @@ webos3Accessory.prototype.pollCallback = function(error, status) {
     }
 };
 
-webos3Accessory.prototype.powerOnTvWithCallback = function(callback) {
+webosTvAccessory.prototype.powerOnTvWithCallback = function(callback) {
     wol.wake(this.mac, (error) => {
         if (error) {
             this.log.info('webOS - wake on lan error');
@@ -312,7 +312,7 @@ webos3Accessory.prototype.powerOnTvWithCallback = function(callback) {
     });
 };
 
-webos3Accessory.prototype.checkTVState = function(callback) {
+webosTvAccessory.prototype.checkTVState = function(callback) {
     tcpp.probe(this.ip, 3000, (err, isAlive) => {
         if (!isAlive) {
             this.connected = false;
@@ -324,7 +324,7 @@ webos3Accessory.prototype.checkTVState = function(callback) {
     });
 };
 
-webos3Accessory.prototype.checkMuteState = function(callback) {
+webosTvAccessory.prototype.checkMuteState = function(callback) {
     if (this.connected) {
         this.lgtv.request('ssap://audio/getStatus', (err, res) => {
             if (!res || err) {
@@ -339,7 +339,7 @@ webos3Accessory.prototype.checkMuteState = function(callback) {
     }
 };
 
-webos3Accessory.prototype.checkVolumeLevel = function(callback) {
+webosTvAccessory.prototype.checkVolumeLevel = function(callback) {
     if (this.connected) {
         this.lgtv.request('ssap://audio/getVolume', (err, res) => {
             if (!res || err) {
@@ -354,7 +354,7 @@ webos3Accessory.prototype.checkVolumeLevel = function(callback) {
     }
 };
 
-webos3Accessory.prototype.checkForegroundApp = function(callback, appId) {
+webosTvAccessory.prototype.checkForegroundApp = function(callback, appId) {
     if (this.connected) {
         this.lgtv.request('ssap://com.webos.applicationManager/getForegroundAppInfo', (err, res) => {
             if (!res || err) {
@@ -375,7 +375,7 @@ webos3Accessory.prototype.checkForegroundApp = function(callback, appId) {
     }
 };
 
-webos3Accessory.prototype.checkWakeOnLan = function(callback) {
+webosTvAccessory.prototype.checkWakeOnLan = function(callback) {
     if (this.connected) {
         this.checkCount = 0;
         callback(null, true);
@@ -392,12 +392,12 @@ webos3Accessory.prototype.checkWakeOnLan = function(callback) {
 };
 
 // HOMEBRIDGE STATE SETTERS/GETTERS
-webos3Accessory.prototype.getState = function(callback) {
+webosTvAccessory.prototype.getState = function(callback) {
     this.lgtv.connect(this.url);
     this.checkTVState.call(this, callback);
 };
 
-webos3Accessory.prototype.setState = function(state, callback) {
+webosTvAccessory.prototype.setState = function(state, callback) {
     if (state) {
         if (!this.connected) {
             wol.wake(this.mac, (error) => {
@@ -425,11 +425,11 @@ webos3Accessory.prototype.setState = function(state, callback) {
 };
 
 
-webos3Accessory.prototype.getMuteState = function(callback) {
+webosTvAccessory.prototype.getMuteState = function(callback) {
     setTimeout(this.checkMuteState.bind(this, callback), 50);
 };
 
-webos3Accessory.prototype.setMuteState = function(state, callback) {
+webosTvAccessory.prototype.setMuteState = function(state, callback) {
     if (this.connected) {
         this.lgtv.request('ssap://audio/setMute', {
             mute: !state
@@ -441,11 +441,11 @@ webos3Accessory.prototype.setMuteState = function(state, callback) {
 };
 
 
-webos3Accessory.prototype.getVolume = function(callback) {
+webosTvAccessory.prototype.getVolume = function(callback) {
     setTimeout(this.checkVolumeLevel.bind(this, callback), 50);
 };
 
-webos3Accessory.prototype.setVolume = function(level, callback) {
+webosTvAccessory.prototype.setVolume = function(level, callback) {
     if (this.connected) {
         if (level > this.volumeLimit) {
             level = this.volumeLimit;
@@ -459,11 +459,11 @@ webos3Accessory.prototype.setVolume = function(level, callback) {
     }
 };
 
-webos3Accessory.prototype.getVolumeSwitch = function(callback) {
+webosTvAccessory.prototype.getVolumeSwitch = function(callback) {
     callback(null, false);
 };
 
-webos3Accessory.prototype.setVolumeSwitch = function(state, callback, isUp) {
+webosTvAccessory.prototype.setVolumeSwitch = function(state, callback, isUp) {
     if (this.connected) {
         let volLevel = this.volumeService.getCharacteristic(Characteristic.Brightness).value;
         if (isUp) {
@@ -487,11 +487,11 @@ webos3Accessory.prototype.setVolumeSwitch = function(state, callback, isUp) {
     }
 };
 
-webos3Accessory.prototype.getChannelSwitch = function(callback) {
+webosTvAccessory.prototype.getChannelSwitch = function(callback) {
     callback(null, false);
 };
 
-webos3Accessory.prototype.setChannelSwitch = function(state, callback, isUp) {
+webosTvAccessory.prototype.setChannelSwitch = function(state, callback, isUp) {
     if (this.connected) {
         if (isUp) {
             this.lgtv.request('ssap://tv/channelUp');
@@ -508,7 +508,7 @@ webos3Accessory.prototype.setChannelSwitch = function(state, callback, isUp) {
     }
 };
 
-webos3Accessory.prototype.getAppSwitchState = function(callback, appId) {
+webosTvAccessory.prototype.getAppSwitchState = function(callback, appId) {
     if (!this.connected) {
         callback(null, false);
     } else {
@@ -516,7 +516,7 @@ webos3Accessory.prototype.getAppSwitchState = function(callback, appId) {
     }
 };
 
-webos3Accessory.prototype.setAppSwitchState = function(state, callback, appId) {
+webosTvAccessory.prototype.setAppSwitchState = function(state, callback, appId) {
     if (this.connected) {
         if (state) {
             this.lgtv.request('ssap://system.launcher/launch', {
@@ -545,6 +545,6 @@ webos3Accessory.prototype.setAppSwitchState = function(state, callback, appId) {
     }
 };
 
-webos3Accessory.prototype.getServices = function() {
+webosTvAccessory.prototype.getServices = function() {
     return this.enabledServices;
 };

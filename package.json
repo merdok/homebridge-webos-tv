@@ -1,5 +1,5 @@
 {
-  "name": "homebridge-webos3",
+  "name": "homebridge-webos-tv",
   "version": "1.0.0",
   "description": "Homebridge plugin for LG webOS TVs",
   "main": "index.js",
@@ -9,6 +9,7 @@
   },
   "keywords": [
     "homebridge-plugin",
+    "webos2",
     "webos3",
     "webos4",
     "lgtv",
@@ -24,10 +25,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/merdok/homebridge-webos3.git"
+    "url": "https://github.com/merdok/homebridge-webos-tv.git"
   },
   "bugs": {
-    "url": "https://github.com/merdok/homebridge-webos3/issues"
+    "url": "https://github.com/merdok/homebridge-webos-tv/issues"
   },
-  "homepage": "https://github.com/merdok/homebridge-webos3#readme"
+  "homepage": "https://github.com/merdok/homebridge-webos-tv#readme"
 }

@@ -1,6 +1,6 @@
-# homebridge-webos3
+# homebridge-webos-tv
 
-`homebridge-webos3` is a plugin for HomeBridge which allows you to control your webOS TV! It should work with all TVs that support webOS2 and never.
+`homebridge-webos-tv` is a plugin for HomeBridge which allows you to control your webOS TV! It should work with all TVs that support webOS2 and never.
 The idea is that the TV should be controlled completely from the native HomeKit iOS app and Siri, that is why volume appears as a light bulb or external input as a switch.
 
 ### IMPORTANT
@@ -25,9 +25,9 @@ Install homebridge:
 sudo npm install -g homebridge
 ```
 
-Install homebridge-webos3:
+Install homebridge-webos-tv:
 ```sh
-sudo npm install -g homebridge-webos3
+sudo npm install -g homebridge-webos-tv
 ```
 
 ## Configuration
@@ -38,7 +38,7 @@ Add the accessory in `config.json` in your home directory inside `.homebridge`.
 {
   "accessories": [
     {
-      "accessory": "webos3",
+      "accessory": "webostv",
       "name": "My webOS tv",
       "ip": "192.168.0.40",
       "mac": "ab:cd:ef:fe:dc:ba",
@@ -62,7 +62,7 @@ On newer TVs **LG Connect Apps** under the network settings needs to be enabled.
 
 ### Configuration fields
 - `accessory` [required]
-Should always be "webos3"
+Should always be "webostv"
 - `name` [required]
 Name of your accessory
 - `ip` [required]
