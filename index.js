@@ -22,6 +22,10 @@ function webos3Accessory(log, config, api) {
     if (this.volumeControl == undefined) {
         this.volumeControl = true;
     }
+	this.volumeLimit = config['volumeLimit'];
+    if (this.volumeLimit == undefined || isNaN(this.volumeLimit)) {
+        this.volumeLimit = 100;
+    }
     this.pollingEnabled = config['pollingEnabled'];
     if (this.pollingEnabled == undefined) {
         this.pollingEnabled = false;
@@ -378,6 +382,9 @@ webos3Accessory.prototype.getVolume = function (callback) {
 
 webos3Accessory.prototype.setVolume = function (level, callback) {
     if (this.connected) {
+	if (level > this.volumeLimit) {
+            level = this.volumeLimit;
+	}
         this.lgtv.request('ssap://audio/setVolume', {volume: level});
         callback(null, level);
     } else {
@@ -419,3 +426,5 @@ webos3Accessory.prototype.setAppSwitchState = function (state, callback, appId) 
 webos3Accessory.prototype.getServices = function () {
     return this.enabledServices;
 };
+
+
