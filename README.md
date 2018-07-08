@@ -5,7 +5,7 @@ The idea is that the TV should be controlled completely from the native HomeKit 
 
 ### IMPORTANT
 
-This is a work in progress. Please contribute!_
+This is a work in progress. Please contribute!
 
 ### Features
 * Power status
