@@ -5,7 +5,7 @@ The idea is that the TV should be controlled completely from the native HomeKit 
 
 ### IMPORTANT
 
-#### The old package ```homebridge-webos3``` is deprecated. New development will be made here. Please change your accessory in your config.json to ```webostv``` and install this new package!
+#### The old package ```homebridge-webos3``` is deprecated. New development will be made here. If you used the old package please change your accessory in your config.json to ```webostv``` and install this new package!
 
 This is a work in progress. Please contribute!
 
