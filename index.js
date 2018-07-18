@@ -406,20 +406,23 @@ webosTvAccessory.prototype.setState = function(state, callback) {
                 setTimeout(this.checkWakeOnLan.bind(this, callback), 5000);
             })
         } else {
-            callback(null, true);
+
+            callback();
         }
     } else {
         if (this.connected) {
             this.lgtv.request('ssap://system/turnOff', (err, res) => {
-                if (err) return callback(null, false);
+                if (err) return callback(new Error('webOS - error turning off the TV'));
                 this.lgtv.disconnect();
                 this.connected = false;
                 this.setMuteStateManually(null, false);
                 this.setAppSwitchManually(null, false, null);
-                callback(null, true);
+
+                callback();
             })
         } else {
-            callback(new Error('webOS - is not connected'))
+
+            callback();
         }
     }
 };
@@ -434,9 +437,11 @@ webosTvAccessory.prototype.setMuteState = function(state, callback) {
         this.lgtv.request('ssap://audio/setMute', {
             mute: !state
         });
-        callback(null, state);
+
+        callback();
     } else {
-        callback(new Error('webOS - is not connected'))
+		callback(); // respond with success when tv is off
+       // callback(new Error('webOS - is not connected, cannot set mute state'));
     }
 };
 
@@ -453,9 +458,10 @@ webosTvAccessory.prototype.setVolume = function(level, callback) {
         this.lgtv.request('ssap://audio/setVolume', {
             volume: level
         });
-        callback(null, level);
+
+        callback();
     } else {
-        callback(new Error('webOS - is not connected'))
+        callback(new Error('webOS - is not connected, cannot set volume'));
     }
 };
 
@@ -483,7 +489,7 @@ webosTvAccessory.prototype.setVolumeSwitch = function(state, callback, isUp) {
         }, 10);
         callback();
     } else {
-        callback(new Error('webOS - is not connected'))
+        callback(new Error('webOS - is not connected, cannot set volume'));
     }
 };
 
@@ -504,7 +510,7 @@ webosTvAccessory.prototype.setChannelSwitch = function(state, callback, isUp) {
         }, 10);
         callback();
     } else {
-        callback(new Error('webOS - is not connected'))
+        callback(new Error('webOS - is not connected, cannot change channel'));
     }
 };
 
@@ -528,7 +534,8 @@ webosTvAccessory.prototype.setAppSwitchState = function(state, callback, appId) 
                 id: "com.webos.app.livetv"
             });
         }
-        callback(null, state);
+
+        callback();
     } else {
 
         if (state) {
@@ -537,14 +544,16 @@ webosTvAccessory.prototype.setAppSwitchState = function(state, callback, appId) 
                 this.lgtv.request('ssap://system.launcher/launch', {
                     id: appId
                 });
-                callback(null, true);
+
+                callback();
             });
         }
 
-        //  callback(new Error('webOS - is not connected'))
+
     }
 };
 
 webosTvAccessory.prototype.getServices = function() {
     return this.enabledServices;
 };
+
