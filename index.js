@@ -248,6 +248,9 @@ webosTvAccessory.prototype.prepareChannelService = function() {
 };
 
 // HELPER METHODS
+webosTvAccessory.prototype.setPowerStateManually = function(error, value) {
+    this.powerService.getCharacteristic(Characteristic.On).updateValue(value);
+};
 webosTvAccessory.prototype.setMuteStateManually = function(error, value) {
     if (this.volumeService) this.volumeService.getCharacteristic(Characteristic.On).updateValue(value);
 };
@@ -399,17 +402,15 @@ webosTvAccessory.prototype.getState = function(callback) {
 
 webosTvAccessory.prototype.setState = function(state, callback) {
     if (state) {
-        if (!this.connected) {
             wol.wake(this.mac, (error) => {
                 if (error) return callback(new Error('webOS - wake on lan error'));
                 this.checkCount = 0;
                 setTimeout(this.checkWakeOnLan.bind(this, callback), 5000);
             })
-        } else {
-            callback(null, true);
-        }
+            this.lgtv.connect(this.url);
+            this.setPowerStateManually(null, true);
     } else {
-        if (this.connected) {
+        this.lgtv.connect(this.url);
             this.lgtv.request('ssap://system/turnOff', (err, res) => {
                 if (err) return callback(null, false);
                 this.lgtv.disconnect();
@@ -418,9 +419,6 @@ webosTvAccessory.prototype.setState = function(state, callback) {
                 this.setAppSwitchManually(null, false, null);
                 callback(null, true);
             })
-        } else {
-            callback(new Error('webOS - is not connected'))
-        }
     }
 };
 
