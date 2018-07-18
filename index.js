@@ -410,7 +410,8 @@ webosTvAccessory.prototype.setState = function(state, callback) {
             this.lgtv.connect(this.url);
             this.setPowerStateManually(null, true);
     } else {
-        this.lgtv.connect(this.url);
+            this.lgtv.connect(this.url);
+            this.setPowerStateManually(null, false);
             this.lgtv.request('ssap://system/turnOff', (err, res) => {
                 if (err) return callback(null, false);
                 this.lgtv.disconnect();
