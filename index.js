@@ -440,7 +440,7 @@ webosTvAccessory.prototype.setMuteState = function(state, callback) {
 
         callback();
     } else {
-		callback(); // respond with success when tv is off
+	callback(); // respond with success when tv is off
        // callback(new Error('webOS - is not connected, cannot set mute state'));
     }
 };
