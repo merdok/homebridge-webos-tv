@@ -3,6 +3,7 @@ const wol = require('wake_on_lan');
 const tcpp = require('tcp-ping');
 
 let lgtv, Service, Characteristic;
+var tvVolume = 0;
 
 module.exports = function(homebridge) {
     Service = homebridge.hap.Service;
@@ -57,9 +58,17 @@ function webosTvAccessory(log, config, api) {
         if (!this.checkAliveInterval && this.pollingEnabled) {
             this.checkAliveInterval = setInterval(this.checkTVState.bind(this, this.pollCallback.bind(this)), this.alivePollingInterval);
         }
+		this.log.debug('webOS - subscribing to TV services');
         this.lgtv.subscribe('ssap://com.webos.applicationManager/getForegroundAppInfo', (err, res) => {
             if (res && res.appId) {
-                this.log.info('webOS - current appId: %s', res.appId);
+                this.log.info('webOS - app launched, current appId: %s', res.appId);
+            }
+        });
+        this.lgtv.subscribe('ssap://audio/getVolume', (err, res) => {
+            if (res && res.volume) {
+                this.tvVolume = res.volume;
+                this.setVolumeManually(null, this.tvVolume);
+                this.log.info('webOS - volume level change: %s', res.volume);
             }
         });
         this.updateAccessoryStatus();
@@ -252,6 +261,10 @@ webosTvAccessory.prototype.setMuteStateManually = function(error, value) {
     if (this.volumeService) this.volumeService.getCharacteristic(Characteristic.On).updateValue(value);
 };
 
+webosTvAccessory.prototype.setVolumeManually = function(error, value) {
+    if (this.volumeService) this.volumeService.getCharacteristic(Characteristic.Brightness).updateValue(value);
+};
+
 webosTvAccessory.prototype.setAppSwitchManually = function(error, value, appId) {
     if (this.appSwitchService) {
         if (Array.isArray(this.appSwitch)) {
@@ -332,21 +345,6 @@ webosTvAccessory.prototype.checkMuteState = function(callback) {
             } else {
                 this.log.info('webOS - TV muted: %s', res.mute ? "Yes" : "No");
                 callback(null, !res.mute);
-            }
-        });
-    } else {
-        callback(null, false);
-    }
-};
-
-webosTvAccessory.prototype.checkVolumeLevel = function(callback) {
-    if (this.connected) {
-        this.lgtv.request('ssap://audio/getVolume', (err, res) => {
-            if (!res || err) {
-                callback(new Error('webOS - TV volume - error while getting current volume'));
-            } else {
-                this.log.info('webOS - TV volume: ' + res.volume);
-                callback(null, parseInt(res.volume));
             }
         });
     } else {
@@ -440,14 +438,14 @@ webosTvAccessory.prototype.setMuteState = function(state, callback) {
 
         callback();
     } else {
-	callback(); // respond with success when tv is off
-       // callback(new Error('webOS - is not connected, cannot set mute state'));
+        callback(); // respond with success when tv is off
+        // callback(new Error('webOS - is not connected, cannot set mute state'));
     }
 };
 
 
 webosTvAccessory.prototype.getVolume = function(callback) {
-    setTimeout(this.checkVolumeLevel.bind(this, callback), 50);
+    callback(null, this.tvVolume);
 };
 
 webosTvAccessory.prototype.setVolume = function(level, callback) {
@@ -471,21 +469,18 @@ webosTvAccessory.prototype.getVolumeSwitch = function(callback) {
 
 webosTvAccessory.prototype.setVolumeSwitch = function(state, callback, isUp) {
     if (this.connected) {
-        let volLevel = this.volumeService.getCharacteristic(Characteristic.Brightness).value;
+        let volLevel = this.tvVolume;
         if (isUp) {
             if (volLevel < this.volumeLimit) {
                 this.lgtv.request('ssap://audio/volumeUp');
-                volLevel++;
             }
         } else {
             this.lgtv.request('ssap://audio/volumeDown');
-            volLevel--;
         }
         setTimeout(() => {
             this.volumeUpService.getCharacteristic(Characteristic.On).updateValue(false);
             this.volumeDownService.getCharacteristic(Characteristic.On).updateValue(false);
             this.setMuteStateManually(null, true);
-            this.volumeService.getCharacteristic(Characteristic.Brightness).updateValue(volLevel);
         }, 10);
         callback();
     } else {
@@ -556,4 +551,3 @@ webosTvAccessory.prototype.setAppSwitchState = function(state, callback, appId) 
 webosTvAccessory.prototype.getServices = function() {
     return this.enabledServices;
 };
-
