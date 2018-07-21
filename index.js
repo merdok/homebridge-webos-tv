@@ -6,7 +6,10 @@ let lgtv, Service, Characteristic;
 var tvVolume = 0;
 var tvMuted = false;
 
-// note to myself: keep track of the power status in a variable? Could improve power status, especially for oled tvs, set power state true on connect subscribe, set power state to false on close subscribe?
+// note to myself: 
+// - keep track of the power status in a variable? Could improve power status, especially for oled tvs, set power state true on connect subscribe, set power state to false on close subscribe?
+// - add setPowerStateManually function? To set the homekit switch status to disabled when the user turns off the TV with the remote. Can be done on the close subscribe?
+
 
 module.exports = function(homebridge) {
     Service = homebridge.hap.Service;
@@ -149,11 +152,11 @@ function webosTvAccessory(log, config, api) {
 
 webosTvAccessory.prototype.prepareVolumeService = function() {
 
-    if (!this.volumeControl) {
-        return;
-    }
+	if (!this.volumeControl) {
+	    return;
+	}
 
-    // slider/lightbulb
+	// slider/lightbulb
 	if(this.volumeControl == true || this.volumeControl === "slider"){
 		this.volumeService = new Service.Lightbulb(this.name + " Volume", "volumeService");
 
@@ -170,7 +173,7 @@ webosTvAccessory.prototype.prepareVolumeService = function() {
 		this.enabledServices.push(this.volumeService);
 	}
 
-    // up/down switches
+	// up/down switches
 	if(this.volumeControl == true || this.volumeControl === "switch"){
 	    this.volumeUpService = new Service.Switch(this.name + " Volume Up", "volumeUpService");
 
