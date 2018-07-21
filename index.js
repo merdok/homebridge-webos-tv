@@ -6,6 +6,8 @@ let lgtv, Service, Characteristic;
 var tvVolume = 0;
 var tvMuted = false;
 
+// note to myself: keep track of the power status in a variable? Could improve power status, especially for oled tvs, set power state true on connect subscribe, set power state to false on close subscribe?
+
 module.exports = function(homebridge) {
     Service = homebridge.hap.Service;
     Characteristic = homebridge.hap.Characteristic;
@@ -31,6 +33,10 @@ function webosTvAccessory(log, config, api) {
     this.channelControl = config['channelControl'];
     if (this.channelControl == undefined) {
         this.channelControl = true;
+    }
+	this.mediaControl = config['mediaControl'];
+    if (this.mediaControl == undefined) {
+        this.mediaControl = true;
     }
     this.pollingEnabled = config['pollingEnabled'];
     if (this.pollingEnabled == undefined) {
@@ -136,7 +142,7 @@ function webosTvAccessory(log, config, api) {
     this.prepareVolumeService();
     this.prepareAppSwitchService();
     this.prepareChannelService();
-
+    this.prepareMediaControlService();
 }
 
 // SETUP COMPLEX SERVICES
@@ -272,6 +278,69 @@ webosTvAccessory.prototype.prepareChannelService = function() {
 
 
     this.enabledServices.push(this.channelDownService);
+
+};
+
+webosTvAccessory.prototype.prepareMediaControlService = function() {
+
+    if (!this.mediaControl) {
+        return;
+    }
+
+    this.mediaPlayService = new Service.Switch(this.name + " Play", "mediaPlayService");
+
+    this.mediaPlayService
+        .getCharacteristic(Characteristic.On)
+        .on('get', this.getMediaControlSwitch.bind(this))
+        .on('set', (state, callback) => {
+            this.setMediaControlSwitch(state, callback, "play");
+        });
+
+    this.enabledServices.push(this.mediaPlayService);
+
+    this.mediaPauseService = new Service.Switch(this.name + " Pause", "mediaPauseService");
+
+    this.mediaPauseService
+        .getCharacteristic(Characteristic.On)
+        .on('get', this.getMediaControlSwitch.bind(this))
+        .on('set', (state, callback) => {
+            this.setMediaControlSwitch(state, callback, "pause");
+        });
+
+    this.enabledServices.push(this.mediaPauseService);
+	
+	this.mediaStopService = new Service.Switch(this.name + " Stop", "mediaStopService");
+
+    this.mediaStopService
+        .getCharacteristic(Characteristic.On)
+        .on('get', this.getMediaControlSwitch.bind(this))
+        .on('set', (state, callback) => {
+            this.setMediaControlSwitch(state, callback, "stop");
+        });
+
+    this.enabledServices.push(this.mediaStopService);
+	
+	this.mediaRewindService = new Service.Switch(this.name + " Rewind", "mediaRewindService");
+
+    this.mediaRewindService
+        .getCharacteristic(Characteristic.On)
+        .on('get', this.getMediaControlSwitch.bind(this))
+        .on('set', (state, callback) => {
+            this.setMediaControlSwitch(state, callback, "rewind");
+        });
+
+    this.enabledServices.push(this.mediaRewindService);
+	
+	this.mediaFastForwardService = new Service.Switch(this.name + " Fast Forward", "mediaFastForwardService");
+
+    this.mediaFastForwardService
+        .getCharacteristic(Characteristic.On)
+        .on('get', this.getMediaControlSwitch.bind(this))
+        .on('set', (state, callback) => {
+            this.setMediaControlSwitch(state, callback, "fastForward");
+        });
+
+    this.enabledServices.push(this.mediaFastForwardService);
 
 };
 
@@ -550,6 +619,37 @@ webosTvAccessory.prototype.setAppSwitchState = function(state, callback, appId) 
     }
 };
 
+webosTvAccessory.prototype.getMediaControlSwitch = function(callback) {
+    callback(null, false);
+};
+
+webosTvAccessory.prototype.setMediaControlSwitch = function(state, callback, action) {
+    if (this.connected) {
+        if (action === "play") {
+            this.lgtv.request('ssap://media.controls/play');
+        } else if (action === "pause") {
+            this.lgtv.request('ssap://media.controls/pause');
+        } else if (action === "stop") {
+            this.lgtv.request('ssap://media.controls/stop');
+        } else if (action === "rewind") {
+            this.lgtv.request('ssap://media.controls/rewind');
+        } else if (action === "fastForward") {
+            this.lgtv.request('ssap://media.controls/fastForward');
+        }
+        setTimeout(() => {
+            this.mediaPlayService.getCharacteristic(Characteristic.On).updateValue(false);
+            this.mediaPauseService.getCharacteristic(Characteristic.On).updateValue(false);
+			this.mediaStopService.getCharacteristic(Characteristic.On).updateValue(false);
+			this.mediaRewindService.getCharacteristic(Characteristic.On).updateValue(false);
+			this.mediaFastForwardService.getCharacteristic(Characteristic.On).updateValue(false);
+        }, 10);
+        callback();
+    } else {
+        callback(new Error('webOS - is not connected, cannot control media'));
+    }
+};
+
 webosTvAccessory.prototype.getServices = function() {
     return this.enabledServices;
 };
+
