@@ -16,6 +16,7 @@ This is a work in progress. Please contribute!
 * Mute / Unmute (as light bulb)
 * Volume control (as light bulb and switches)
 * Open apps (switch between apps of your choice and live tv)
+* Channel control
 
 ## Installation
 
@@ -78,7 +79,11 @@ Wheter the TV state background polling is enabled. Useful for more accurate TV s
 - `pollingInterval` [optional]
 The TV state background polling interval in seconds. **Default: 5**
 - `volumeControl` [optional]
-Wheter the volume control service is enabled. **Default: true**
+Wheter the volume control service is enabled. **Default: true**  
+Available values:
+  - *true* - slider and switches 
+  - *"slider"* - just slider
+  - *"switch"* - just switches
 - `volumeLimit` [optional]
 The max allowed volume which can be set using the volume service. Range 1-100. **Default: 100**
 - `channelControl` [optional]
