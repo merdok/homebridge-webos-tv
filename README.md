@@ -17,6 +17,7 @@ This is a work in progress. Please contribute!
 * Volume control (as light bulb and switches)
 * Open apps (switch between apps of your choice and live tv)
 * Channel control
+* Media control
 
 ## Installation
 
@@ -46,6 +47,8 @@ Add the accessory in `config.json` in your home directory inside `.homebridge`.
       "ip": "192.168.0.40",
       "mac": "ab:cd:ef:fe:dc:ba",
       "keyFile": "/home/pi/.homebridge/lgtvKeyFile",
+      "volumeControl": "switch",
+      "mediaControl": false,
       "pollingEnabled": true,
       "appSwitch":[
          "com.webos.app.tvguide",
@@ -88,6 +91,8 @@ Available values:
 The max allowed volume which can be set using the volume service. Range 1-100. **Default: 100**
 - `channelControl` [optional]
 Wheter the channel control service is enabled. **Default: true**
+- `mediaControl` [optional]
+Wheter the media control service is enabled. Buttons: play, pause, stop, rewind, fast forward. **Default: true**
 - `appSwitch` [optional] 
 Wheter the app switch service is enabled. This allows to switch live tv with apps of your choice. To get the app ID simply open an app on your TV and check the homebridge console. The app ID of the opened app will be printed. **Default: "" (disabled)**
   - For a *single switch*  set the desired app ID as the value
