@@ -59,32 +59,32 @@ function webosTvAccessory(log, config, api) {
         if (!this.checkAliveInterval && this.pollingEnabled) {
             this.checkAliveInterval = setInterval(this.checkTVState.bind(this, this.pollCallback.bind(this)), this.alivePollingInterval);
         }
-		this.log.debug('webOS - subscribing to TV services');
+	this.log.debug('webOS - subscribing to TV services');
         this.lgtv.subscribe('ssap://com.webos.applicationManager/getForegroundAppInfo', (err, res) => {
-			if (!res || err) {
-                this.log.error('webOS - TV app check - error while getting current app');
-            } else {
-				if (res.appId) {
-					this.log.info('webOS - app launched, current appId: %s', res.appId);
-				}
-            }
+		if (!res || err) {
+                	this.log.error('webOS - TV app check - error while getting current app');
+           	 } else {
+			if (res.appId) {
+				this.log.info('webOS - app launched, current appId: %s', res.appId);
+			}
+		 }
         });
-		this.lgtv.subscribe('ssap://audio/getStatus', (err, res) => {
-		    if (!res || err) {
-                this.log.error('webOS - TV audio status - error while getting current audio status');
-            } else {
-				this.log.info('webOS - audio status changed');
+	this.lgtv.subscribe('ssap://audio/getStatus', (err, res) => {
+		if (!res || err) {
+			this.log.error('webOS - TV audio status - error while getting current audio status');
+		} else {
+			this.log.info('webOS - audio status changed');
 			
-				// volume state
-				this.tvVolume = res.volume;
-                this.setVolumeManually(null, this.tvVolume);
-                this.log.info('webOS - current volume: %s', res.volume);
+			// volume state
+			this.tvVolume = res.volume;
+                	this.setVolumeManually(null, this.tvVolume);
+                	this.log.info('webOS - current volume: %s', res.volume);
 				
-				// mute state
-                this.tvMuted = res.mute;
-                this.setMuteStateManually(null, !this.tvMuted);
-				this.log.info('webOS - muted: %s', res.mute ? "Yes" : "No");
-            }
+			// mute state
+                	this.tvMuted = res.mute;
+			this.setMuteStateManually(null, !this.tvMuted);
+			this.log.info('webOS - muted: %s', res.mute ? "Yes" : "No");
+        	}
         });
         this.updateAccessoryStatus();
     });
@@ -379,7 +379,7 @@ webosTvAccessory.prototype.checkForegroundApp = function(callback, appId) {
 webosTvAccessory.prototype.checkWakeOnLan = function(callback) {
     if (this.connected) {
         this.checkCount = 0;
-		this.lgtv.connect(this.url);
+	this.lgtv.connect(this.url);
         callback(null, true);
     } else {
         if (this.checkCount < 3) {
@@ -408,7 +408,6 @@ webosTvAccessory.prototype.setState = function(state, callback) {
                 setTimeout(this.checkWakeOnLan.bind(this, callback), 5000);
             })
         } else {
-
             callback();
         }
     } else {
@@ -418,7 +417,7 @@ webosTvAccessory.prototype.setState = function(state, callback) {
                 this.lgtv.disconnect();
                 this.connected = false;
                 this.setAppSwitchManually(null, false, null);
-				this.setMuteStateManually(null, false);
+		this.setMuteStateManually(null, false);
                 callback();
             })
         } else {
@@ -431,9 +430,9 @@ webosTvAccessory.prototype.setState = function(state, callback) {
 webosTvAccessory.prototype.getMuteState = function(callback) {
 	if (this.connected) {
 		callback(null, !this.tvMuted);
-    } else {
-        callback(null, false);
-    }
+	} else {
+		callback(null, false);
+	}
 };
 
 webosTvAccessory.prototype.setMuteState = function(state, callback) {
@@ -441,7 +440,6 @@ webosTvAccessory.prototype.setMuteState = function(state, callback) {
         this.lgtv.request('ssap://audio/setMute', {
             mute: !state
         });
-
         callback();
     } else {
         callback(); // respond with success when tv is off
@@ -452,10 +450,10 @@ webosTvAccessory.prototype.setMuteState = function(state, callback) {
 
 webosTvAccessory.prototype.getVolume = function(callback) {
 	if (this.connected) {
-		callback(null, this.tvVolume);
-    } else {
-        callback(null, 0);
-    }
+	callback(null, this.tvVolume);
+	} else {
+		callback(null, 0);
+	}
 };
 
 webosTvAccessory.prototype.setVolume = function(level, callback) {
@@ -537,7 +535,6 @@ webosTvAccessory.prototype.setAppSwitchState = function(state, callback, appId) 
                 id: "com.webos.app.livetv"
             });
         }
-
         callback();
     } else {
 
@@ -547,12 +544,9 @@ webosTvAccessory.prototype.setAppSwitchState = function(state, callback, appId) 
                 this.lgtv.request('ssap://system.launcher/launch', {
                     id: appId
                 });
-
                 callback();
             });
         }
-
-
     }
 };
 
