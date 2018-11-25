@@ -97,7 +97,13 @@ Wheter the media control service is enabled. Buttons: play, pause, stop, rewind,
 Wheter the app switch service is enabled. This allows to switch live tv with apps of your choice. To get the app ID simply open an app on your TV and check the homebridge console. The app ID of the opened app will be printed. **Default: "" (disabled)**
   - For a *single switch*  set the desired app ID as the value
   - For *multiple switches* set an array of app IDs as the value
-  - External sources are also apps and can be used as app switches, available sources: *com.webos.app.hdmi1, com.webos.app.hdmi2, com.webos.app.hdmi3, com.webos.app.externalinput.component, com.webos.app.externalinput.av1*
+  - External sources are also apps and can be used as app switches, available sources:
+    - *com.webos.app.livetv*
+    - *com.webos.app.hdmi1*, 
+    - *com.webos.app.hdmi2*, 
+    - *com.webos.app.hdmi3*, 
+    - *com.webos.app.externalinput.component*, 
+    - *com.webos.app.externalinput.av1*
   - Apps can also be started when the TV is off, in that case an attempt to power on the TV and switch to the chosen app will be made
 
 ## Special thanks
