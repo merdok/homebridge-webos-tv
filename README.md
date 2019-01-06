@@ -108,6 +108,8 @@ Wheter the app switch service is enabled. This allows to switch live tv with app
   - Apps can also be started when the TV is off, in that case an attempt to power on the TV and switch to the chosen app will be made
 - `channelButtons` [optional] 
 Wheter the channel buttons service is enabled. This allows to create switches for the channels of your choice. This way you can quickly switch between favorite channels. **Default: "" (disabled)**
+  - For a *single button*  set the desired channel number as the value
+  - For *multiple buttons* set an array of channel numbers as the value
   - Channels can also be opened when the TV is off, in that case an attempt to power on the TV and afterwards open the chosen channel will be made.
 
 ## Special thanks
