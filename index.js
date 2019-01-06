@@ -6,11 +6,6 @@ let lgtv, Service, Characteristic;
 var tvVolume = 0;
 var tvMuted = false;
 
-// note to myself: 
-// - keep track of the power status in a variable? Could improve power status, especially for oled tvs, set power state true on connect subscribe, set power state to false on close subscribe?
-// - add setPowerStateManually function? To set the homekit switch status to disabled when the user turns off the TV with the remote. Can be done on the close subscribe?
-
-
 module.exports = function(homebridge) {
     Service = homebridge.hap.Service;
     Characteristic = homebridge.hap.Characteristic;
@@ -41,10 +36,6 @@ function webosTvAccessory(log, config, api) {
     if (this.mediaControl == undefined) {
         this.mediaControl = true;
     }
-    this.pollingEnabled = config['pollingEnabled'];
-    if (this.pollingEnabled == undefined) {
-        this.pollingEnabled = false;
-    }
     this.alivePollingInterval = config['pollingInterval'] || 5;
     this.alivePollingInterval = this.alivePollingInterval * 1000;
     this.appSwitch = config['appSwitch'];
@@ -61,39 +52,41 @@ function webosTvAccessory(log, config, api) {
         reconnect: 3000,
         keyFile: this.keyFile
     });
+	
+	if (!this.checkAliveInterval) {
+		this.checkAliveInterval = setInterval(this.checkTVState.bind(this, this.updateTvStatus.bind(this)), this.alivePollingInterval);
+    }
 
     this.lgtv.on('connect', () => {
         this.log.info('webOS - connected to TV');
         this.connected = true;
-        if (!this.checkAliveInterval && this.pollingEnabled) {
-            this.checkAliveInterval = setInterval(this.checkTVState.bind(this, this.pollCallback.bind(this)), this.alivePollingInterval);
-        }
-	this.log.debug('webOS - subscribing to TV services');
+		this.updateTvStatus(null, true);
+		this.log.debug('webOS - subscribing to TV services');
         this.lgtv.subscribe('ssap://com.webos.applicationManager/getForegroundAppInfo', (err, res) => {
-		if (!res || err) {
-                	this.log.error('webOS - TV app check - error while getting current app');
-           	 } else {
-			if (res.appId) {
-				this.log.info('webOS - app launched, current appId: %s', res.appId);
+			if (!res || err) {
+				this.log.error('webOS - TV app check - error while getting current app');
+			} else {
+				if (res.appId) {
+					this.log.info('webOS - app launched, current appId: %s', res.appId);
+				}
 			}
-		 }
         });
-	this.lgtv.subscribe('ssap://audio/getStatus', (err, res) => {
-		if (!res || err) {
-			this.log.error('webOS - TV audio status - error while getting current audio status');
-		} else {
-			this.log.info('webOS - audio status changed');
-			
-			// volume state
-			this.tvVolume = res.volume;
-                	this.setVolumeManually(null, this.tvVolume);
-                	this.log.info('webOS - current volume: %s', res.volume);
+		this.lgtv.subscribe('ssap://audio/getStatus', (err, res) => {
+			if (!res || err) {
+				this.log.error('webOS - TV audio status - error while getting current audio status');
+			} else {
+				this.log.info('webOS - audio status changed');
 				
-			// mute state
-                	this.tvMuted = res.mute;
-			this.setMuteStateManually(null, !this.tvMuted);
-			this.log.info('webOS - muted: %s', res.mute ? "Yes" : "No");
-        	}
+				// volume state
+				this.tvVolume = res.volume;
+				this.setVolumeManually(null, this.tvVolume);
+				this.log.info('webOS - current volume: %s', res.volume);
+					
+				// mute state
+				this.tvMuted = res.mute;
+				this.setMuteStateManually(null, !this.tvMuted);
+				this.log.info('webOS - muted: %s', res.mute ? "Yes" : "No");
+			}
         });
         this.updateAccessoryStatus();
     });
@@ -101,10 +94,7 @@ function webosTvAccessory(log, config, api) {
     this.lgtv.on('close', () => {
         this.log.info('webOS - disconnected from TV');
         this.connected = false;
-        //if(this.checkAliveInterval) {
-        //  clearInterval(this.checkAliveInterval);
-        //  this.checkAliveInterval = undefined;
-        //}
+		this.updateTvStatus(null, false);
     });
 
     this.lgtv.on('error', (error) => {
@@ -149,7 +139,6 @@ function webosTvAccessory(log, config, api) {
 }
 
 // SETUP COMPLEX SERVICES
-
 webosTvAccessory.prototype.prepareVolumeService = function() {
 
 	if (!this.volumeControl) {
@@ -382,7 +371,7 @@ webosTvAccessory.prototype.updateAccessoryStatus = function() {
     if (this.appSwitchService) this.checkForegroundApp(this.setAppSwitchManually.bind(this));
 };
 
-webosTvAccessory.prototype.pollCallback = function(error, status) {
+webosTvAccessory.prototype.updateTvStatus = function(error, status) {
     if (!status) {
         this.powerService.getCharacteristic(Characteristic.On).updateValue(status);
         if (this.volumeService) this.volumeService.getCharacteristic(Characteristic.On).updateValue(status);
@@ -417,9 +406,11 @@ webosTvAccessory.prototype.powerOnTvWithCallback = function(callback) {
 
 webosTvAccessory.prototype.checkTVState = function(callback) {
     tcpp.probe(this.ip, 3000, (err, isAlive) => {
-        if (!isAlive) {
+        if (!isAlive && this.connected) {
             this.connected = false;
-        } else {
+			this.lgtv.disconnect();
+        } else if (isAlive && !this.connected) {
+			this.lgtv.connect(this.url);
             this.connected = true;
         }
         this.log.debug('webOS - TV state: %s', this.connected ? "On" : "Off");
@@ -448,40 +439,20 @@ webosTvAccessory.prototype.checkForegroundApp = function(callback, appId) {
     }
 };
 
-webosTvAccessory.prototype.checkWakeOnLan = function(callback) {
-    if (this.connected) {
-        this.checkCount = 0;
-	this.lgtv.connect(this.url);
-        callback(null, true);
-    } else {
-        if (this.checkCount < 3) {
-            this.checkCount++;
-            this.lgtv.connect(this.url);
-            setTimeout(this.checkWakeOnLan.bind(this, callback), 5000);
-        } else {
-            this.checkCount = 0;
-            callback(new Error('webOS - wake timeout'));
-        }
-    }
-};
-
 // HOMEBRIDGE STATE SETTERS/GETTERS
 webosTvAccessory.prototype.getState = function(callback) {
-    this.lgtv.connect(this.url);
-    this.checkTVState.call(this, callback);
+    callback(null, this.connected);
 };
 
 webosTvAccessory.prototype.setState = function(state, callback) {
     if (state) {
-        if (!this.connected) {
-            wol.wake(this.mac, (error) => {
-                if (error) return callback(new Error('webOS - wake on lan error'));
-                this.checkCount = 0;
-                setTimeout(this.checkWakeOnLan.bind(this, callback), 5000);
-            })
-        } else {
-            callback();
-        }
+		wol.wake(this.mac, (error) => {
+			if (error) {
+				this.log.info('webOS - wake on lan error');
+				return callback(new Error('webOS - wake on lan error'));
+			}
+		})
+		callback();
     } else {
         if (this.connected) {
             this.lgtv.request('ssap://system/turnOff', (err, res) => {
@@ -514,6 +485,10 @@ webosTvAccessory.prototype.setMuteState = function(state, callback) {
         });
         callback();
     } else {
+		// disable the switch immediately since i am responding with success
+	    setTimeout(() => {
+            this.volumeService.getCharacteristic(Characteristic.On).updateValue(false);
+        }, 10);
         callback(); // respond with success when tv is off
         // callback(new Error('webOS - is not connected, cannot set mute state'));
     }
@@ -609,7 +584,6 @@ webosTvAccessory.prototype.setAppSwitchState = function(state, callback, appId) 
         }
         callback();
     } else {
-
         if (state) {
             this.log.info('webOS - Trying to launch %s but TV is off, attempting to power on the TV', appId);
             this.powerOnTvWithCallback(() => {
