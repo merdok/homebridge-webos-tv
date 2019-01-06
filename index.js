@@ -531,8 +531,9 @@ webosTvAccessory.prototype.checkTVState = function(callback) {
 webosTvAccessory.prototype.checkForegroundApp = function(callback, appId) {
     if (this.connected) {
         this.lgtv.request('ssap://com.webos.applicationManager/getForegroundAppInfo', (err, res) => {
-            if (!res || err) {
-                callback(new Error('webOS - current app - error while getting current app info'));
+            if (!res || err || res.errorCode || res.appId === "") {
+               this.log.debug('webOS - current app - error while getting current app info');
+				callback(null, false, null); // disable all switches
             } else {
                 this.log.debug('webOS - TV current appId: %s', res.appId);
                 if (appId == undefined || appId == null) { // if appId undefined or null then i am checking which app is currently running; if set then continue normally
@@ -552,8 +553,9 @@ webosTvAccessory.prototype.checkForegroundApp = function(callback, appId) {
 webosTvAccessory.prototype.checkCurrentChannel = function(callback, channelNum) {
     if (this.connected) {
         this.lgtv.request('ssap://tv/getCurrentChannel', (err, res) => {
-            if (!res || err) {
-                callback(new Error('webOS - current channel - error while getting current channel info'));
+            if (!res || err || res.errorCode) {
+                this.log.debug('webOS - current channel - error while getting current channel info');
+				callback(null, false, null); // disable all switches
             } else {
                 this.log.debug('webOS - TV current channel: %s, %s', res.channelNumber, res.channelName);
                 if (channelNum == undefined || channelNum == null) { // if channelNum undefined or null then i am checking which channel is currently running; if set then continue normally
@@ -587,17 +589,14 @@ webosTvAccessory.prototype.setState = function(state, callback) {
     } else {
         if (this.connected) {
             this.lgtv.request('ssap://system/turnOff', (err, res) => {
-                if (err) return callback(new Error('webOS - error turning off the TV'));
                 this.lgtv.disconnect();
                 this.connected = false;
                 this.setAppSwitchManually(null, false, null);
                 this.setChannelButtonManually(null, false, null);
                 this.setMuteStateManually(null, false);
-                callback();
             })
-        } else {
-            callback();
-        }
+        } 
+		callback();
     }
 };
 
@@ -807,3 +806,4 @@ webosTvAccessory.prototype.setChannelButtonState = function(state, callback, cha
 webosTvAccessory.prototype.getServices = function() {
     return this.enabledServices;
 };
+
