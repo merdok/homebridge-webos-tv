@@ -49,13 +49,14 @@ Add the accessory in `config.json` in your home directory inside `.homebridge`.
       "keyFile": "/home/pi/.homebridge/lgtvKeyFile",
       "volumeControl": "switch",
       "mediaControl": false,
-      "pollingEnabled": true,
+      "pollingInterval": 10,
       "appSwitch":[
          "com.webos.app.tvguide",
          "youtube.leanback.v4",
          "com.webos.app.hdmi2",
          "com.webos.app.externalinput.component"
-      ]
+      ],
+      "channelButtons": [3,5,7,8]
 
     }
   ]  
@@ -105,6 +106,9 @@ Wheter the app switch service is enabled. This allows to switch live tv with app
     - *com.webos.app.externalinput.component*, 
     - *com.webos.app.externalinput.av1*
   - Apps can also be started when the TV is off, in that case an attempt to power on the TV and switch to the chosen app will be made
+- `channelButtons` [optional] 
+Wheter the channel buttons service is enabled. This allows to create switches for the channels of your choice. This way you can quickly switch between favorite channels. **Default: "" (disabled)**
+  - Channels can also be opened when the TV is off, in that case an attempt to power on the TV and afterwards open the chosen channel will be made.
 
 ## Special thanks
 [lgtv2](https://github.com/hobbyquaker/lgtv2) - the Node.js remote control module for LG WebOS smart TVs.
