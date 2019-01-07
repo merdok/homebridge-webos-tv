@@ -43,6 +43,7 @@ function webosTvAccessory(log, config, api) {
     this.alivePollingInterval = this.alivePollingInterval * 1000;
     this.appSwitch = config['appSwitch'];
     this.channelButtons = config['channelButtons'];
+    this.notificationButtons = config['notificationButtons'];
 
     this.url = 'ws://' + this.ip + ':3000';
     this.enabledServices = [];
@@ -75,20 +76,20 @@ function webosTvAccessory(log, config, api) {
                     this.setAppSwitchManually(null, true, this.tvCurrentAppId);
                     this.log.info('webOS - app launched, current appId: %s', res.appId);
                     if (this.channelButtonService) {
-						if(this.tvCurrentAppId === "com.webos.app.livetv"){
-							// if the launchLiveTvChannel variable is not empty then switch to the specified channel and set the varaible to null
-							if (this.launchLiveTvChannel !== undefined || this.launchLiveTvChannel !== null || this.launchLiveTvChannel.length > 0) {
-								this.lgtv.request('ssap://tv/openChannel', {
-									channelNumber: this.launchLiveTvChannel
-								});
-								this.launchLiveTvChannel = null;
-							}
-							// check which channel is currently active and update the channel switch if exists
-							this.checkCurrentChannel(this.setChannelButtonManually.bind(this));
-						}else {
-							//if not livetv app then disable all other channel buttons
-							this.setChannelButtonManually(null, false, null);
-						}
+                        if (this.tvCurrentAppId === "com.webos.app.livetv") {
+                            // if the launchLiveTvChannel variable is not empty then switch to the specified channel and set the varaible to null
+                            if (this.launchLiveTvChannel !== undefined || this.launchLiveTvChannel !== null || this.launchLiveTvChannel.length > 0) {
+                                this.lgtv.request('ssap://tv/openChannel', {
+                                    channelNumber: this.launchLiveTvChannel
+                                });
+                                this.launchLiveTvChannel = null;
+                            }
+                            // check which channel is currently active and update the channel switch if exists
+                            this.checkCurrentChannel(this.setChannelButtonManually.bind(this));
+                        } else {
+                            //if not livetv app then disable all other channel buttons
+                            this.setChannelButtonManually(null, false, null);
+                        }
 
                     }
                 }
@@ -162,7 +163,7 @@ function webosTvAccessory(log, config, api) {
         .setCharacteristic(Characteristic.Manufacturer, 'LG Electronics Inc.')
         .setCharacteristic(Characteristic.Model, 'webOS TV')
         .setCharacteristic(Characteristic.SerialNumber, '-')
-        .setCharacteristic(Characteristic.FirmwareRevision, '1.2.0');
+        .setCharacteristic(Characteristic.FirmwareRevision, '1.2.1');
 
 
     this.enabledServices.push(this.powerService);
@@ -173,6 +174,7 @@ function webosTvAccessory(log, config, api) {
     this.prepareChannelService();
     this.prepareMediaControlService();
     this.prepareChannelButtonService();
+    this.prepareNotificationButtonService();
 }
 
 // SETUP COMPLEX SERVICES
@@ -239,10 +241,11 @@ webosTvAccessory.prototype.prepareAppSwitchService = function() {
     if (isArray) {
         this.appSwitchService = new Array();
         this.appSwitch.forEach((value, i) => {
-            this.appSwitch[i] = this.appSwitch[i].replace(/\s/g, '');
+            this.appSwitch[i] = this.appSwitch[i].replace(/\s/g, ''); // remove all white spaces from the string
             this.appSwitchService[i] = new Service.Switch(this.name + " App: " + value, "appSwitchService" + i);
         });
     } else {
+        this.appSwitch = this.appSwitch.replace(/\s/g, ''); // remove all white spaces from the string
         this.appSwitchService = new Service.Switch(this.name + " App: " + this.appSwitch, "appSwitchService");
     }
 
@@ -424,6 +427,57 @@ webosTvAccessory.prototype.prepareChannelButtonService = function() {
 
 };
 
+webosTvAccessory.prototype.prepareNotificationButtonService = function() {
+
+    if (this.notificationButtons == undefined || this.notificationButtons == null || this.notificationButtons.length <= 0) {
+        return;
+    }
+
+    let isArray = Array.isArray(this.notificationButtons);
+
+    if (isArray) {
+        this.notificationButtonService = new Array();
+        this.notificationButtons.forEach((value, i) => {
+            this.notificationButtons[i] = this.notificationButtons[i].toString();
+            this.notificationButtonService[i] = new Service.Switch(this.name + " Notification: " + value, "notificationButtonService" + i);
+        });
+    } else {
+        this.notificationButtons = this.notificationButtons.toString();
+        this.notificationButtonService = new Service.Switch(this.name + " Notification: " + this.notificationButtons, "notificationButtonService");
+    }
+
+    if (isArray) {
+        this.notificationButtons.forEach((value, i) => {
+            this.notificationButtonService[i]
+                .getCharacteristic(Characteristic.On)
+                .on('get', (callback) => {
+                    this.getNotificationButtonState(callback, this.notificationButtons[i]);
+                })
+                .on('set', (state, callback) => {
+                    this.setNotificationButtonState(state, callback, this.notificationButtons[i]);
+                });
+        });
+    } else {
+        this.notificationButtonService
+            .getCharacteristic(Characteristic.On)
+            .on('get', (callback) => {
+                this.getNotificationButtonState(callback, this.notificationButtons);
+            })
+            .on('set', (state, callback) => {
+                this.setNotificationButtonState(state, callback, this.notificationButtons);
+            });
+    }
+
+    if (isArray) {
+        this.notificationButtons.forEach((value, i) => {
+            this.enabledServices.push(this.notificationButtonService[i]);
+        });
+    } else {
+        this.enabledServices.push(this.notificationButtonService);
+    }
+
+};
+
 // HELPER METHODS
 webosTvAccessory.prototype.setMuteStateManually = function(error, value) {
     if (this.volumeService) this.volumeService.getCharacteristic(Characteristic.On).updateValue(value);
@@ -477,6 +531,18 @@ webosTvAccessory.prototype.setChannelButtonManually = function(error, value, cha
             } else {
                 this.channelButtonService.getCharacteristic(Characteristic.On).updateValue(false);
             }
+        }
+    }
+};
+
+webosTvAccessory.prototype.disableAllNotificationButtons = function() {
+    if (this.notificationButtonService) {
+        if (Array.isArray(this.notificationButtons)) {
+            this.notificationButtons.forEach((tmpVal, i) => {
+                this.notificationButtonService[i].getCharacteristic(Characteristic.On).updateValue(false);
+            });
+        } else {
+            this.notificationButtonService.getCharacteristic(Characteristic.On).updateValue(false);
         }
     }
 };
@@ -808,6 +874,23 @@ webosTvAccessory.prototype.setChannelButtonState = function(state, callback, cha
             });
         }
     }
+};
+
+webosTvAccessory.prototype.getNotificationButtonState = function(callback) {
+    callback(null, false);
+};
+
+webosTvAccessory.prototype.setNotificationButtonState = function(state, callback, notification) {
+    if (this.connected) {
+        this.lgtv.request('ssap://system.notifications/createToast', {
+            message: notification
+        });
+    }
+    setTimeout(() => {
+        this.disableAllNotificationButtons();
+    }, 10);
+    callback(); // always report success, if i return an error here then siri will respond with "Some device are not responding" which is bad for automation or scenes
+    //callback(new Error('webOS - is not connected, cannot show notifications'));
 };
 
 webosTvAccessory.prototype.getServices = function() {
