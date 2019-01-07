@@ -72,17 +72,24 @@ function webosTvAccessory(log, config, api) {
             } else {
                 if (res.appId) {
                     this.tvCurrentAppId = res.appId;
+                    this.setAppSwitchManually(null, true, this.tvCurrentAppId);
                     this.log.info('webOS - app launched, current appId: %s', res.appId);
-                    if (this.tvCurrentAppId === "com.webos.app.livetv" && this.channelButtonService) {
-                        // if the launchLiveTvChannel varaible is not empty then switch to the specified channel and set the varaible to null
-                        if (this.launchLiveTvChannel !== undefined || this.launchLiveTvChannel !== null || this.launchLiveTvChannel.length > 0) {
-                            this.lgtv.request('ssap://tv/openChannel', {
-                                channelNumber: this.launchLiveTvChannel
-                            });
-                            this.launchLiveTvChannel = null;
-                        }
-                        // update current channel switch
-                        this.checkCurrentChannel(this.setChannelButtonManually.bind(this));
+                    if (this.channelButtonService) {
+						if(this.tvCurrentAppId === "com.webos.app.livetv"){
+							// if the launchLiveTvChannel variable is not empty then switch to the specified channel and set the varaible to null
+							if (this.launchLiveTvChannel !== undefined || this.launchLiveTvChannel !== null || this.launchLiveTvChannel.length > 0) {
+								this.lgtv.request('ssap://tv/openChannel', {
+									channelNumber: this.launchLiveTvChannel
+								});
+								this.launchLiveTvChannel = null;
+							}
+							// check which channel is currently active and update the channel switch if exists
+							this.checkCurrentChannel(this.setChannelButtonManually.bind(this));
+						}else {
+							//if not livetv app then disable all other channel buttons
+							this.setChannelButtonManually(null, false, null);
+						}
+
                     }
                 }
             }
@@ -155,7 +162,7 @@ function webosTvAccessory(log, config, api) {
         .setCharacteristic(Characteristic.Manufacturer, 'LG Electronics Inc.')
         .setCharacteristic(Characteristic.Model, 'webOS TV')
         .setCharacteristic(Characteristic.SerialNumber, '-')
-        .setCharacteristic(Characteristic.FirmwareRevision, '1.2.1');
+        .setCharacteristic(Characteristic.FirmwareRevision, '1.2.0');
 
 
     this.enabledServices.push(this.powerService);
