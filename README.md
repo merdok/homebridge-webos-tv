@@ -7,8 +7,6 @@ The idea is that the TV should be controlled completely from the native HomeKit 
 
 #### The old package ```homebridge-webos3``` is deprecated. New development will be made here. If you used the old package please change your accessory in your config.json to ```webostv``` and install this new package!
 
-This is a work in progress. Please contribute!
-
 ### Features
 * Power status
 * Turn on / off
@@ -18,6 +16,7 @@ This is a work in progress. Please contribute!
 * Open apps (switch between apps of your choice and live tv)
 * Channel control
 * Media control
+* Show notifications
 
 ## Installation
 
@@ -56,8 +55,11 @@ Add the accessory in `config.json` in your home directory inside `.homebridge`.
          "com.webos.app.hdmi2",
          "com.webos.app.externalinput.component"
       ],
-      "channelButtons": [3,5,7,8]
-
+      "channelButtons": [3,5,7,8],
+      "notificationButtons": [
+         "Motion detected - living room",
+         "Motion detected - kitchen"
+      ]
     }
   ]  
 }
@@ -78,8 +80,6 @@ ip address of your tv
 Mac address of your tv
 - `keyFile` [optional]
 To prevent the tv from asking for permission when you reboot homebridge, specify a file path to store the permission token. If the file doesn't exist it'll be created. Don't specify a directory or you'll get an `EISDIR` error. 
-- `pollingEnabled` [optional]
-Wheter the TV state background polling is enabled. Useful for more accurate TV state awareness and HomeKit automation. **Default: false**
 - `pollingInterval` [optional]
 The TV state background polling interval in seconds. **Default: 5**
 - `volumeControl` [optional]
@@ -111,6 +111,10 @@ Wheter the channel buttons service is enabled. This allows to create switches fo
   - For a *single button*  set the desired channel number as the value
   - For *multiple buttons* set an array of channel numbers as the value
   - Channels can also be opened when the TV is off, in that case an attempt to power on the TV and afterwards open the chosen channel will be made.
+- `notificationButtons` [optional] 
+Wheter the notification buttons service is enabled. This allows to create buttons which when pressed display the specified text on the TV screen. Useful for HomeKit automation or to display text on TV for viewers. **Default: "" (disabled)**
+  - For a *single button*  set the desired notification text as the value
+  - For *multiple buttons* set an array of notification texts as the value
 
 ## Special thanks
 [lgtv2](https://github.com/hobbyquaker/lgtv2) - the Node.js remote control module for LG WebOS smart TVs.
