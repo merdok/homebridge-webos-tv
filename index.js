@@ -20,6 +20,7 @@ module.exports = function(homebridge) {
 function webosTvAccessory(log, config, api) {
     this.log = log;
     this.ip = config['ip'];
+    this.wolIp = config['wolIp'] || '255.255.255.255';
     this.name = config['name'];
     this.mac = config['mac'];
     this.keyFile = config['keyFile'];
@@ -564,7 +565,7 @@ webosTvAccessory.prototype.updateTvStatus = function(error, status) {
 };
 
 webosTvAccessory.prototype.powerOnTvWithCallback = function(callback) {
-    wol.wake(this.mac, (error) => {
+    wol.wake(this.mac, { 'address': this.wolIp }, (error) => {
         if (error) {
             this.log.info('webOS - wake on lan error');
             return;
@@ -652,7 +653,7 @@ webosTvAccessory.prototype.getState = function(callback) {
 
 webosTvAccessory.prototype.setState = function(state, callback) {
     if (state) {
-        wol.wake(this.mac, (error) => {
+        wol.wake(this.mac, { 'address': this.wolIp }, (error) => {
             if (error) {
                 this.log.info('webOS - wake on lan error');
                 return callback(new Error('webOS - wake on lan error'));

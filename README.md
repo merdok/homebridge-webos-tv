@@ -61,7 +61,7 @@ Add the accessory in `config.json` in your home directory inside `.homebridge`.
          "Motion detected - kitchen"
       ]
     }
-  ]  
+  ]
 }
 ```
 
@@ -78,14 +78,16 @@ Name of your accessory
 ip address of your tv
 - `mac` [required]
 Mac address of your tv
+- `wolIp` [optional]
+Wake-on-LAN address. If homebridge runs on a host with more than one network address/interface/LAN, the WoL address should be set to the broadcast address of the network the TV is on, so that the WoL packet is sent to the proper LAN. I.e. if the TV address is 192.168.0.40, the broadcast address should likely to be set to 192.168.0.255. **Default: 255.255.255.255**
 - `keyFile` [optional]
-To prevent the tv from asking for permission when you reboot homebridge, specify a file path to store the permission token. If the file doesn't exist it'll be created. Don't specify a directory or you'll get an `EISDIR` error. 
+To prevent the tv from asking for permission when you reboot homebridge, specify a file path to store the permission token. If the file doesn't exist it'll be created. Don't specify a directory or you'll get an `EISDIR` error.
 - `pollingInterval` [optional]
 The TV state background polling interval in seconds. **Default: 5**
 - `volumeControl` [optional]
-Wheter the volume control service is enabled. **Default: true**  
+Wheter the volume control service is enabled. **Default: true**
 Available values:
-  - *true* - slider and switches 
+  - *true* - slider and switches
   - *"slider"* - just slider
   - *"switch"* - just switches
 - `volumeLimit` [optional]
@@ -94,24 +96,24 @@ The max allowed volume which can be set using the volume service. Range 1-100. *
 Wheter the channel control service is enabled. **Default: true**
 - `mediaControl` [optional]
 Wheter the media control service is enabled. Buttons: play, pause, stop, rewind, fast forward. **Default: true**
-- `appSwitch` [optional] 
+- `appSwitch` [optional]
 Wheter the app switch service is enabled. This allows to switch live tv with apps of your choice. To get the app ID simply open an app on your TV and check the homebridge console. The app ID of the opened app will be printed. **Default: "" (disabled)**
   - For a *single switch*  set the desired app ID as the value
   - For *multiple switches* set an array of app IDs as the value
   - External sources are also apps and can be used as app switches, available sources:
     - *com.webos.app.livetv*
-    - *com.webos.app.hdmi1*, 
-    - *com.webos.app.hdmi2*, 
-    - *com.webos.app.hdmi3*, 
-    - *com.webos.app.externalinput.component*, 
+    - *com.webos.app.hdmi1*,
+    - *com.webos.app.hdmi2*,
+    - *com.webos.app.hdmi3*,
+    - *com.webos.app.externalinput.component*,
     - *com.webos.app.externalinput.av1*
   - Apps can also be started when the TV is off, in that case an attempt to power on the TV and switch to the chosen app will be made
-- `channelButtons` [optional] 
+- `channelButtons` [optional]
 Wheter the channel buttons service is enabled. This allows to create switches for the channels of your choice. This way you can quickly switch between favorite channels. **Default: "" (disabled)**
   - For a *single button*  set the desired channel number as the value
   - For *multiple buttons* set an array of channel numbers as the value
   - Channels can also be opened when the TV is off, in that case an attempt to power on the TV and afterwards open the chosen channel will be made.
-- `notificationButtons` [optional] 
+- `notificationButtons` [optional]
 Wheter the notification buttons service is enabled. This allows to create buttons which when pressed display the specified text on the TV screen. Useful for HomeKit automation or to display text on TV for viewers. **Default: "" (disabled)**
   - For a *single button*  set the desired notification text as the value
   - For *multiple buttons* set an array of notification texts as the value
