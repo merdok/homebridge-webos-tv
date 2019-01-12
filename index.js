@@ -2,7 +2,11 @@ const lgtv2 = require('lgtv2');
 const wol = require('wake_on_lan');
 const tcpp = require('tcp-ping');
 
-let lgtv, Service, Characteristic;
+let Service;
+let Characteristic;
+
+let lgtv;
+let pointerInputSocket;
 var tvVolume = 0;
 var tvMuted = false;
 var tvCurrentChannel = -1;
@@ -47,6 +51,7 @@ function webosTvAccessory(log, config, api) {
     this.appSwitch = config['appSwitch'];
     this.channelButtons = config['channelButtons'];
     this.notificationButtons = config['notificationButtons'];
+    this.remoteControlButtons = config['remoteControlButtons'];
 
     this.url = 'ws://' + this.ip + ':' + this.port;
     this.enabledServices = [];
@@ -71,12 +76,14 @@ function webosTvAccessory(log, config, api) {
         this.connected = true;
         this.updateTvStatus(null, true);
         this.subscribeToServices();
+        this.connectToPointerInputSocket();
         this.updateAccessoryStatus();
     });
 
     this.lgtv.on('close', () => {
         this.log.info('webOS - disconnected from TV');
         this.connected = false;
+        this.pointerInputSocket = null;
         this.updateTvStatus(null, false);
     });
 
@@ -121,11 +128,12 @@ function webosTvAccessory(log, config, api) {
     this.prepareMediaControlService();
     this.prepareChannelButtonService();
     this.prepareNotificationButtonService();
+    this.prepareRemoteControlButtonService();
 }
 
 
 // INIT HELPER METHODS
-webosTvAccessory.prototype.getTvInformation = function(error, value) {
+webosTvAccessory.prototype.getTvInformation = function() {
 
     setTimeout(() => {
         this.log.debug('webOS - requesting TV information');
@@ -160,7 +168,7 @@ webosTvAccessory.prototype.getTvInformation = function(error, value) {
 
 }
 
-webosTvAccessory.prototype.subscribeToServices = function(error, value) {
+webosTvAccessory.prototype.subscribeToServices = function() {
 
     this.log.debug('webOS - subscribing to TV services');
 
@@ -225,6 +233,19 @@ webosTvAccessory.prototype.subscribeToServices = function(error, value) {
             }
         }
     });
+
+};
+
+webosTvAccessory.prototype.connectToPointerInputSocket = function() {
+
+    this.log.debug('webOS - connecting to remote control socket');
+
+    this.lgtv.getSocket('ssap://com.webos.service.networkinput/getPointerInputSocket', (err, sock) => {
+        if (!err) {
+            this.pointerInputSocket = sock;
+        }
+    });
+
 };
 
 
@@ -529,6 +550,57 @@ webosTvAccessory.prototype.prepareNotificationButtonService = function() {
 
 };
 
+webosTvAccessory.prototype.prepareRemoteControlButtonService = function() {
+
+    if (this.remoteControlButtons == undefined || this.remoteControlButtons == null || this.remoteControlButtons.length <= 0) {
+        return;
+    }
+
+    let isArray = Array.isArray(this.remoteControlButtons);
+
+    if (isArray) {
+        this.remoteControlButtonService = new Array();
+        this.remoteControlButtons.forEach((value, i) => {
+            this.remoteControlButtons[i] = this.remoteControlButtons[i].toString().toUpperCase();
+            this.remoteControlButtonService[i] = new Service.Switch(this.name + " RC: " + value, "remoteControlButtonService" + i);
+        });
+    } else {
+        this.remoteControlButtons = this.remoteControlButtons.toString().toUpperCase();
+        this.remoteControlButtonService = new Service.Switch(this.name + " RC: " + this.remoteControlButtons, "remoteControlButtonService");
+    }
+
+    if (isArray) {
+        this.remoteControlButtons.forEach((value, i) => {
+            this.remoteControlButtonService[i]
+                .getCharacteristic(Characteristic.On)
+                .on('get', (callback) => {
+                    this.getRemoteControlButtonState(callback, this.remoteControlButtons[i]);
+                })
+                .on('set', (state, callback) => {
+                    this.setRemoteControlButtonState(state, callback, this.remoteControlButtons[i]);
+                });
+        });
+    } else {
+        this.remoteControlButtonService
+            .getCharacteristic(Characteristic.On)
+            .on('get', (callback) => {
+                this.getRemoteControlButtonState(callback, this.remoteControlButtons);
+            })
+            .on('set', (state, callback) => {
+                this.setRemoteControlButtonState(state, callback, this.remoteControlButtons);
+            });
+    }
+
+    if (isArray) {
+        this.remoteControlButtons.forEach((value, i) => {
+            this.enabledServices.push(this.remoteControlButtonService[i]);
+        });
+    } else {
+        this.enabledServices.push(this.remoteControlButtonService);
+    }
+
+};
+
 
 // HELPER METHODS
 webosTvAccessory.prototype.setMuteStateManually = function(error, value) {
@@ -595,6 +667,18 @@ webosTvAccessory.prototype.disableAllNotificationButtons = function() {
             });
         } else {
             this.notificationButtonService.getCharacteristic(Characteristic.On).updateValue(false);
+        }
+    }
+};
+
+webosTvAccessory.prototype.disableAllRemoteControlButtons = function() {
+    if (this.remoteControlButtonService) {
+        if (Array.isArray(this.remoteControlButtons)) {
+            this.remoteControlButtons.forEach((tmpVal, i) => {
+                this.remoteControlButtonService[i].getCharacteristic(Characteristic.On).updateValue(false);
+            });
+        } else {
+            this.remoteControlButtonService.getCharacteristic(Characteristic.On).updateValue(false);
         }
     }
 };
@@ -705,7 +789,7 @@ webosTvAccessory.prototype.openChannel = function(channelNum) {
         }, (err, res) => {
             if (!res || err || res.errorCode || !res.returnValue) {
                 this.log.debug('webOS - open channel - error while switching channel');
-                if (res.errorText) {
+                if (res && res.errorText) {
                     this.log.debug('webOS - open channel - error message: %s', res.errorText);
                 }
             } else {
@@ -965,6 +1049,24 @@ webosTvAccessory.prototype.setNotificationButtonState = function(state, callback
     }
     setTimeout(() => {
         this.disableAllNotificationButtons();
+    }, 10);
+    callback(); // always report success, if i return an error here then siri will respond with "Some device are not responding" which is bad for automation or scenes
+    //callback(new Error('webOS - is not connected, cannot show notifications'));
+};
+
+webosTvAccessory.prototype.getRemoteControlButtonState = function(callback) {
+    callback(null, false);
+};
+
+webosTvAccessory.prototype.setRemoteControlButtonState = function(state, callback, rcButton) {
+    if (this.connected && this.pointerInputSocket) {
+        this.log.debug('webOS - remote control button service - emulating remote control %s press', rcButton);
+        this.pointerInputSocket.send("button", {
+            name: rcButton
+        });
+    }
+    setTimeout(() => {
+        this.disableAllRemoteControlButtons();
     }, 10);
     callback(); // always report success, if i return an error here then siri will respond with "Some device are not responding" which is bad for automation or scenes
     //callback(new Error('webOS - is not connected, cannot show notifications'));
