@@ -308,48 +308,30 @@ webosTvAccessory.prototype.prepareAppSwitchService = function() {
         return;
     }
 
-    let isArray = Array.isArray(this.appSwitch);
-
-    if (isArray) {
-        this.appSwitchService = new Array();
-        this.appSwitch.forEach((value, i) => {
-            this.appSwitch[i] = this.appSwitch[i].replace(/\s/g, ''); // remove all white spaces from the string
-            this.appSwitchService[i] = new Service.Switch(this.name + " App: " + value, "appSwitchService" + i);
-        });
-    } else {
-        this.appSwitch = this.appSwitch.replace(/\s/g, ''); // remove all white spaces from the string
-        this.appSwitchService = new Service.Switch(this.name + " App: " + this.appSwitch, "appSwitchService");
+    if (Array.isArray(this.appSwitch) == false) {
+        this.appSwitch = [this.appSwitch];
     }
 
-    if (isArray) {
-        this.appSwitch.forEach((value, i) => {
-            this.appSwitchService[i]
-                .getCharacteristic(Characteristic.On)
-                .on('get', (callback) => {
-                    this.getAppSwitchState(callback, this.appSwitch[i]);
-                })
-                .on('set', (state, callback) => {
-                    this.setAppSwitchState(state, callback, this.appSwitch[i]);
-                });
-        });
-    } else {
-        this.appSwitchService
+    this.appSwitchService = new Array();
+    this.appSwitch.forEach((value, i) => {
+        this.appSwitch[i] = this.appSwitch[i].replace(/\s/g, ''); // remove all white spaces from the string
+        this.appSwitchService[i] = new Service.Switch(this.name + " App: " + value, "appSwitchService" + i);
+    });
+
+    this.appSwitch.forEach((value, i) => {
+        this.appSwitchService[i]
             .getCharacteristic(Characteristic.On)
             .on('get', (callback) => {
-                this.getAppSwitchState(callback, this.appSwitch);
+                this.getAppSwitchState(callback, this.appSwitch[i]);
             })
             .on('set', (state, callback) => {
-                this.setAppSwitchState(state, callback, this.appSwitch);
+                this.setAppSwitchState(state, callback, this.appSwitch[i]);
             });
-    }
+    });
 
-    if (isArray) {
-        this.appSwitch.forEach((value, i) => {
-            this.enabledServices.push(this.appSwitchService[i]);
-        });
-    } else {
-        this.enabledServices.push(this.appSwitchService);
-    }
+    this.appSwitch.forEach((value, i) => {
+        this.enabledServices.push(this.appSwitchService[i]);
+    });
 
 };
 
@@ -454,48 +436,30 @@ webosTvAccessory.prototype.prepareChannelButtonService = function() {
         return;
     }
 
-    let isArray = Array.isArray(this.channelButtons);
-
-    if (isArray) {
-        this.channelButtonService = new Array();
-        this.channelButtons.forEach((value, i) => {
-            this.channelButtons[i] = this.channelButtons[i].toString();
-            this.channelButtonService[i] = new Service.Switch(this.name + " Channel: " + value, "channelButtonService" + i);
-        });
-    } else {
-        this.channelButtons = this.channelButtons.toString();
-        this.channelButtonService = new Service.Switch(this.name + " Channel: " + this.channelButtons, "channelButtonService");
+    if (Array.isArray(this.channelButtons) == false) {
+        this.channelButtons = [this.channelButtons];
     }
 
-    if (isArray) {
-        this.channelButtons.forEach((value, i) => {
-            this.channelButtonService[i]
-                .getCharacteristic(Characteristic.On)
-                .on('get', (callback) => {
-                    this.getChannelButtonState(callback, this.channelButtons[i]);
-                })
-                .on('set', (state, callback) => {
-                    this.setChannelButtonState(state, callback, this.channelButtons[i]);
-                });
-        });
-    } else {
-        this.channelButtonService
+    this.channelButtonService = new Array();
+    this.channelButtons.forEach((value, i) => {
+        this.channelButtons[i] = this.channelButtons[i].toString();
+        this.channelButtonService[i] = new Service.Switch(this.name + " Channel: " + value, "channelButtonService" + i);
+    });
+
+    this.channelButtons.forEach((value, i) => {
+        this.channelButtonService[i]
             .getCharacteristic(Characteristic.On)
             .on('get', (callback) => {
-                this.getChannelButtonState(callback, this.channelButtons);
+                this.getChannelButtonState(callback, this.channelButtons[i]);
             })
             .on('set', (state, callback) => {
-                this.setChannelButtonState(state, callback, this.channelButtons);
+                this.setChannelButtonState(state, callback, this.channelButtons[i]);
             });
-    }
+    });
 
-    if (isArray) {
-        this.channelButtons.forEach((value, i) => {
-            this.enabledServices.push(this.channelButtonService[i]);
-        });
-    } else {
-        this.enabledServices.push(this.channelButtonService);
-    }
+    this.channelButtons.forEach((value, i) => {
+        this.enabledServices.push(this.channelButtonService[i]);
+    });
 
 };
 
@@ -505,48 +469,30 @@ webosTvAccessory.prototype.prepareNotificationButtonService = function() {
         return;
     }
 
-    let isArray = Array.isArray(this.notificationButtons);
-
-    if (isArray) {
-        this.notificationButtonService = new Array();
-        this.notificationButtons.forEach((value, i) => {
-            this.notificationButtons[i] = this.notificationButtons[i].toString();
-            this.notificationButtonService[i] = new Service.Switch(this.name + " Notification: " + value, "notificationButtonService" + i);
-        });
-    } else {
-        this.notificationButtons = this.notificationButtons.toString();
-        this.notificationButtonService = new Service.Switch(this.name + " Notification: " + this.notificationButtons, "notificationButtonService");
+    if (Array.isArray(this.notificationButtons) == false) {
+        this.notificationButtons = [this.notificationButtons];
     }
 
-    if (isArray) {
-        this.notificationButtons.forEach((value, i) => {
-            this.notificationButtonService[i]
-                .getCharacteristic(Characteristic.On)
-                .on('get', (callback) => {
-                    this.getNotificationButtonState(callback, this.notificationButtons[i]);
-                })
-                .on('set', (state, callback) => {
-                    this.setNotificationButtonState(state, callback, this.notificationButtons[i]);
-                });
-        });
-    } else {
-        this.notificationButtonService
+    this.notificationButtonService = new Array();
+    this.notificationButtons.forEach((value, i) => {
+        this.notificationButtons[i] = this.notificationButtons[i].toString();
+        this.notificationButtonService[i] = new Service.Switch(this.name + " Notification: " + value, "notificationButtonService" + i);
+    });
+
+    this.notificationButtons.forEach((value, i) => {
+        this.notificationButtonService[i]
             .getCharacteristic(Characteristic.On)
             .on('get', (callback) => {
-                this.getNotificationButtonState(callback, this.notificationButtons);
+                this.getNotificationButtonState(callback, this.notificationButtons[i]);
             })
             .on('set', (state, callback) => {
-                this.setNotificationButtonState(state, callback, this.notificationButtons);
+                this.setNotificationButtonState(state, callback, this.notificationButtons[i]);
             });
-    }
+    });
 
-    if (isArray) {
-        this.notificationButtons.forEach((value, i) => {
-            this.enabledServices.push(this.notificationButtonService[i]);
-        });
-    } else {
-        this.enabledServices.push(this.notificationButtonService);
-    }
+    this.notificationButtons.forEach((value, i) => {
+        this.enabledServices.push(this.notificationButtonService[i]);
+    });
 
 };
 
@@ -556,48 +502,30 @@ webosTvAccessory.prototype.prepareRemoteControlButtonService = function() {
         return;
     }
 
-    let isArray = Array.isArray(this.remoteControlButtons);
-
-    if (isArray) {
-        this.remoteControlButtonService = new Array();
-        this.remoteControlButtons.forEach((value, i) => {
-            this.remoteControlButtons[i] = this.remoteControlButtons[i].toString().toUpperCase();
-            this.remoteControlButtonService[i] = new Service.Switch(this.name + " RC: " + value, "remoteControlButtonService" + i);
-        });
-    } else {
-        this.remoteControlButtons = this.remoteControlButtons.toString().toUpperCase();
-        this.remoteControlButtonService = new Service.Switch(this.name + " RC: " + this.remoteControlButtons, "remoteControlButtonService");
+    if (Array.isArray(this.remoteControlButtons) == false) {
+        this.remoteControlButtons = [this.remoteControlButtons];
     }
 
-    if (isArray) {
-        this.remoteControlButtons.forEach((value, i) => {
-            this.remoteControlButtonService[i]
-                .getCharacteristic(Characteristic.On)
-                .on('get', (callback) => {
-                    this.getRemoteControlButtonState(callback, this.remoteControlButtons[i]);
-                })
-                .on('set', (state, callback) => {
-                    this.setRemoteControlButtonState(state, callback, this.remoteControlButtons[i]);
-                });
-        });
-    } else {
-        this.remoteControlButtonService
+    this.remoteControlButtonService = new Array();
+    this.remoteControlButtons.forEach((value, i) => {
+        this.remoteControlButtons[i] = this.remoteControlButtons[i].toString().toUpperCase();
+        this.remoteControlButtonService[i] = new Service.Switch(this.name + " RC: " + value, "remoteControlButtonService" + i);
+    });
+
+    this.remoteControlButtons.forEach((value, i) => {
+        this.remoteControlButtonService[i]
             .getCharacteristic(Characteristic.On)
             .on('get', (callback) => {
-                this.getRemoteControlButtonState(callback, this.remoteControlButtons);
+                this.getRemoteControlButtonState(callback, this.remoteControlButtons[i]);
             })
             .on('set', (state, callback) => {
-                this.setRemoteControlButtonState(state, callback, this.remoteControlButtons);
+                this.setRemoteControlButtonState(state, callback, this.remoteControlButtons[i]);
             });
-    }
+    });
 
-    if (isArray) {
-        this.remoteControlButtons.forEach((value, i) => {
-            this.enabledServices.push(this.remoteControlButtonService[i]);
-        });
-    } else {
-        this.enabledServices.push(this.remoteControlButtonService);
-    }
+    this.remoteControlButtons.forEach((value, i) => {
+        this.enabledServices.push(this.remoteControlButtonService[i]);
+    });
 
 };
 
@@ -613,73 +541,53 @@ webosTvAccessory.prototype.setVolumeManually = function(error, value) {
 
 webosTvAccessory.prototype.setAppSwitchManually = function(error, value, appId) {
     if (this.appSwitchService) {
-        if (Array.isArray(this.appSwitch)) {
-            if (appId == undefined || appId == null || appId.length <= 0) {
-                this.appSwitch.forEach((tmpVal, i) => {
-                    this.appSwitchService[i].getCharacteristic(Characteristic.On).updateValue(value);
-                });
-            } else {
-                this.appSwitch.forEach((tmpVal, i) => {
-                    if (appId === tmpVal) {
-                        this.appSwitchService[i].getCharacteristic(Characteristic.On).updateValue(value);
-                    } else {
-                        this.appSwitchService[i].getCharacteristic(Characteristic.On).updateValue(false);
-                    }
-                });
-            }
+        if (appId == undefined || appId == null || appId.length <= 0) {
+            this.appSwitch.forEach((tmpVal, i) => {
+                this.appSwitchService[i].getCharacteristic(Characteristic.On).updateValue(value);
+            });
         } else {
-            this.appSwitchService.getCharacteristic(Characteristic.On).updateValue(value);
+            this.appSwitch.forEach((tmpVal, i) => {
+                if (appId === tmpVal) {
+                    this.appSwitchService[i].getCharacteristic(Characteristic.On).updateValue(value);
+                } else {
+                    this.appSwitchService[i].getCharacteristic(Characteristic.On).updateValue(false);
+                }
+            });
         }
     }
 };
 
 webosTvAccessory.prototype.setChannelButtonManually = function(error, value, channelNumber) {
     if (this.channelButtonService) {
-        if (Array.isArray(this.channelButtons)) {
-            if (channelNumber == undefined || channelNumber == null || channelNumber.length <= 0) {
-                this.channelButtons.forEach((tmpVal, i) => {
-                    this.channelButtonService[i].getCharacteristic(Characteristic.On).updateValue(value);
-                });
-            } else {
-                this.channelButtons.forEach((tmpVal, i) => {
-                    if (channelNumber === tmpVal) {
-                        this.channelButtonService[i].getCharacteristic(Characteristic.On).updateValue(value);
-                    } else {
-                        this.channelButtonService[i].getCharacteristic(Characteristic.On).updateValue(false);
-                    }
-                });
-            }
+        if (channelNumber == undefined || channelNumber == null || channelNumber.length <= 0) {
+            this.channelButtons.forEach((tmpVal, i) => {
+                this.channelButtonService[i].getCharacteristic(Characteristic.On).updateValue(value);
+            });
         } else {
-            if (this.channelButtons === channelNumber) {
-                this.channelButtonService.getCharacteristic(Characteristic.On).updateValue(value);
-            } else {
-                this.channelButtonService.getCharacteristic(Characteristic.On).updateValue(false);
-            }
+            this.channelButtons.forEach((tmpVal, i) => {
+                if (channelNumber === tmpVal) {
+                    this.channelButtonService[i].getCharacteristic(Characteristic.On).updateValue(value);
+                } else {
+                    this.channelButtonService[i].getCharacteristic(Characteristic.On).updateValue(false);
+                }
+            });
         }
     }
 };
 
 webosTvAccessory.prototype.disableAllNotificationButtons = function() {
     if (this.notificationButtonService) {
-        if (Array.isArray(this.notificationButtons)) {
-            this.notificationButtons.forEach((tmpVal, i) => {
-                this.notificationButtonService[i].getCharacteristic(Characteristic.On).updateValue(false);
-            });
-        } else {
-            this.notificationButtonService.getCharacteristic(Characteristic.On).updateValue(false);
-        }
+        this.notificationButtons.forEach((tmpVal, i) => {
+            this.notificationButtonService[i].getCharacteristic(Characteristic.On).updateValue(false);
+        });
     }
 };
 
 webosTvAccessory.prototype.disableAllRemoteControlButtons = function() {
     if (this.remoteControlButtonService) {
-        if (Array.isArray(this.remoteControlButtons)) {
-            this.remoteControlButtons.forEach((tmpVal, i) => {
-                this.remoteControlButtonService[i].getCharacteristic(Characteristic.On).updateValue(false);
-            });
-        } else {
-            this.remoteControlButtonService.getCharacteristic(Characteristic.On).updateValue(false);
-        }
+        this.remoteControlButtons.forEach((tmpVal, i) => {
+            this.remoteControlButtonService[i].getCharacteristic(Characteristic.On).updateValue(false);
+        });
     }
 };
 
