@@ -17,6 +17,7 @@ The idea is that the TV should be controlled completely from the native HomeKit 
 * Channel control
 * Media control
 * Show notifications
+* Emulate remote control
 
 ## Installation
 
@@ -59,6 +60,11 @@ Add the accessory in `config.json` in your home directory inside `.homebridge`.
       "notificationButtons": [
          "Motion detected - living room",
          "Motion detected - kitchen"
+      ],
+      "remoteControlButtons": [
+         "HOME",
+         "LIST",
+         "EXIT"
       ]
     }
   ]  
@@ -96,8 +102,7 @@ Wheter the channel control service is enabled. **Default: true**
 Wheter the media control service is enabled. Buttons: play, pause, stop, rewind, fast forward. **Default: true**
 - `appSwitch` [optional] 
 Wheter the app switch service is enabled. This allows to switch live tv with apps of your choice. To get the app ID simply open an app on your TV and check the homebridge console. The app ID of the opened app will be printed. **Default: "" (disabled)**
-  - For a *single switch*  set the desired app ID as the value
-  - For *multiple switches* set an array of app IDs as the value
+  - Set an array of app IDs as the value
   - External sources are also apps and can be used as app switches, available sources:
     - *com.webos.app.livetv*
     - *com.webos.app.hdmi1*, 
@@ -108,13 +113,27 @@ Wheter the app switch service is enabled. This allows to switch live tv with app
   - Apps can also be started when the TV is off, in that case an attempt to power on the TV and switch to the chosen app will be made
 - `channelButtons` [optional] 
 Wheter the channel buttons service is enabled. This allows to create switches for the channels of your choice. This way you can quickly switch between favorite channels. **Default: "" (disabled)**
-  - For a *single button*  set the desired channel number as the value
-  - For *multiple buttons* set an array of channel numbers as the value
+  - Set an array of channel numbers as the value
   - Channels can also be opened when the TV is off, in that case an attempt to power on the TV and afterwards open the chosen channel will be made.
 - `notificationButtons` [optional] 
 Wheter the notification buttons service is enabled. This allows to create buttons which when pressed display the specified text on the TV screen. Useful for HomeKit automation or to display text on TV for viewers. **Default: "" (disabled)**
-  - For a *single button*  set the desired notification text as the value
-  - For *multiple buttons* set an array of notification texts as the value
+  - Set an array of notification texts as the value
+- `remoteControlButtons` [optional] 
+Wheter the remote control buttons service is enabled. This allows to emulate remote control buttons. **Default: "" (disabled)**
+  - Set an array of commands as the value. Possible values are:
+    - *1*, *2*, *3*, *4*, *5*, *6*, *7*, *8*, *9*, *0*, *LIST*, *AD*,
+    - *MUTE*, *VOLUMEUP*, *VOLUMEDOWN*, *CHANNELUP*, *CHANNELDOWN*, *HOME*
+    - *UP*, *DOWN*, *LEFT*, *RIGHT*, *BACK*, *EXIT*, *PROGRAM* 
+    - *RED*, *GREEN*, *YELLOW*, *BLUE*, *LIVE_ZOOM*
+  - Most probably there are also other values possible which i didn't find yet (like settings or voice command), you can try typing some other values and if you find some that work then please let me know
+  
+## Troubleshooting
+If you have any issues with the plugin or tv services then you can run homebridge in debug mode, which will provide some additional information. This might be useful for debugging issues. 
+
+Homebridge debug mode:
+```sh
+homebridge -D
+```
 
 ## Special thanks
 [lgtv2](https://github.com/hobbyquaker/lgtv2) - the Node.js remote control module for LG WebOS smart TVs.
