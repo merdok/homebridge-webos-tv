@@ -123,7 +123,7 @@ Wheter the remote control buttons service is enabled. This allows to emulate rem
   - Set an array of commands as the value. Possible values are:
     - *1*, *2*, *3*, *4*, *5*, *6*, *7*, *8*, *9*, *0*, *LIST*, *AD*,
     - *MUTE*, *VOLUMEUP*, *VOLUMEDOWN*, *CHANNELUP*, *CHANNELDOWN*, *HOME*
-    - *UP*, *DOWN*, *LEFT*, *RIGHT*, *BACK*, *EXIT*, *PROGRAM* 
+    - *UP*, *DOWN*, *LEFT*, *RIGHT*, *CLICK*, *BACK*, *EXIT*, *PROGRAM* 
     - *RED*, *GREEN*, *YELLOW*, *BLUE*, *LIVE_ZOOM*
   - Most probably there are also other values possible which i didn't find yet (like settings or voice command), you can try typing some other values and if you find some that work then please let me know
   
