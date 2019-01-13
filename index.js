@@ -969,9 +969,13 @@ webosTvAccessory.prototype.getRemoteControlButtonState = function(callback) {
 webosTvAccessory.prototype.setRemoteControlButtonState = function(state, callback, rcButton) {
     if (this.connected && this.pointerInputSocket) {
         this.log.debug('webOS - remote control button service - emulating remote control %s press', rcButton);
-        this.pointerInputSocket.send("button", {
-            name: rcButton
-        });
+        if (rcButton === 'CLICK') {
+            this.pointerInputSocket.send("click");
+        } else {
+            this.pointerInputSocket.send("button", {
+                name: rcButton
+            });
+        }
     }
     setTimeout(() => {
         this.disableAllRemoteControlButtons();
