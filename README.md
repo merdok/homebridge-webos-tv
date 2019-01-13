@@ -125,7 +125,7 @@ Wheter the remote control buttons service is enabled. This allows to emulate rem
     - *MUTE*, *VOLUMEUP*, *VOLUMEDOWN*, *CHANNELUP*, *CHANNELDOWN*, *HOME*
     - *UP*, *DOWN*, *LEFT*, *RIGHT*, *BACK*, *EXIT*, *PROGRAM* 
     - *RED*, *GREEN*, *YELLOW*, *BLUE*, *LIVE_ZOOM*
-  - Most probably there are also other values possible which i didn't find yet (like settings or voice command), you can try typing some other values and if you find some that also work then please let me know
+  - Most probably there are also other values possible which i didn't find yet (like settings or voice command), you can try typing some other values and if you find some that work then please let me know
 
 ## Special thanks
 [lgtv2](https://github.com/hobbyquaker/lgtv2) - the Node.js remote control module for LG WebOS smart TVs.
