@@ -120,8 +120,7 @@ Wheter the notification buttons service is enabled. This allows to create button
   - Set an array of notification texts as the value
 - `remoteControlButtons` [optional] 
 Wheter the remote control buttons service is enabled. This allows to emulate remote control buttons. **Default: "" (disabled)**
-  - Set an array of commands from below as the value
-  - Possible values are:
+  - Set an array of commands as the value. Possible values are:
     - *1*, *2*, *3*, *4*, *5*, *6*, *7*, *8*, *9*, *0*, *LIST*, *AD*,
     - *MUTE*, *VOLUMEUP*, *VOLUMEDOWN*, *CHANNELUP*, *CHANNELDOWN*, *HOME*
     - *UP*, *DOWN*, *LEFT*, *RIGHT*, *BACK*, *EXIT*, *PROGRAM* 
