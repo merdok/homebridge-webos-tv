@@ -116,7 +116,7 @@ function webosTvAccessory(log, config, api) {
         .setCharacteristic(Characteristic.Manufacturer, 'LG Electronics Inc.')
         .setCharacteristic(Characteristic.Model, 'webOS TV')
         .setCharacteristic(Characteristic.SerialNumber, '-')
-        .setCharacteristic(Characteristic.FirmwareRevision, '1.3.0');
+        .setCharacteristic(Characteristic.FirmwareRevision, '1.4.0');
 
 
     this.enabledServices.push(this.powerService);
