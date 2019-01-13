@@ -126,6 +126,14 @@ Wheter the remote control buttons service is enabled. This allows to emulate rem
     - *UP*, *DOWN*, *LEFT*, *RIGHT*, *BACK*, *EXIT*, *PROGRAM* 
     - *RED*, *GREEN*, *YELLOW*, *BLUE*, *LIVE_ZOOM*
   - Most probably there are also other values possible which i didn't find yet (like settings or voice command), you can try typing some other values and if you find some that work then please let me know
+  
+## Troubleshooting
+If you have any issues with the plugin or tv services then you can run homebridge in debug mode, which will provide some additional information. This might be useful for debugging issues. 
+
+Homebridge debug mode:
+```sh
+homebridge -D
+```
 
 ## Special thanks
 [lgtv2](https://github.com/hobbyquaker/lgtv2) - the Node.js remote control module for LG WebOS smart TVs.
