@@ -52,9 +52,14 @@ Add the accessory in `config.json` in your home directory inside `.homebridge`.
       "pollingInterval": 10,
       "appSwitch":[
          "com.webos.app.tvguide",
-         "youtube.leanback.v4",
+         "com.webos.app.livetv",
+         "com.webos.app.hdmi1",
          "com.webos.app.hdmi2",
-         "com.webos.app.externalinput.component"
+         "com.webos.app.externalinput.component",
+         "com.webos.netflix",
+         "amazon.row",
+         "googleplaymovieswebos",
+         "youtube.leanback.v4"
       ],
       "channelButtons": [3,5,7,8],
       "notificationButtons": [
