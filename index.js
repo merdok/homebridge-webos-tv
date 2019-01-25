@@ -105,7 +105,31 @@ function webosTvAccessory(log, config, api) {
 
     this.powerService = new Service.Switch(this.name + " Power", "powerService");
     this.informationService = new Service.AccessoryInformation();
+    this.tvService = new Service.Television(this.name, "tvService");
 
+    this.tvService
+        .setCharacteristic(Characteristic.ConfiguredName, 'LG webOS TV');
+    this.tvService
+        .setCharacteristic(Characteristic.SleepDiscoveryMode, 
+            Characteristic.SleepDiscoveryMode.ALWAYS_DISCOVERABLE
+        );
+    this.tvService
+        .getCharacteristic(Characteristic.Active)
+        .on('set', this.setPowerState.bind(this))
+        .on('get', this.getPowerState.bind(this));
+    this.tvService
+        .setCharacteristic(Characteristic.ActiveIdentifier, 1);
+
+    this.tvService
+        .getCharacteristic(Characteristic.ActiveIdentifier)
+        .on('set', function (newValue, callback) {
+            console.log("set Active Identifier => setNewValue: " + newValue);
+            callback(null);
+        });
+
+    this.tvService
+        .getCharacteristic(Characteristic.RemoteKey)
+        .on('set', this.setRemoteKey.bind(this));
 
     this.powerService
         .getCharacteristic(Characteristic.On)
@@ -119,16 +143,21 @@ function webosTvAccessory(log, config, api) {
         .setCharacteristic(Characteristic.FirmwareRevision, '1.4.0');
 
 
-    this.enabledServices.push(this.powerService);
-    this.enabledServices.push(this.informationService);
+    //this.enabledServices.push(this.powerService);
+    //this.enabledServices.push(this.informationService);
+    this.enabledServices.push(this.tvService);
+
+    /*this.tvService
+        .getCharacteristic(Characteristic.InputSourceType)
+        .on('get', this.getInputSourceType.bind(this));*/
 
     this.prepareVolumeService();
-    this.prepareAppSwitchService();
-    this.prepareChannelService();
-    this.prepareMediaControlService();
-    this.prepareChannelButtonService();
-    this.prepareNotificationButtonService();
-    this.prepareRemoteControlButtonService();
+    //this.prepareAppSwitchService();
+    //this.prepareChannelService();
+    //this.prepareMediaControlService();
+    //this.prepareChannelButtonService();
+    //this.prepareNotificationButtonService();
+    //this.prepareRemoteControlButtonService();
 }
 
 
@@ -255,6 +284,30 @@ webosTvAccessory.prototype.prepareVolumeService = function() {
     if (!this.volumeControl) {
         return;
     }
+
+    this.volumeService = new Service.TelevisionSpeaker(this.name + " Volume", "volumeService");
+
+    this.volumeService
+        .setCharacteristic(Characteristic.Active, Characteristic.Active.ACTIVE)
+        .setCharacteristic(Characteristic.VolumeControlType, Characteristic.VolumeControlType.ABSOLUTE);
+
+    this.volumeService
+        .getCharacteristic(Characteristic.Mute)
+        .on('get', this.getMuteState.bind(this))
+        .on('set', this.setMuteState.bind(this));
+
+    this.volumeService.getCharacteristic(Characteristic.VolumeSelector)
+        .on('set', this.setVolume.bind(this));
+
+    this.tvService.addLinkedService(this.volumeService);
+    //this.enabledServices.push(this.volumeService);
+
+    /*this.volumeService
+        .getCharacteristic(Characteristic.VolumeSelector)
+        .on('set', this.setVolumeSelector.bind(this));*/
+
+    
+    return;
 
     // slider/lightbulb
     if (this.volumeControl == true || this.volumeControl === "slider") {
@@ -728,9 +781,9 @@ webosTvAccessory.prototype.setPowerState = function(state, callback) {
             this.lgtv.request('ssap://system/turnOff', (err, res) => {
                 this.lgtv.disconnect();
                 this.connected = false;
-                this.setAppSwitchManually(null, false, null);
-                this.setChannelButtonManually(null, false, null);
-                this.setMuteStateManually(null, false);
+                //this.setAppSwitchManually(null, false, null);
+                //this.setChannelButtonManually(null, false, null);
+                //this.setMuteStateManually(null, false);
             })
         }
         callback();
@@ -763,7 +816,6 @@ webosTvAccessory.prototype.setMuteState = function(state, callback) {
     }
 };
 
-
 webosTvAccessory.prototype.getVolume = function(callback) {
     if (this.connected) {
         callback(null, this.tvVolume);
@@ -785,6 +837,50 @@ webosTvAccessory.prototype.setVolume = function(level, callback) {
     } else {
         callback(new Error('webOS - is not connected, cannot set volume'));
     }
+};
+
+webosTvAccessory.prototype.setRemoteKey = function (remoteKey, callback) {
+
+    var actionName = 'button';
+    var buttonName = 'NONE';
+
+    switch (remoteKey) {
+        case Characteristic.RemoteKey.ARROW_UP:
+            buttonName = 'UP';
+            break;
+        case Characteristic.RemoteKey.ARROW_DOWN:
+            buttonName = 'DOWN';
+            break;
+        case Characteristic.RemoteKey.ARROW_LEFT:
+            buttonName = 'LEFT';
+            break;
+        case Characteristic.RemoteKey.ARROW_RIGHT:
+            buttonName = 'RIGHT';
+            break;
+        case Characteristic.RemoteKey.BACK:
+            buttonName = 'BACK';
+            break;
+        case Characteristic.RemoteKey.EXIT:
+            buttonName = 'EXIT';
+            break;
+        case Characteristic.RemoteKey.SELECT:
+            actionName = 'click';
+            buttonName = '';
+            break;
+    }
+
+    this.log.debug('Send action: ' + actionName);
+    if (buttonName !== '') {
+        this.log.debug('Send button: ' + buttonName);
+
+        this.pointerInputSocket.send(actionName, {
+            name: buttonName
+        });
+    } else {
+        this.pointerInputSocket.send(actionName);
+    }
+
+    callback();
 };
 
 webosTvAccessory.prototype.getVolumeSwitch = function(callback) {
