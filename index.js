@@ -142,10 +142,17 @@ function webosTvAccessory(log, config, api) {
         .setCharacteristic(Characteristic.SerialNumber, '-')
         .setCharacteristic(Characteristic.FirmwareRevision, '1.4.0');
 
+    var inputHDMI1 = new Service.InputSource("hdmi1", "HDMI 1");
 
-    //this.enabledServices.push(this.powerService);
-    //this.enabledServices.push(this.informationService);
+    inputHDMI1
+        .setCharacteristic(Characteristic.Identifier, 1)
+        .setCharacteristic(Characteristic.ConfiguredName, "HDMI 1")
+        .setCharacteristic(Characteristic.IsConfigured, Characteristic.IsConfigured.CONFIGURED)
+        .setCharacteristic(Characteristic.InputSourceType, Characteristic.InputSourceType.HDMI);
+
+    this.tvService.addLinkedService(inputHDMI1);
     this.enabledServices.push(this.tvService);
+    this.enabledServices.push(inputHDMI1);
 
     /*this.tvService
         .getCharacteristic(Characteristic.InputSourceType)
