@@ -15,7 +15,7 @@ The idea is that the TV should be controlled completely from the native HomeKit 
 * Show notifications
 * Emulate remote control
 
-Since version 1.5.0 the new HomeKit integration is supported introduced in iOS12.2. This is a work in progress and might change. 
+Since version 1.5.0 the new TV HomeKit integration is supported introduced in iOS12.2. This is a work in progress and might change. 
 
 ## Installation
 
