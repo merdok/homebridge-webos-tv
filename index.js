@@ -10,8 +10,11 @@ let pointerInputSocket;
 var tvVolume = 0;
 var tvMuted = false;
 var tvCurrentChannel = -1;
-var tvCurrentAppId = "";
+var tvCurrentAppId = '';
 var launchLiveTvChannel = null;
+
+//tvService only
+var isPaused = false;
 
 module.exports = function(homebridge) {
     Service = homebridge.hap.Service;
@@ -21,7 +24,7 @@ module.exports = function(homebridge) {
 };
 
 
-// MAIN SETUP
+// --== MAIN SETUP ==--
 function webosTvAccessory(log, config, api) {
     this.log = log;
     this.port = 3000;
@@ -30,6 +33,10 @@ function webosTvAccessory(log, config, api) {
     this.name = config['name'];
     this.mac = config['mac'];
     this.keyFile = config['keyFile'];
+    this.isTvService = config['tvService'];
+    if (this.isTvService == undefined) {
+        this.isTvService = false;
+    }
     this.volumeControl = config['volumeControl'];
     if (this.volumeControl == undefined) {
         this.volumeControl = true;
@@ -52,6 +59,7 @@ function webosTvAccessory(log, config, api) {
     this.channelButtons = config['channelButtons'];
     this.notificationButtons = config['notificationButtons'];
     this.remoteControlButtons = config['remoteControlButtons'];
+    this.inputs = config['inputs'];
 
     this.url = 'ws://' + this.ip + ':' + this.port;
     this.enabledServices = [];
@@ -103,36 +111,20 @@ function webosTvAccessory(log, config, api) {
         this.connected = false;
     });
 
-    this.powerService = new Service.Switch(this.name + " Power", "powerService");
-    this.informationService = new Service.AccessoryInformation();
+    // preapre the services
+    this.prepareInformationService();
 
+    // choose between new or old services
+    if (this.isTvService) {
+        this.prepareNewTvService();
+    } else {
+        this.prepareLegacyService();
+    }
 
-    this.powerService
-        .getCharacteristic(Characteristic.On)
-        .on('get', this.getPowerState.bind(this))
-        .on('set', this.setPowerState.bind(this));
-
-    this.informationService
-        .setCharacteristic(Characteristic.Manufacturer, 'LG Electronics Inc.')
-        .setCharacteristic(Characteristic.Model, 'webOS TV')
-        .setCharacteristic(Characteristic.SerialNumber, '-')
-        .setCharacteristic(Characteristic.FirmwareRevision, '1.4.0');
-
-
-    this.enabledServices.push(this.powerService);
-    this.enabledServices.push(this.informationService);
-
-    this.prepareVolumeService();
-    this.prepareAppSwitchService();
-    this.prepareChannelService();
-    this.prepareMediaControlService();
-    this.prepareChannelButtonService();
-    this.prepareNotificationButtonService();
-    this.prepareRemoteControlButtonService();
 }
 
 
-// INIT HELPER METHODS
+// --== INIT HELPER METHODS ==--
 webosTvAccessory.prototype.getTvInformation = function() {
 
     setTimeout(() => {
@@ -182,7 +174,7 @@ webosTvAccessory.prototype.subscribeToServices = function() {
                 this.setAppSwitchManually(null, true, this.tvCurrentAppId);
                 this.log.info('webOS - app launched, current appId: %s', res.appId);
                 if (this.channelButtonService) {
-                    if (this.tvCurrentAppId === "com.webos.app.livetv") {
+                    if (this.tvCurrentAppId === 'com.webos.app.livetv') {
                         // if the launchLiveTvChannel variable is not empty then switch to the specified channel and set the varaible to null
                         if (this.launchLiveTvChannel !== undefined || this.launchLiveTvChannel !== null || this.launchLiveTvChannel.length > 0) {
                             this.openChannel(this.launchLiveTvChannel);
@@ -195,6 +187,11 @@ webosTvAccessory.prototype.subscribeToServices = function() {
                         this.setChannelButtonManually(null, false, null);
                     }
 
+                }
+
+                if (this.tvService && this.inputAppIds && this.inputAppIds.length > 0) {
+                    let inputIdentifier = this.inputAppIds.indexOf(res.appId);
+                    this.tvService.getCharacteristic(Characteristic.ActiveIdentifier).updateValue(inputIdentifier);
                 }
             }
         }
@@ -215,7 +212,7 @@ webosTvAccessory.prototype.subscribeToServices = function() {
             // mute state
             this.tvMuted = res.mute;
             this.setMuteStateManually(null, !this.tvMuted);
-            this.log.info('webOS - muted: %s', res.mute ? "Yes" : "No");
+            this.log.info('webOS - muted: %s', res.mute ? 'Yes' : 'No');
         }
     });
 
@@ -249,7 +246,248 @@ webosTvAccessory.prototype.connectToPointerInputSocket = function() {
 };
 
 
-// SETUP COMPLEX SERVICES
+// --== SETUP SERVICES  ==--
+webosTvAccessory.prototype.prepareInformationService = function() {
+
+    this.informationService = new Service.AccessoryInformation();
+
+    // there is currently no way to update the AccessoryInformation service after it was added to the service list
+    // when this is fixed in homebridge, update the informationService with the TV info?
+    this.informationService
+        .setCharacteristic(Characteristic.Manufacturer, 'LG Electronics Inc.')
+        .setCharacteristic(Characteristic.Model, 'webOS TV')
+        .setCharacteristic(Characteristic.SerialNumber, '-')
+        .setCharacteristic(Characteristic.FirmwareRevision, '1.4.0');
+
+    this.enabledServices.push(this.informationService);
+
+};
+
+// new services ----------------------------------------------------------------
+webosTvAccessory.prototype.prepareNewTvService = function() {
+
+    this.tvService = new Service.Television(this.name, 'tvService');
+
+    this.tvService
+        .setCharacteristic(Characteristic.ConfiguredName, this.name);
+
+    this.tvService
+        .setCharacteristic(Characteristic.SleepDiscoveryMode, Characteristic.SleepDiscoveryMode.ALWAYS_DISCOVERABLE);
+
+    this.tvService
+        .getCharacteristic(Characteristic.Active)
+        .on('get', this.getPowerState.bind(this))
+        .on('set', this.setPowerState.bind(this));
+
+    this.tvService
+        .setCharacteristic(Characteristic.ActiveIdentifier, 0); // preselect livetv as default
+
+    this.tvService
+        .getCharacteristic(Characteristic.ActiveIdentifier)
+        .on('set', (inputIdentifier, callback) => {
+            this.log.debug('webOS - input source changed, new input source identifier: %d, source appId: %s', inputIdentifier, this.inputAppIds[inputIdentifier]);
+            this.setAppSwitchState(true, callback, this.inputAppIds[inputIdentifier]);
+        });
+
+    this.tvService
+        .getCharacteristic(Characteristic.RemoteKey)
+        .on('set', this.remoteKeyPress.bind(this));
+
+    this.tvService
+        .getCharacteristic(Characteristic.PowerModeSelection)
+        .on('set', (newValue, callback) => {
+            this.log.debug('webOS - requested tv settings (PowerModeSelection): ' + newValue);
+            this.setRemoteControlButtonState(true, callback, 'MENU');
+        });
+
+
+    // not supported in the ios beta yet?
+    /* 
+	this.tvService
+	  .getCharacteristic(Characteristic.PictureMode)
+	  .on('set', function(newValue, callback) {
+		console.log('set PictureMode => setNewValue: ' + newValue);
+		callback(null);
+	  });
+	  */
+
+
+    this.enabledServices.push(this.tvService);
+
+
+    this.prepareTvSpeakerService();
+    this.prepareInputSourcesService();
+
+    // additional legacy services
+    this.prepareVolumeService();
+    this.prepareChannelService();
+    this.prepareMediaControlService();
+    this.prepareChannelButtonService();
+    this.prepareNotificationButtonService();
+    this.prepareRemoteControlButtonService();
+
+};
+
+webosTvAccessory.prototype.prepareTvSpeakerService = function() {
+
+    this.tvSpeakerService = new Service.TelevisionSpeaker(this.name + ' Volume', 'tvSpeakerService');
+
+    this.tvSpeakerService
+        .setCharacteristic(Characteristic.Active, Characteristic.Active.ACTIVE)
+        .setCharacteristic(Characteristic.VolumeControlType, Characteristic.VolumeControlType.ABSOLUTE);
+
+    this.tvSpeakerService
+        .getCharacteristic(Characteristic.VolumeSelector)
+        .on('set', (state, callback) => {
+            this.setVolumeSwitch(state, callback, !state);
+        });
+
+
+    this.tvSpeakerService
+        .getCharacteristic(Characteristic.Mute)
+        .on('get', this.getMuteState.bind(this))
+        .on('set', this.setMuteState.bind(this));
+
+
+    this.tvSpeakerService
+        .addCharacteristic(Characteristic.Volume)
+        .on('get', this.getVolume.bind(this))
+        .on('set', this.setVolume.bind(this));
+
+
+    this.tvService.addLinkedService(this.tvSpeakerService);
+    this.enabledServices.push(this.tvSpeakerService);
+
+};
+
+webosTvAccessory.prototype.prepareInputSourcesService = function() {
+
+    let defaultInputs = [{
+            appId: 'com.webos.app.livetv',
+            name: 'Live TV',
+            type: Characteristic.InputSourceType.TUNER
+        },
+        {
+            appId: 'com.webos.app.hdmi1',
+            name: 'HDMI 1',
+            type: Characteristic.InputSourceType.HDMI
+        },
+        {
+            appId: 'com.webos.app.hdmi2',
+            name: 'HDMI 2',
+            type: Characteristic.InputSourceType.HDMI
+        },
+        {
+            appId: 'com.webos.app.hdmi3',
+            name: 'HDMI 3',
+            type: Characteristic.InputSourceType.HDMI
+        },
+        {
+            appId: 'com.webos.app.externalinput.component',
+            name: 'Component',
+            type: Characteristic.InputSourceType.COMPONENT_VIDEO
+        },
+        {
+            appId: 'com.webos.app.externalinput.av1',
+            name: 'AV',
+            type: Characteristic.InputSourceType.COMPOSITE_VIDEO
+        }
+    ];
+
+    this.inputAppIds = new Array();
+
+    // predefined inputs
+    defaultInputs.forEach((value, i) => {
+
+        let tmpDefaultSource = new Service.InputSource(value.name, 'inputSource' + i);
+        tmpDefaultSource
+            .setCharacteristic(Characteristic.Identifier, i)
+            .setCharacteristic(Characteristic.ConfiguredName, value.name)
+            .setCharacteristic(Characteristic.IsConfigured, Characteristic.IsConfigured.CONFIGURED)
+            .setCharacteristic(Characteristic.InputSourceType, value.type)
+            .setCharacteristic(Characteristic.CurrentVisibilityState, Characteristic.CurrentVisibilityState.SHOWN);
+
+        this.tvService.addLinkedService(tmpDefaultSource);
+        this.enabledServices.push(tmpDefaultSource);
+        this.inputAppIds.push(value.appId);
+
+    });
+
+
+    // custom inputs
+    if (this.inputs == undefined || this.inputs == null || this.inputs.length <= 0) {
+        return;
+    }
+
+    if (Array.isArray(this.inputs) == false) {
+        this.inputs = [this.inputs];
+    }
+
+    this.inputs.forEach((value, i) => {
+
+        let appId = null;
+        let inputName = null;
+
+        // get appid
+        if (typeof value === 'string' || value instanceof String) {
+            appId = value;
+        } else if (value.appId != undefined) {
+            appId = value.appId;
+        }
+
+        // get name
+        if (value.name) {
+            inputName = value.name;
+        }
+
+        if (inputName == undefined || inputName == null || inputName == '') {
+            inputName = appId;
+        }
+
+        // if appId not null or empty add the input
+        if (appId != undefined && appId != null && appId != '') {
+            appId = appId.replace(/\s/g, ''); // remove all white spaces from the string
+            let newIdentifier = i + defaultInputs.length;
+
+            let tmpInput = new Service.InputSource(appId, 'inputSource' + newIdentifier);
+            tmpInput
+                .setCharacteristic(Characteristic.Identifier, newIdentifier)
+                .setCharacteristic(Characteristic.ConfiguredName, inputName)
+                .setCharacteristic(Characteristic.IsConfigured, Characteristic.IsConfigured.CONFIGURED)
+                .setCharacteristic(Characteristic.InputSourceType, Characteristic.InputSourceType.APPLICATION)
+                .setCharacteristic(Characteristic.CurrentVisibilityState, Characteristic.CurrentVisibilityState.SHOWN);
+
+            this.tvService.addLinkedService(tmpInput);
+            this.enabledServices.push(tmpInput);
+            this.inputAppIds.push(appId);
+        }
+
+    });
+
+};
+
+// old services ----------------------------------------------------------------
+webosTvAccessory.prototype.prepareLegacyService = function() {
+
+    this.powerService = new Service.Switch(this.name + ' Power', 'powerService');
+
+    this.powerService
+        .getCharacteristic(Characteristic.On)
+        .on('get', this.getPowerState.bind(this))
+        .on('set', this.setPowerState.bind(this));
+
+    this.enabledServices.push(this.powerService);
+
+    this.prepareVolumeService();
+    this.prepareAppSwitchService();
+    this.prepareChannelService();
+    this.prepareMediaControlService();
+    this.prepareChannelButtonService();
+    this.prepareNotificationButtonService();
+    this.prepareRemoteControlButtonService();
+
+};
+
 webosTvAccessory.prototype.prepareVolumeService = function() {
 
     if (!this.volumeControl) {
@@ -257,8 +495,8 @@ webosTvAccessory.prototype.prepareVolumeService = function() {
     }
 
     // slider/lightbulb
-    if (this.volumeControl == true || this.volumeControl === "slider") {
-        this.volumeService = new Service.Lightbulb(this.name + " Volume", "volumeService");
+    if (this.volumeControl == true || this.volumeControl === 'slider') {
+        this.volumeService = new Service.Lightbulb(this.name + ' Volume', 'volumeService');
 
         this.volumeService
             .getCharacteristic(Characteristic.On)
@@ -274,8 +512,8 @@ webosTvAccessory.prototype.prepareVolumeService = function() {
     }
 
     // up/down switches
-    if (this.volumeControl == true || this.volumeControl === "switch") {
-        this.volumeUpService = new Service.Switch(this.name + " Volume Up", "volumeUpService");
+    if (this.volumeControl == true || this.volumeControl === 'switch') {
+        this.volumeUpService = new Service.Switch(this.name + ' Volume Up', 'volumeUpService');
 
         this.volumeUpService
             .getCharacteristic(Characteristic.On)
@@ -287,7 +525,7 @@ webosTvAccessory.prototype.prepareVolumeService = function() {
 
         this.enabledServices.push(this.volumeUpService);
 
-        this.volumeDownService = new Service.Switch(this.name + " Volume Down", "volumeDownService");
+        this.volumeDownService = new Service.Switch(this.name + ' Volume Down', 'volumeDownService');
 
         this.volumeDownService
             .getCharacteristic(Characteristic.On)
@@ -315,7 +553,7 @@ webosTvAccessory.prototype.prepareAppSwitchService = function() {
     this.appSwitchService = new Array();
     this.appSwitch.forEach((value, i) => {
         this.appSwitch[i] = this.appSwitch[i].replace(/\s/g, ''); // remove all white spaces from the string
-        this.appSwitchService[i] = new Service.Switch(this.name + " App: " + value, "appSwitchService" + i);
+        this.appSwitchService[i] = new Service.Switch(this.name + ' App: ' + value, 'appSwitchService' + i);
     });
 
     this.appSwitch.forEach((value, i) => {
@@ -341,7 +579,7 @@ webosTvAccessory.prototype.prepareChannelService = function() {
         return;
     }
 
-    this.channelUpService = new Service.Switch(this.name + " Channel Up", "channelUpService");
+    this.channelUpService = new Service.Switch(this.name + ' Channel Up', 'channelUpService');
 
     this.channelUpService
         .getCharacteristic(Characteristic.On)
@@ -353,7 +591,7 @@ webosTvAccessory.prototype.prepareChannelService = function() {
 
     this.enabledServices.push(this.channelUpService);
 
-    this.channelDownService = new Service.Switch(this.name + " Channel Down", "channelDownService");
+    this.channelDownService = new Service.Switch(this.name + ' Channel Down', 'channelDownService');
 
     this.channelDownService
         .getCharacteristic(Characteristic.On)
@@ -373,57 +611,57 @@ webosTvAccessory.prototype.prepareMediaControlService = function() {
         return;
     }
 
-    this.mediaPlayService = new Service.Switch(this.name + " Play", "mediaPlayService");
+    this.mediaPlayService = new Service.Switch(this.name + ' Play', 'mediaPlayService');
 
     this.mediaPlayService
         .getCharacteristic(Characteristic.On)
         .on('get', this.getMediaControlSwitch.bind(this))
         .on('set', (state, callback) => {
-            this.setMediaControlSwitch(state, callback, "play");
+            this.setMediaControlSwitch(state, callback, 'play');
         });
 
     this.enabledServices.push(this.mediaPlayService);
 
-    this.mediaPauseService = new Service.Switch(this.name + " Pause", "mediaPauseService");
+    this.mediaPauseService = new Service.Switch(this.name + ' Pause', 'mediaPauseService');
 
     this.mediaPauseService
         .getCharacteristic(Characteristic.On)
         .on('get', this.getMediaControlSwitch.bind(this))
         .on('set', (state, callback) => {
-            this.setMediaControlSwitch(state, callback, "pause");
+            this.setMediaControlSwitch(state, callback, 'pause');
         });
 
     this.enabledServices.push(this.mediaPauseService);
 
-    this.mediaStopService = new Service.Switch(this.name + " Stop", "mediaStopService");
+    this.mediaStopService = new Service.Switch(this.name + ' Stop', 'mediaStopService');
 
     this.mediaStopService
         .getCharacteristic(Characteristic.On)
         .on('get', this.getMediaControlSwitch.bind(this))
         .on('set', (state, callback) => {
-            this.setMediaControlSwitch(state, callback, "stop");
+            this.setMediaControlSwitch(state, callback, 'stop');
         });
 
     this.enabledServices.push(this.mediaStopService);
 
-    this.mediaRewindService = new Service.Switch(this.name + " Rewind", "mediaRewindService");
+    this.mediaRewindService = new Service.Switch(this.name + ' Rewind', 'mediaRewindService');
 
     this.mediaRewindService
         .getCharacteristic(Characteristic.On)
         .on('get', this.getMediaControlSwitch.bind(this))
         .on('set', (state, callback) => {
-            this.setMediaControlSwitch(state, callback, "rewind");
+            this.setMediaControlSwitch(state, callback, 'rewind');
         });
 
     this.enabledServices.push(this.mediaRewindService);
 
-    this.mediaFastForwardService = new Service.Switch(this.name + " Fast Forward", "mediaFastForwardService");
+    this.mediaFastForwardService = new Service.Switch(this.name + ' Fast Forward', 'mediaFastForwardService');
 
     this.mediaFastForwardService
         .getCharacteristic(Characteristic.On)
         .on('get', this.getMediaControlSwitch.bind(this))
         .on('set', (state, callback) => {
-            this.setMediaControlSwitch(state, callback, "fastForward");
+            this.setMediaControlSwitch(state, callback, 'fastForward');
         });
 
     this.enabledServices.push(this.mediaFastForwardService);
@@ -443,7 +681,7 @@ webosTvAccessory.prototype.prepareChannelButtonService = function() {
     this.channelButtonService = new Array();
     this.channelButtons.forEach((value, i) => {
         this.channelButtons[i] = this.channelButtons[i].toString();
-        this.channelButtonService[i] = new Service.Switch(this.name + " Channel: " + value, "channelButtonService" + i);
+        this.channelButtonService[i] = new Service.Switch(this.name + ' Channel: ' + value, 'channelButtonService' + i);
     });
 
     this.channelButtons.forEach((value, i) => {
@@ -476,7 +714,7 @@ webosTvAccessory.prototype.prepareNotificationButtonService = function() {
     this.notificationButtonService = new Array();
     this.notificationButtons.forEach((value, i) => {
         this.notificationButtons[i] = this.notificationButtons[i].toString();
-        this.notificationButtonService[i] = new Service.Switch(this.name + " Notification: " + value, "notificationButtonService" + i);
+        this.notificationButtonService[i] = new Service.Switch(this.name + ' Notification: ' + value, 'notificationButtonService' + i);
     });
 
     this.notificationButtons.forEach((value, i) => {
@@ -509,7 +747,7 @@ webosTvAccessory.prototype.prepareRemoteControlButtonService = function() {
     this.remoteControlButtonService = new Array();
     this.remoteControlButtons.forEach((value, i) => {
         this.remoteControlButtons[i] = this.remoteControlButtons[i].toString().toUpperCase();
-        this.remoteControlButtonService[i] = new Service.Switch(this.name + " RC: " + value, "remoteControlButtonService" + i);
+        this.remoteControlButtonService[i] = new Service.Switch(this.name + ' RC: ' + value, 'remoteControlButtonService' + i);
     });
 
     this.remoteControlButtons.forEach((value, i) => {
@@ -530,7 +768,7 @@ webosTvAccessory.prototype.prepareRemoteControlButtonService = function() {
 };
 
 
-// HELPER METHODS
+// --== HELPER METHODS ==--
 webosTvAccessory.prototype.setMuteStateManually = function(error, value) {
     if (this.volumeService) this.volumeService.getCharacteristic(Characteristic.On).updateValue(value);
 };
@@ -598,12 +836,16 @@ webosTvAccessory.prototype.updateAccessoryStatus = function() {
 
 webosTvAccessory.prototype.updateTvStatus = function(error, status) {
     if (!status) {
-        this.powerService.getCharacteristic(Characteristic.On).updateValue(false);
+        if (this.powerService) this.powerService.getCharacteristic(Characteristic.On).updateValue(false);
         if (this.volumeService) this.volumeService.getCharacteristic(Characteristic.On).updateValue(false);
+        //tv service
+        if (this.tvService) this.tvService.getCharacteristic(Characteristic.Active).updateValue(false);
         this.setAppSwitchManually(null, false, null);
         this.setChannelButtonManually(null, false, null);
     } else {
-        this.powerService.getCharacteristic(Characteristic.On).updateValue(status);
+        if (this.powerService) this.powerService.getCharacteristic(Characteristic.On).updateValue(status);
+        //tv service
+        if (this.tvService) this.tvService.getCharacteristic(Characteristic.Active).updateValue(true);
     }
 };
 
@@ -641,7 +883,7 @@ webosTvAccessory.prototype.checkTVState = function(callback) {
             this.lgtv.connect(this.url);
             this.connected = true;
         }
-        this.log.debug('webOS - TV state: %s', this.connected ? "On" : "Off");
+        this.log.debug('webOS - TV state: %s', this.connected ? 'On' : 'Off');
         callback(null, this.connected);
     });
 };
@@ -649,7 +891,7 @@ webosTvAccessory.prototype.checkTVState = function(callback) {
 webosTvAccessory.prototype.checkForegroundApp = function(callback, appId) {
     if (this.connected) {
         this.lgtv.request('ssap://com.webos.applicationManager/getForegroundAppInfo', (err, res) => {
-            if (!res || err || res.errorCode || res.appId === "") {
+            if (!res || err || res.errorCode || res.appId === '') {
                 this.log.debug('webOS - current app - error while getting current app info');
                 callback(null, false, null); // disable all switches
             } else {
@@ -707,7 +949,7 @@ webosTvAccessory.prototype.openChannel = function(channelNum) {
     }
 };
 
-// HOMEBRIDGE STATE SETTERS/GETTERS
+// --== HOMEBRIDGE STATE SETTERS/GETTERS ==--
 webosTvAccessory.prototype.getPowerState = function(callback) {
     callback(null, this.connected);
 };
@@ -748,7 +990,7 @@ webosTvAccessory.prototype.getMuteState = function(callback) {
 
 webosTvAccessory.prototype.setMuteState = function(state, callback) {
     if (this.connected) {
-        this.log.debug('webOS - volume service - TV %s', !state ? "Muted" : "Unmuted");
+        this.log.debug('webOS - volume service - TV %s', !state ? 'Muted' : 'Unmuted');
         this.lgtv.request('ssap://audio/setMute', {
             mute: !state
         });
@@ -793,7 +1035,7 @@ webosTvAccessory.prototype.getVolumeSwitch = function(callback) {
 
 webosTvAccessory.prototype.setVolumeSwitch = function(state, callback, isUp) {
     if (this.connected) {
-        this.log.debug('webOS - volume service - volume %s pressed, current volume: %s, limit: %s', isUp ? "Up" : "Down", this.tvVolume, this.volumeLimit);
+        this.log.debug('webOS - volume service - volume %s pressed, current volume: %s, limit: %s', isUp ? 'Up' : 'Down', this.tvVolume, this.volumeLimit);
         let volLevel = this.tvVolume;
         if (isUp) {
             if (volLevel < this.volumeLimit) {
@@ -803,8 +1045,8 @@ webosTvAccessory.prototype.setVolumeSwitch = function(state, callback, isUp) {
             this.lgtv.request('ssap://audio/volumeDown');
         }
         setTimeout(() => {
-            this.volumeUpService.getCharacteristic(Characteristic.On).updateValue(false);
-            this.volumeDownService.getCharacteristic(Characteristic.On).updateValue(false);
+            if (this.volumeUpService) this.volumeUpService.getCharacteristic(Characteristic.On).updateValue(false);
+            if (this.volumeDownService) this.volumeDownService.getCharacteristic(Characteristic.On).updateValue(false);
         }, 10);
         callback();
     } else {
@@ -818,7 +1060,7 @@ webosTvAccessory.prototype.getChannelSwitch = function(callback) {
 
 webosTvAccessory.prototype.setChannelSwitch = function(state, callback, isUp) {
     if (this.connected) {
-        this.log.debug('webOS - channel service - channel %s pressed', isUp ? "Up" : "Down");
+        this.log.debug('webOS - channel service - channel %s pressed', isUp ? 'Up' : 'Down');
         if (isUp) {
             this.lgtv.request('ssap://tv/channelUp');
         } else {
@@ -854,7 +1096,7 @@ webosTvAccessory.prototype.setAppSwitchState = function(state, callback, appId) 
         } else {
             this.log.debug('webOS - app switch service - returning back to live tv');
             this.lgtv.request('ssap://system.launcher/launch', {
-                id: "com.webos.app.livetv"
+                id: 'com.webos.app.livetv'
             });
         }
         callback();
@@ -879,23 +1121,23 @@ webosTvAccessory.prototype.getMediaControlSwitch = function(callback) {
 webosTvAccessory.prototype.setMediaControlSwitch = function(state, callback, action) {
     if (this.connected) {
         this.log.debug('webOS - media control service - current media %s', action);
-        if (action === "play") {
+        if (action === 'play') {
             this.lgtv.request('ssap://media.controls/play');
-        } else if (action === "pause") {
+        } else if (action === 'pause') {
             this.lgtv.request('ssap://media.controls/pause');
-        } else if (action === "stop") {
+        } else if (action === 'stop') {
             this.lgtv.request('ssap://media.controls/stop');
-        } else if (action === "rewind") {
+        } else if (action === 'rewind') {
             this.lgtv.request('ssap://media.controls/rewind');
-        } else if (action === "fastForward") {
+        } else if (action === 'fastForward') {
             this.lgtv.request('ssap://media.controls/fastForward');
         }
         setTimeout(() => {
-            this.mediaPlayService.getCharacteristic(Characteristic.On).updateValue(false);
-            this.mediaPauseService.getCharacteristic(Characteristic.On).updateValue(false);
-            this.mediaStopService.getCharacteristic(Characteristic.On).updateValue(false);
-            this.mediaRewindService.getCharacteristic(Characteristic.On).updateValue(false);
-            this.mediaFastForwardService.getCharacteristic(Characteristic.On).updateValue(false);
+            if (this.mediaPlayService) this.mediaPlayService.getCharacteristic(Characteristic.On).updateValue(false);
+            if (this.mediaPauseService) this.mediaPauseService.getCharacteristic(Characteristic.On).updateValue(false);
+            if (this.mediaStopService) this.mediaStopService.getCharacteristic(Characteristic.On).updateValue(false);
+            if (this.mediaRewindService) this.mediaRewindService.getCharacteristic(Characteristic.On).updateValue(false);
+            if (this.mediaFastForwardService) this.mediaFastForwardService.getCharacteristic(Characteristic.On).updateValue(false);
         }, 10);
         callback();
     } else {
@@ -914,14 +1156,14 @@ webosTvAccessory.prototype.getChannelButtonState = function(callback, channelNum
 webosTvAccessory.prototype.setChannelButtonState = function(state, callback, channelNum) {
     if (this.connected) {
         if (state) {
-            if (this.tvCurrentAppId === "com.webos.app.livetv") { // it is only possible to switch channels when we are in the livetv app
+            if (this.tvCurrentAppId === 'com.webos.app.livetv') { // it is only possible to switch channels when we are in the livetv app
                 this.log.debug('webOS - channel button service - switching to channel number %s', channelNum);
                 this.openChannel(channelNum);
             } else { // if we are not in the livetv app, then switch to the livetv app and set launchLiveTvChannel, after the app is switched the channel will be switched to the selected
                 this.log.debug('webOS - channel button service - trying to switch to channel %s but the livetv app is not running, switching to livetv app', channelNum);
                 this.launchLiveTvChannel = channelNum;
                 this.lgtv.request('ssap://system.launcher/launch', {
-                    id: "com.webos.app.livetv"
+                    id: 'com.webos.app.livetv'
                 });
             }
             this.setChannelButtonManually(null, true, channelNum); // enable the selected channel switch and disable all other
@@ -958,7 +1200,7 @@ webosTvAccessory.prototype.setNotificationButtonState = function(state, callback
     setTimeout(() => {
         this.disableAllNotificationButtons();
     }, 10);
-    callback(); // always report success, if i return an error here then siri will respond with "Some device are not responding" which is bad for automation or scenes
+    callback(); // always report success, if i return an error here then siri will respond with 'Some device are not responding' which is bad for automation or scenes
     //callback(new Error('webOS - is not connected, cannot show notifications'));
 };
 
@@ -970,9 +1212,9 @@ webosTvAccessory.prototype.setRemoteControlButtonState = function(state, callbac
     if (this.connected && this.pointerInputSocket) {
         this.log.debug('webOS - remote control button service - emulating remote control %s press', rcButton);
         if (rcButton === 'CLICK') {
-            this.pointerInputSocket.send("click");
+            this.pointerInputSocket.send('click');
         } else {
-            this.pointerInputSocket.send("button", {
+            this.pointerInputSocket.send('button', {
                 name: rcButton
             });
         }
@@ -980,8 +1222,65 @@ webosTvAccessory.prototype.setRemoteControlButtonState = function(state, callbac
     setTimeout(() => {
         this.disableAllRemoteControlButtons();
     }, 10);
-    callback(); // always report success, if i return an error here then siri will respond with "Some device are not responding" which is bad for automation or scenes
+    callback(); // always report success, if i return an error here then siri will respond with 'Some device are not responding' which is bad for automation or scenes
     //callback(new Error('webOS - is not connected, cannot show notifications'));
+};
+
+webosTvAccessory.prototype.remoteKeyPress = function(remoteKey, callback) {
+
+    this.log.debug('webOS - remote key pressed: %d', remoteKey);
+
+    switch (remoteKey) {
+        case Characteristic.RemoteKey.REWIND:
+            this.setRemoteControlButtonState(true, callback, 'REWIND');
+            break;
+        case Characteristic.RemoteKey.FAST_FORWARD:
+            this.setRemoteControlButtonState(true, callback, 'FASTFORWARD');
+            break;
+        case Characteristic.RemoteKey.NEXT_TRACK:
+            // does a endpoint call exist?
+            this.log.info('webOS - next track remote key not supported');
+            callback();
+            break;
+        case Characteristic.RemoteKey.PREVIOUS_TRACK:
+            // does a endpoint call exist?
+            this.log.info('webOS - previous track remote key not supported');
+            callback();
+            break;
+        case Characteristic.RemoteKey.ARROW_UP:
+            this.setRemoteControlButtonState(true, callback, 'UP');
+            break;
+        case Characteristic.RemoteKey.ARROW_DOWN:
+            this.setRemoteControlButtonState(true, callback, 'DOWN');
+            break;
+        case Characteristic.RemoteKey.ARROW_LEFT:
+            this.setRemoteControlButtonState(true, callback, 'LEFT');
+            break;
+        case Characteristic.RemoteKey.ARROW_RIGHT:
+            this.setRemoteControlButtonState(true, callback, 'RIGHT');
+            break;
+        case Characteristic.RemoteKey.SELECT:
+            this.setRemoteControlButtonState(true, callback, 'ENTER');
+            break;
+        case Characteristic.RemoteKey.BACK:
+            this.setRemoteControlButtonState(true, callback, 'BACK');
+            break;
+        case Characteristic.RemoteKey.EXIT:
+            this.setRemoteControlButtonState(true, callback, 'EXIT');
+            break;
+        case Characteristic.RemoteKey.PLAY_PAUSE:
+            if (this.isPaused) {
+                this.setRemoteControlButtonState(true, callback, 'PLAY');
+            } else {
+                this.setRemoteControlButtonState(true, callback, 'PAUSE');
+            }
+            this.isPaused = !this.isPaused;
+            break;
+        case Characteristic.RemoteKey.INFORMATION:
+            this.setRemoteControlButtonState(true, callback, 'INFO');
+            break;
+    }
+
 };
 
 webosTvAccessory.prototype.getServices = function() {
