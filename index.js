@@ -32,6 +32,7 @@ function webosTvAccessory(log, config, api) {
     this.ip = config['ip'];
     this.name = config['name'];
     this.mac = config['mac'];
+    this.broadcastAdr = config['broadcastAdr'] || '255.255.255.255';
     this.keyFile = config['keyFile'];
     this.isTvService = config['tvService'];
     if (this.isTvService == undefined) {
@@ -189,8 +190,8 @@ webosTvAccessory.prototype.subscribeToServices = function() {
 
                 }
 
-                if (this.tvService && this.inputSources && this.inputSources.length > 0) {
-                    let inputIdentifier = this.inputSources.indexOf(res.appId);
+                if (this.tvService && this.inputAppIds && this.inputAppIds.length > 0) {
+                    let inputIdentifier = this.inputAppIds.indexOf(res.appId);
                     this.tvService.getCharacteristic(Characteristic.ActiveIdentifier).updateValue(inputIdentifier);
                 }
             }
@@ -285,8 +286,8 @@ webosTvAccessory.prototype.prepareNewTvService = function() {
     this.tvService
         .getCharacteristic(Characteristic.ActiveIdentifier)
         .on('set', (inputIdentifier, callback) => {
-            this.log.debug('webOS - input source changed, new input source identifier: %d, source appId: %s', inputIdentifier, this.inputSources[inputIdentifier]);
-            this.setAppSwitchState(true, callback, this.inputSources[inputIdentifier]);
+            this.log.debug('webOS - input source changed, new input source identifier: %d, source appId: %s', inputIdentifier, this.inputAppIds[inputIdentifier]);
+            this.setAppSwitchState(true, callback, this.inputAppIds[inputIdentifier]);
         });
 
     this.tvService
@@ -339,21 +340,19 @@ webosTvAccessory.prototype.prepareTvSpeakerService = function() {
     this.tvSpeakerService
         .getCharacteristic(Characteristic.VolumeSelector)
         .on('set', (state, callback) => {
+            this.log.debug('webOS - volume change over the remote control (VolumeSelector), pressed: %s', state === 1 ? 'Down' : 'Up');
             this.setVolumeSwitch(state, callback, !state);
         });
-
 
     this.tvSpeakerService
         .getCharacteristic(Characteristic.Mute)
         .on('get', this.getMuteState.bind(this))
         .on('set', this.setMuteState.bind(this));
 
-
     this.tvSpeakerService
         .addCharacteristic(Characteristic.Volume)
         .on('get', this.getVolume.bind(this))
         .on('set', this.setVolume.bind(this));
-
 
     this.tvService.addLinkedService(this.tvSpeakerService);
     this.enabledServices.push(this.tvSpeakerService);
@@ -394,7 +393,7 @@ webosTvAccessory.prototype.prepareInputSourcesService = function() {
         }
     ];
 
-    this.inputSources = new Array();
+    this.inputAppIds = new Array();
 
     // predefined inputs
     defaultInputs.forEach((value, i) => {
@@ -409,7 +408,7 @@ webosTvAccessory.prototype.prepareInputSourcesService = function() {
 
         this.tvService.addLinkedService(tmpDefaultSource);
         this.enabledServices.push(tmpDefaultSource);
-        this.inputSources.push(value.appId);
+        this.inputAppIds.push(value.appId);
 
     });
 
@@ -459,7 +458,7 @@ webosTvAccessory.prototype.prepareInputSourcesService = function() {
 
             this.tvService.addLinkedService(tmpInput);
             this.enabledServices.push(tmpInput);
-            this.inputSources.push(appId);
+            this.inputAppIds.push(appId);
         }
 
     });
@@ -850,7 +849,9 @@ webosTvAccessory.prototype.updateTvStatus = function(error, status) {
 };
 
 webosTvAccessory.prototype.powerOnTvWithCallback = function(callback) {
-    wol.wake(this.mac, (error) => {
+    wol.wake(this.mac, {
+        'address': this.broadcastAdr
+    }, (error) => {
         if (error) {
             this.log.info('webOS - wake on lan error');
             return;
@@ -957,7 +958,9 @@ webosTvAccessory.prototype.getPowerState = function(callback) {
 webosTvAccessory.prototype.setPowerState = function(state, callback) {
     if (state) {
         this.log.debug('webOS - power service - Trying to power on tv, sending magic packet');
-        wol.wake(this.mac, (error) => {
+        wol.wake(this.mac, {
+            'address': this.broadcastAdr
+        }, (error) => {
             if (error) {
                 this.log.info('webOS - wake on lan error');
                 return callback(new Error('webOS - wake on lan error'));
