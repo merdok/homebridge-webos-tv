@@ -52,7 +52,7 @@ function webosTvAccessory(log, config, api) {
     }
     this.mediaControl = config['mediaControl'];
     if (this.mediaControl == undefined) {
-        this.mediaControl = true;
+        this.mediaControl = false;
     }
     this.alivePollingInterval = config['pollingInterval'] || 5;
     this.alivePollingInterval = this.alivePollingInterval * 1000;
@@ -258,7 +258,7 @@ webosTvAccessory.prototype.prepareInformationService = function() {
         .setCharacteristic(Characteristic.Manufacturer, 'LG Electronics Inc.')
         .setCharacteristic(Characteristic.Model, 'webOS TV')
         .setCharacteristic(Characteristic.SerialNumber, '-')
-        .setCharacteristic(Characteristic.FirmwareRevision, '1.5.0');
+        .setCharacteristic(Characteristic.FirmwareRevision, '1.4.0');
 
     this.enabledServices.push(this.informationService);
 
