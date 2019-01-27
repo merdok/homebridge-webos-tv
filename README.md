@@ -35,6 +35,7 @@ sudo npm install -g homebridge-webos-tv
 ## Configuration
 
 Add the accessory in `config.json` in your home directory inside `.homebridge`.
+
 Example configuration:
 
 ```js
