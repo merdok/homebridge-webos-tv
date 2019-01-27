@@ -3,10 +3,6 @@
 `homebridge-webos-tv` is a plugin for HomeBridge which allows you to control your webOS TV! It should work with all TVs that support webOS2 and newer.
 The idea is that the TV should be controlled completely from the native HomeKit iOS app and Siri, that is why volume appears as a light bulb or external input as a switch.
 
-### IMPORTANT
-
-#### The old package ```homebridge-webos3``` is deprecated. New development will be made here. If you used the old package please change your accessory in your config.json to ```webostv``` and install this new package!
-
 ### Features
 * Power status
 * Turn on / off
@@ -18,6 +14,8 @@ The idea is that the TV should be controlled completely from the native HomeKit 
 * Media control
 * Show notifications
 * Emulate remote control
+
+Since version 1.5.0 the new HomeKit integration is supported introduced in iOS12.2. This is a work in progress and might change. 
 
 ## Installation
 
@@ -84,10 +82,19 @@ Name of your accessory
 ip address of your tv
 - `mac` [required]
 Mac address of your tv
+- `broadcastAdr` [optional]
+If homebridge runs on a host with more than one network interface use this to specify the broadcast address.
 - `keyFile` [optional]
 To prevent the tv from asking for permission when you reboot homebridge, specify a file path to store the permission token. If the file doesn't exist it'll be created. Don't specify a directory or you'll get an `EISDIR` error. 
 - `pollingInterval` [optional]
 The TV state background polling interval in seconds. **Default: 5**
+- `tvService` [optional]
+Wheter to use the new tv service introduced in iOS 12.2. This way you can use the native iOS TV integration to control your TV. This is still in beta.  **Default: false**  
+- `inputs` [optional] 
+Additional inputs for the new tv service. Replaces the app `appSwitch` service when the new tv service is used. **Default: "" (no additional inputs)**
+  - Set an array of app IDs or objects as the value. An object needs to have the *appId* and *name* property
+  - Default inputs are: *Live TV*, *HDMI1*, *HDMI2*, *HDMI3*, *Component*, *AV*
+  - Inputs can also be switched when the TV is off, in that case an attempt to power on the TV and switch to the chosen input will be made
 - `volumeControl` [optional]
 Wheter the volume control service is enabled. **Default: true**  
 Available values:
@@ -99,16 +106,16 @@ The max allowed volume which can be set using the volume service. Range 1-100. *
 - `channelControl` [optional]
 Wheter the channel control service is enabled. **Default: true**
 - `mediaControl` [optional]
-Wheter the media control service is enabled. Buttons: play, pause, stop, rewind, fast forward. **Default: true**
+Wheter the media control service is enabled. Buttons: play, pause, stop, rewind, fast forward. **Default: false**
 - `appSwitch` [optional] 
 Wheter the app switch service is enabled. This allows to switch live tv with apps of your choice. To get the app ID simply open an app on your TV and check the homebridge console. The app ID of the opened app will be printed. **Default: "" (disabled)**
   - Set an array of app IDs as the value
   - External sources are also apps and can be used as app switches, available sources:
     - *com.webos.app.livetv*
-    - *com.webos.app.hdmi1*, 
-    - *com.webos.app.hdmi2*, 
-    - *com.webos.app.hdmi3*, 
-    - *com.webos.app.externalinput.component*, 
+    - *com.webos.app.hdmi1*
+    - *com.webos.app.hdmi2*
+    - *com.webos.app.hdmi3*
+    - *com.webos.app.externalinput.component*
     - *com.webos.app.externalinput.av1*
   - Apps can also be started when the TV is off, in that case an attempt to power on the TV and switch to the chosen app will be made
 - `channelButtons` [optional] 
@@ -139,3 +146,5 @@ homebridge -D
 [lgtv2](https://github.com/hobbyquaker/lgtv2) - the Node.js remote control module for LG WebOS smart TVs.
 
 [homebridge-lgtv2](https://github.com/alessiodionisi/homebridge-lgtv2) & [homebridge-webos2](https://github.com/zwerch/homebridge-webos2) - the basic idea for the plugin.
+
+[HAP-NodeJS](https://github.com/KhaosT/HAP-NodeJS) & [homebridge](https://github.com/nfarina/homebridge) - for making this possible.
