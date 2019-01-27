@@ -45,11 +45,22 @@ Add the accessory in `config.json` in your home directory inside `.homebridge`.
       "ip": "192.168.0.40",
       "mac": "ab:cd:ef:fe:dc:ba",
       "keyFile": "/home/pi/.homebridge/lgtvKeyFile",
+      "pollingInterval": 10,
+      "tvService": true,
+      "inputs": [
+          {
+            "appId": "youtube.leanback.v4",
+            "name": "YouTube"
+          },
+          {
+            "appId": "youtube.leanback.v4",
+            "name": "Photo Video"
+          }
+      ],
       "volumeControl": "switch",
       "mediaControl": false,
-      "pollingInterval": 10,
       "appSwitch":[
-         "com.webos.app.tvguide",
+         "com.webos.app.photovideo",
          "youtube.leanback.v4",
          "com.webos.app.hdmi2",
          "com.webos.app.externalinput.component"
