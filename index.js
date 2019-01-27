@@ -189,8 +189,8 @@ webosTvAccessory.prototype.subscribeToServices = function() {
 
                 }
 
-                if (this.tvService && this.inputAppIds && this.inputAppIds.length > 0) {
-                    let inputIdentifier = this.inputAppIds.indexOf(res.appId);
+                if (this.tvService && this.inputSources && this.inputSources.length > 0) {
+                    let inputIdentifier = this.inputSources.indexOf(res.appId);
                     this.tvService.getCharacteristic(Characteristic.ActiveIdentifier).updateValue(inputIdentifier);
                 }
             }
@@ -285,8 +285,8 @@ webosTvAccessory.prototype.prepareNewTvService = function() {
     this.tvService
         .getCharacteristic(Characteristic.ActiveIdentifier)
         .on('set', (inputIdentifier, callback) => {
-            this.log.debug('webOS - input source changed, new input source identifier: %d, source appId: %s', inputIdentifier, this.inputAppIds[inputIdentifier]);
-            this.setAppSwitchState(true, callback, this.inputAppIds[inputIdentifier]);
+            this.log.debug('webOS - input source changed, new input source identifier: %d, source appId: %s', inputIdentifier, this.inputSources[inputIdentifier]);
+            this.setAppSwitchState(true, callback, this.inputSources[inputIdentifier]);
         });
 
     this.tvService
@@ -394,7 +394,7 @@ webosTvAccessory.prototype.prepareInputSourcesService = function() {
         }
     ];
 
-    this.inputAppIds = new Array();
+    this.inputSources = new Array();
 
     // predefined inputs
     defaultInputs.forEach((value, i) => {
@@ -409,7 +409,7 @@ webosTvAccessory.prototype.prepareInputSourcesService = function() {
 
         this.tvService.addLinkedService(tmpDefaultSource);
         this.enabledServices.push(tmpDefaultSource);
-        this.inputAppIds.push(value.appId);
+        this.inputSources.push(value.appId);
 
     });
 
@@ -459,7 +459,7 @@ webosTvAccessory.prototype.prepareInputSourcesService = function() {
 
             this.tvService.addLinkedService(tmpInput);
             this.enabledServices.push(tmpInput);
-            this.inputAppIds.push(appId);
+            this.inputSources.push(appId);
         }
 
     });
