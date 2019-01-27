@@ -91,7 +91,7 @@ Example configuration new tv service (HomeKit TV integration, requies iOS 12.2 o
             "name": "YouTube"
           },
           {
-            "appId": "youtube.leanback.v4",
+            "appId": "com.webos.app.photovideo",
             "name": "Photo Video"
           }
       ],
