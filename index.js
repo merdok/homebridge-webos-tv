@@ -258,7 +258,7 @@ webosTvAccessory.prototype.prepareInformationService = function() {
         .setCharacteristic(Characteristic.Manufacturer, 'LG Electronics Inc.')
         .setCharacteristic(Characteristic.Model, 'webOS TV')
         .setCharacteristic(Characteristic.SerialNumber, '-')
-        .setCharacteristic(Characteristic.FirmwareRevision, '1.5.0');
+        .setCharacteristic(Characteristic.FirmwareRevision, '1.5.1');
 
     this.enabledServices.push(this.informationService);
 
