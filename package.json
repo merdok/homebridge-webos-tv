@@ -4,8 +4,8 @@
   "description": "Homebridge plugin for LG webOS TVs",
   "main": "index.js",
   "engines": {
-    "node": ">=0.12.0",
-    "homebridge": ">=0.2.0"
+    "node": ">=4.3.2",
+    "homebridge": ">=0.4.46"
   },
   "keywords": [
     "homebridge-plugin",
