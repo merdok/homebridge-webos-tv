@@ -361,59 +361,8 @@ webosTvAccessory.prototype.prepareTvSpeakerService = function() {
 
 webosTvAccessory.prototype.prepareInputSourcesService = function() {
 
-    let defaultInputs = [{
-            appId: 'com.webos.app.livetv',
-            name: 'Live TV',
-            type: Characteristic.InputSourceType.TUNER
-        },
-        {
-            appId: 'com.webos.app.hdmi1',
-            name: 'HDMI 1',
-            type: Characteristic.InputSourceType.HDMI
-        },
-        {
-            appId: 'com.webos.app.hdmi2',
-            name: 'HDMI 2',
-            type: Characteristic.InputSourceType.HDMI
-        },
-        {
-            appId: 'com.webos.app.hdmi3',
-            name: 'HDMI 3',
-            type: Characteristic.InputSourceType.HDMI
-        },
-        {
-            appId: 'com.webos.app.externalinput.component',
-            name: 'Component',
-            type: Characteristic.InputSourceType.COMPONENT_VIDEO
-        },
-        {
-            appId: 'com.webos.app.externalinput.av1',
-            name: 'AV',
-            type: Characteristic.InputSourceType.COMPOSITE_VIDEO
-        }
-    ];
-
     this.inputAppIds = new Array();
 
-    // predefined inputs
-    defaultInputs.forEach((value, i) => {
-
-        let tmpDefaultSource = new Service.InputSource(value.name, 'inputSource' + i);
-        tmpDefaultSource
-            .setCharacteristic(Characteristic.Identifier, i)
-            .setCharacteristic(Characteristic.ConfiguredName, value.name)
-            .setCharacteristic(Characteristic.IsConfigured, Characteristic.IsConfigured.CONFIGURED)
-            .setCharacteristic(Characteristic.InputSourceType, value.type)
-            .setCharacteristic(Characteristic.CurrentVisibilityState, Characteristic.CurrentVisibilityState.SHOWN);
-
-        this.tvService.addLinkedService(tmpDefaultSource);
-        this.enabledServices.push(tmpDefaultSource);
-        this.inputAppIds.push(value.appId);
-
-    });
-
-
-    // custom inputs
     if (this.inputs == undefined || this.inputs == null || this.inputs.length <= 0) {
         return;
     }
@@ -446,11 +395,10 @@ webosTvAccessory.prototype.prepareInputSourcesService = function() {
         // if appId not null or empty add the input
         if (appId != undefined && appId != null && appId != '') {
             appId = appId.replace(/\s/g, ''); // remove all white spaces from the string
-            let newIdentifier = i + defaultInputs.length;
 
-            let tmpInput = new Service.InputSource(appId, 'inputSource' + newIdentifier);
+            let tmpInput = new Service.InputSource(appId, 'inputSource' + i);
             tmpInput
-                .setCharacteristic(Characteristic.Identifier, newIdentifier)
+                .setCharacteristic(Characteristic.Identifier, i)
                 .setCharacteristic(Characteristic.ConfiguredName, inputName)
                 .setCharacteristic(Characteristic.IsConfigured, Characteristic.IsConfigured.CONFIGURED)
                 .setCharacteristic(Characteristic.InputSourceType, Characteristic.InputSourceType.APPLICATION)
