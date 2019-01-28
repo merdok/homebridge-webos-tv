@@ -87,6 +87,14 @@ Example configuration new tv service (HomeKit TV integration, requies iOS 12.2 o
       "tvService": true,
       "inputs": [
           {
+            "appId": "com.webos.app.livetv",
+            "name": "Live TV"
+          },
+          {
+            "appId": "com.webos.app.hdmi1",
+            "name": "PS4"
+          },
+          {
             "appId": "youtube.leanback.v4",
             "name": "YouTube"
           },
@@ -127,7 +135,6 @@ Wheter to use the new tv service introduced in iOS 12.2. This way you can use th
 - `inputs` [optional] 
 Additional inputs for the new tv service. Replaces the app `appSwitch` service when the new tv service is used. **Default: "" (no additional inputs)**
   - Set an array of app IDs or objects as the value. An object needs to have the *appId* and *name* property
-  - Default inputs are: *Live TV*, *HDMI1*, *HDMI2*, *HDMI3*, *Component*, *AV*
   - Inputs can also be switched when the TV is off, in that case an attempt to power on the TV and switch to the chosen input will be made
 - `volumeControl` [optional]
 Wheter the volume control service is enabled. **Default: true**  
