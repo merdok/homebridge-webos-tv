@@ -211,12 +211,12 @@ webosTvAccessory.prototype.subscribeToServices = function() {
 
             // volume state
             this.tvVolume = res.volume;
-            this.setVolumeManually(null, this.tvVolume);
+            this.setVolumeManually(this.tvVolume);
             this.log.info('webOS - current volume: %s', res.volume);
 
             // mute state
             this.tvMuted = res.mute;
-            this.setMuteStateManually(null, !this.tvMuted);
+            this.setMuteStateManually(!this.tvMuted);
             this.log.info('webOS - muted: %s', res.mute ? 'Yes' : 'No');
         }
     });
@@ -668,11 +668,11 @@ webosTvAccessory.prototype.prepareRemoteControlButtonService = function() {
 
 
 // --== HELPER METHODS ==--
-webosTvAccessory.prototype.setMuteStateManually = function(error, value) {
+webosTvAccessory.prototype.setMuteStateManually = function(value) {
     if (this.volumeService) this.volumeService.getCharacteristic(Characteristic.On).updateValue(value);
 };
 
-webosTvAccessory.prototype.setVolumeManually = function(error, value) {
+webosTvAccessory.prototype.setVolumeManually = function(value) {
     if (this.volumeService) this.volumeService.getCharacteristic(Characteristic.Brightness).updateValue(value);
 };
 
@@ -733,18 +733,16 @@ webosTvAccessory.prototype.updateAccessoryStatus = function() {
     if (this.channelButtonService) this.checkCurrentChannel(this.setChannelButtonManually.bind(this));
 };
 
-webosTvAccessory.prototype.updateTvStatus = function(error, status) {
-    if (!status) {
+webosTvAccessory.prototype.updateTvStatus = function(error, tvStatus) {
+    if (!tvStatus) {
         if (this.powerService) this.powerService.getCharacteristic(Characteristic.On).updateValue(false);
+        if (this.tvService) this.tvService.getCharacteristic(Characteristic.Active).updateValue(false); //tv service
         if (this.volumeService) this.volumeService.getCharacteristic(Characteristic.On).updateValue(false);
-        //tv service
-        if (this.tvService) this.tvService.getCharacteristic(Characteristic.Active).updateValue(false);
         this.setAppSwitchManually(null, false, null);
         this.setChannelButtonManually(null, false, null);
     } else {
-        if (this.powerService) this.powerService.getCharacteristic(Characteristic.On).updateValue(status);
-        //tv service
-        if (this.tvService) this.tvService.getCharacteristic(Characteristic.Active).updateValue(true);
+        if (this.powerService) this.powerService.getCharacteristic(Characteristic.On).updateValue(true);
+        if (this.tvService) this.tvService.getCharacteristic(Characteristic.Active).updateValue(true); //tv service
     }
 };
 
@@ -875,7 +873,7 @@ webosTvAccessory.prototype.setPowerState = function(state, callback) {
                 this.connected = false;
                 this.setAppSwitchManually(null, false, null);
                 this.setChannelButtonManually(null, false, null);
-                this.setMuteStateManually(null, false);
+                this.setMuteStateManually(false);
             })
         }
         callback();
@@ -996,11 +994,10 @@ webosTvAccessory.prototype.setAppSwitchState = function(state, callback, appId) 
             });
             this.setAppSwitchManually(null, true, appId);
             this.setChannelButtonManually(null, false, null);
-        } else {
-            this.log.debug('webOS - app switch service - returning back to live tv');
-            this.lgtv.request('ssap://system.launcher/launch', {
-                id: 'com.webos.app.livetv'
-            });
+        } else { // prevent turning off the switch, since this is the current app we should not turn off the switch
+            setTimeout(() => {
+                this.setAppSwitchManually(null, true, appId);
+            }, 10);
         }
         callback();
     } else {
