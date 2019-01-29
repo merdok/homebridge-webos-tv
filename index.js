@@ -192,6 +192,10 @@ webosTvAccessory.prototype.subscribeToServices = function() {
 
                 if (this.tvService && this.inputAppIds && this.inputAppIds.length > 0) {
                     let inputIdentifier = this.inputAppIds.indexOf(res.appId);
+                    if (inputIdentifier === -1) {
+                        inputIdentifier = 9999999; // select with id that does not exists
+                        this.log.debug('webOS - input not found in the input list, not selecting any input');
+                    }
                     this.tvService.getCharacteristic(Characteristic.ActiveIdentifier).updateValue(inputIdentifier);
                 }
             }
@@ -280,8 +284,8 @@ webosTvAccessory.prototype.prepareNewTvService = function() {
         .on('get', this.getPowerState.bind(this))
         .on('set', this.setPowerState.bind(this));
 
-    this.tvService
-        .setCharacteristic(Characteristic.ActiveIdentifier, 0); // preselect livetv as default
+    //    this.tvService
+    //        .setCharacteristic(Characteristic.ActiveIdentifier, 0); // do not preselect any input since there are no default inputs
 
     this.tvService
         .getCharacteristic(Characteristic.ActiveIdentifier)
