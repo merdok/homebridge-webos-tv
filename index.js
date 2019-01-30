@@ -364,23 +364,20 @@ webosTvAccessory.prototype.prepareInputSourcesService = function() {
     this.inputAppIds = new Array();
     this.inputs.forEach((value, i) => {
 
-        let appId = null;
-        let inputName = null;
-
         // get appid
-        if (typeof value === 'string' || value instanceof String) {
-            appId = value;
-        } else if (value.appId != undefined) {
+        let appId = null;
+
+        if (value.appId != undefined) {
             appId = value.appId;
+        } else {
+            appId = value;
         }
 
-        // get name
+        // get name		
+        let inputName = appId;
+
         if (value.name) {
             inputName = value.name;
-        }
-
-        if (inputName == undefined || inputName == null || inputName == '') {
-            inputName = appId;
         }
 
         // if appId not null or empty add the input
@@ -485,23 +482,20 @@ webosTvAccessory.prototype.prepareInputLegacyService = function() {
     this.inputAppIdsLegacy = new Array();
     this.inputs.forEach((value, i) => {
 
-        let appId = null;
-        let inputName = null;
-
         // get appid
-        if (typeof value === 'string' || value instanceof String) {
-            appId = value;
-        } else if (value.appId != undefined) {
+        let appId = null;
+
+        if (value.appId != undefined) {
             appId = value.appId;
+        } else {
+            appId = value;
         }
 
         // get name
+        let inputName = this.name + ' App: ' + appId;
+
         if (value.name) {
             inputName = value.name;
-        }
-
-        if (inputName == undefined || inputName == null || inputName == '') {
-            inputName = this.name + ' App: ' + appId;
         }
 
         // if appId not null or empty add the input
@@ -1135,7 +1129,6 @@ webosTvAccessory.prototype.setNotificationButtonState = function(state, callback
         this.disableAllNotificationButtons();
     }, 10);
     callback(); // always report success, if i return an error here then siri will respond with 'Some device are not responding' which is bad for automation or scenes
-    //callback(new Error('webOS - is not connected, cannot show notifications'));
 };
 
 webosTvAccessory.prototype.getRemoteControlButtonState = function(callback) {
@@ -1157,7 +1150,6 @@ webosTvAccessory.prototype.setRemoteControlButtonState = function(state, callbac
         this.disableAllRemoteControlButtons();
     }, 10);
     callback(); // always report success, if i return an error here then siri will respond with 'Some device are not responding' which is bad for automation or scenes
-    //callback(new Error('webOS - is not connected, cannot show notifications'));
 };
 
 webosTvAccessory.prototype.remoteKeyPress = function(remoteKey, callback) {
