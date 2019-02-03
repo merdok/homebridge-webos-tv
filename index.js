@@ -1,20 +1,15 @@
 const lgtv2 = require('lgtv2');
 const wol = require('wake_on_lan');
 const tcpp = require('tcp-ping');
+const fs = require('fs');
+const ppath = require('persist-path');
+const mkdirp = require('mkdirp');
 
 let Service;
 let Characteristic;
 
 let lgtv;
 let pointerInputSocket;
-var tvVolume = 0;
-var tvMuted = false;
-var tvCurrentChannel = -1;
-var tvCurrentAppId = '';
-var launchLiveTvChannel = null;
-
-//tvService only
-var isPaused = false;
 
 module.exports = function(homebridge) {
     Service = homebridge.hap.Service;
@@ -29,11 +24,13 @@ function webosTvAccessory(log, config, api) {
     this.log = log;
     this.port = 3000;
 
+    // confugration
     this.ip = config['ip'];
-    this.name = config['name'];
+    this.name = config['name'] || 'webOS TV';
     this.mac = config['mac'];
     this.broadcastAdr = config['broadcastAdr'] || '255.255.255.255';
     this.keyFile = config['keyFile'];
+    this.prefsDir = config['prefsDir'] || ppath('webosTv/');
     this.isTvService = config['tvService'];
     if (this.isTvService == undefined) {
         this.isTvService = false;
@@ -56,18 +53,36 @@ function webosTvAccessory(log, config, api) {
     }
     this.alivePollingInterval = config['pollingInterval'] || 5;
     this.alivePollingInterval = this.alivePollingInterval * 1000;
-    this.appSwitch = config['appSwitch'];
     this.channelButtons = config['channelButtons'];
     this.notificationButtons = config['notificationButtons'];
     this.remoteControlButtons = config['remoteControlButtons'];
     this.inputs = config['inputs'];
 
+    // prepare variables
     this.url = 'ws://' + this.ip + ':' + this.port;
     this.enabledServices = [];
     this.connected = false;
     this.checkCount = 0;
     this.checkAliveInterval = null;
+    var tvVolume = 0;
+    var tvMuted = false;
+    var tvCurrentChannel = -1;
+    var tvCurrentAppId = '';
+    var launchLiveTvChannel = null;
+    var isPaused = false;
 
+
+    // check if prefs directory ends with a /, if not then add it
+    if (this.prefsDir.endsWith('/') === false) {
+        this.prefsDir = this.prefsDir + '/';
+    }
+
+    // check if the tv preferences directory exists, if not then create it
+    if (fs.existsSync(this.prefsDir) === false) {
+        mkdirp(this.prefsDir);
+    }
+
+    // create the lgtv instance
     this.lgtv = new lgtv2({
         url: this.url,
         timeout: 5000,
@@ -75,10 +90,12 @@ function webosTvAccessory(log, config, api) {
         keyFile: this.keyFile
     });
 
+    // start the polling
     if (!this.checkAliveInterval) {
         this.checkAliveInterval = setInterval(this.checkTVState.bind(this, this.updateTvStatus.bind(this)), this.alivePollingInterval);
     }
 
+    //register to listeners
     this.lgtv.on('connect', () => {
         this.log.info('webOS - connected to TV');
         this.getTvInformation();
@@ -98,8 +115,6 @@ function webosTvAccessory(log, config, api) {
 
     this.lgtv.on('error', (error) => {
         this.log.error('webOS - %s', error);
-        //this.connected = false;
-        //setTimeout(this.lgtv.connect(this.url), 5000);
     });
 
     this.lgtv.on('prompt', () => {
@@ -361,6 +376,14 @@ webosTvAccessory.prototype.prepareInputSourcesService = function() {
         this.inputs = [this.inputs];
     }
 
+    let savedNames = {};
+    let inputNamesFile = this.prefsDir + 'inputs_' + this.mac.split(':').join('');
+    try {
+        savedNames = JSON.parse(fs.readFileSync(inputNamesFile));
+    } catch (err) {
+        this.log.debug('webOS - input names file does not exist');
+    }
+
     this.inputAppIds = new Array();
     this.inputs.forEach((value, i) => {
 
@@ -376,7 +399,9 @@ webosTvAccessory.prototype.prepareInputSourcesService = function() {
         // get name		
         let inputName = appId;
 
-        if (value.name) {
+        if (savedNames && savedNames[appId]) {
+            inputName = savedNames[appId];
+        } else if (value.name) {
             inputName = value.name;
         }
 
@@ -391,6 +416,20 @@ webosTvAccessory.prototype.prepareInputSourcesService = function() {
                 .setCharacteristic(Characteristic.IsConfigured, Characteristic.IsConfigured.CONFIGURED)
                 .setCharacteristic(Characteristic.InputSourceType, Characteristic.InputSourceType.APPLICATION)
                 .setCharacteristic(Characteristic.CurrentVisibilityState, Characteristic.CurrentVisibilityState.SHOWN);
+
+            tmpInput
+                .getCharacteristic(Characteristic.ConfiguredName)
+                .on('set', (name, callback) => {
+                    savedNames[appId] = name;
+                    fs.writeFile(inputNamesFile, JSON.stringify(savedNames), (err) => {
+                        if (err) {
+                            this.log.debug('webOS - error occured could not write input name %s', err);
+                        } else {
+                            this.log.debug('webOS - input name successfully saved! New name: %s AppId: %s', name, appId);
+                        }
+                    });
+                    callback()
+                });
 
             this.tvService.addLinkedService(tmpInput);
             this.enabledServices.push(tmpInput);
