@@ -80,7 +80,7 @@ Example configuration old service:
 }
 ```
 
-Example configuration new tv service (HomeKit TV integration, requies iOS 12.2 or newer):
+Example configuration new tv service (HomeKit TV integration, requires iOS 12.2 or newer):
 
 ```js
 {
