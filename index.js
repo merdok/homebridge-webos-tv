@@ -24,7 +24,7 @@ function webosTvAccessory(log, config, api) {
     this.log = log;
     this.port = 3000;
 
-    // confugration
+    // configuration
     this.ip = config['ip'];
     this.name = config['name'] || 'webOS TV';
     this.mac = config['mac'];
@@ -286,7 +286,7 @@ webosTvAccessory.prototype.connectToPointerInputSocket = function() {
 webosTvAccessory.prototype.prepareInformationService = function() {
 
     // currently i save the tv info in a file and load if it exists
-    let modelName = 'webOS TV';
+    let modelName = this.name;
     try {
         let infoArr = JSON.parse(fs.readFileSync(this.tvInfoFile));
         modelName = infoArr.modelName;
