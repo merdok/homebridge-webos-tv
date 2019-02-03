@@ -64,12 +64,12 @@ function webosTvAccessory(log, config, api) {
     this.connected = false;
     this.checkCount = 0;
     this.checkAliveInterval = null;
-    var tvVolume = 0;
-    var tvMuted = false;
-    var tvCurrentChannel = -1;
-    var tvCurrentAppId = '';
-    var launchLiveTvChannel = null;
-    var isPaused = false;
+    this.tvVolume = 0;
+    this.tvMuted = false;
+    this.tvCurrentChannel = -1;
+    this.tvCurrentAppId = '';
+    this.launchLiveTvChannel = null;
+    this.isPaused = false;
 
 
     // check if prefs directory ends with a /, if not then add it
@@ -81,6 +81,10 @@ function webosTvAccessory(log, config, api) {
     if (fs.existsSync(this.prefsDir) === false) {
         mkdirp(this.prefsDir);
     }
+
+    // prepare file paths
+    this.inputNamesFile = this.prefsDir + 'inputs_' + this.mac.split(':').join('');
+    this.tvInfoFile = this.prefsDir + 'info_' + this.mac.split(':').join('');
 
     // create the lgtv instance
     this.lgtv = new lgtv2({
@@ -152,6 +156,18 @@ webosTvAccessory.prototype.getTvInformation = function() {
             } else {
                 delete res['returnValue'];
                 this.log.debug('webOS - system info:' + '\n' + JSON.stringify(res, null, 2));
+                // save the tv info to a file if does not exists
+                if (fs.existsSync(this.tvInfoFile) === false) {
+                    fs.writeFile(this.tvInfoFile, JSON.stringify(res), (err) => {
+                        if (err) {
+                            this.log.debug('webOS - error occured could not write tv info %s', err);
+                        } else {
+                            this.log.debug('webOS - tv info successfully saved!');
+                        }
+                    });
+                } else {
+                    this.log.debug('webOS - tv info file already exists, not saving!');
+                }
             }
         });
 
@@ -269,12 +285,21 @@ webosTvAccessory.prototype.connectToPointerInputSocket = function() {
 // --== SETUP SERVICES  ==--
 webosTvAccessory.prototype.prepareInformationService = function() {
 
+    // currently i save the tv info in a file and load if it exists
+    let modelName = 'webOS TV';
+    try {
+        let infoArr = JSON.parse(fs.readFileSync(this.tvInfoFile));
+        modelName = infoArr.modelName;
+    } catch (err) {
+        this.log.debug('webOS - input names file does not exist');
+    }
+
     // there is currently no way to update the AccessoryInformation service after it was added to the service list
     // when this is fixed in homebridge, update the informationService with the TV info?
     this.informationService = new Service.AccessoryInformation();
     this.informationService
         .setCharacteristic(Characteristic.Manufacturer, 'LG Electronics Inc.')
-        .setCharacteristic(Characteristic.Model, 'webOS TV')
+        .setCharacteristic(Characteristic.Model, modelName)
         .setCharacteristic(Characteristic.SerialNumber, this.mac)
         .setCharacteristic(Characteristic.FirmwareRevision, '1.5.3');
 
@@ -377,9 +402,8 @@ webosTvAccessory.prototype.prepareInputSourcesService = function() {
     }
 
     let savedNames = {};
-    let inputNamesFile = this.prefsDir + 'inputs_' + this.mac.split(':').join('');
     try {
-        savedNames = JSON.parse(fs.readFileSync(inputNamesFile));
+        savedNames = JSON.parse(fs.readFileSync(this.inputNamesFile));
     } catch (err) {
         this.log.debug('webOS - input names file does not exist');
     }
@@ -421,7 +445,7 @@ webosTvAccessory.prototype.prepareInputSourcesService = function() {
                 .getCharacteristic(Characteristic.ConfiguredName)
                 .on('set', (name, callback) => {
                     savedNames[appId] = name;
-                    fs.writeFile(inputNamesFile, JSON.stringify(savedNames), (err) => {
+                    fs.writeFile(this.inputNamesFile, JSON.stringify(savedNames), (err) => {
                         if (err) {
                             this.log.debug('webOS - error occured could not write input name %s', err);
                         } else {
