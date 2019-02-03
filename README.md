@@ -125,17 +125,19 @@ On newer TVs **LG Connect Apps** under the network settings needs to be enabled.
 
 ### Configuration fields
 - `accessory` [required]
-Should always be "webostv"
+Should always be "webostv".
 - `name` [required]
-Name of your accessory
+Name of your accessory.
 - `ip` [required]
-ip address of your TV
+ip address of your TV.
 - `mac` [required]
-Mac address of your TV
+Mac address of your TV.
 - `broadcastAdr` [optional]
 If homebridge runs on a host with more than one network interface use this to specify the broadcast address.
 - `keyFile` [optional]
-To prevent the TV from asking for permission when you reboot homebridge, specify a file path to store the permission token. If the file doesn't exist it'll be created. Don't specify a directory or you'll get an `EISDIR` error. 
+To prevent the TV from asking for permission when you reboot homebridge, specify a file path to store the permission token. If the file doesn't exist it'll be created. Don't specify a directory or you'll get an `EISDIR` error.
+- `prefsDir` [optional]
+The directory where input names and TV model info should be saved. **Default: "~/.webosTv"**
 - `pollingInterval` [optional]
 The TV state background polling interval in seconds. **Default: 5**
 - `tvService` [optional]
