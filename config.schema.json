@@ -1,0 +1,176 @@
+{
+  "pluginAlias": "webostv",
+  "pluginType": "accessory",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "title": "Name",
+        "type": "string",
+        "default": "My LG TV",
+        "minLength": 1,
+        "required": true
+      },
+      "ip": {
+        "title": "IP address of your TV",
+        "type": "string",
+        "required": true
+      },
+      "mac": {
+        "title": "MAC address of your TV",
+        "type": "string",
+        "required": true
+      },
+      "broadcastAdr": {
+        "title": "If homebridge runs on a host with more than one network interface use this to specify the broadcast address",
+        "type": "string",
+        "required": false
+      },
+      "keyFile": {
+        "title": "File where to store the token to prevent the TV from asking for permission when you reboot homebridge",
+        "type": "string",
+        "required": false
+      },
+      "prefsDir": {
+        "title": "The directory where input names and TV model info should be saved",
+        "type": "string",
+        "default": "~/.webosTv",
+        "required": false
+      },
+      "pollingInterval": {
+        "title": "The TV state background polling interval in seconds",
+        "type": "number",
+        "default": 5,
+        "required": false
+      },
+      "tvService": {
+        "title": "Whether to use the new TV service introduced in iOS 12.2. This way you can use the native iOS TV integration to control your TV. This is still in beta.",
+        "type": "boolean",
+        "default": false,
+        "required": false
+      },
+      "volumeControl": {
+        "title": "Whether the volume control service is enabled",
+        "type": [
+          "boolean",
+          "string"
+        ],
+        "enum": [
+          true,
+          false,
+          "slider",
+          "switch"
+        ],
+        "default": true,
+        "required": true
+      },
+      "volumeLimit": {
+        "title": "The max allowed volume which can be set using the volume service",
+        "type": "number",
+        "default": 100,
+        "maximum": 100,
+        "minimum": 1,
+        "required": false
+      },
+      "channelControl": {
+        "title": "Whether the channel control service is enabled",
+        "type": "boolean",
+        "default": true,
+        "required": false
+      },
+      "mediaControl": {
+        "title": "Whether the media control service is enabled. Buttons: play, pause, stop, rewind, fast forward",
+        "type": "boolean",
+        "default": false,
+        "required": false
+      },
+      "inputs": {
+        "title": "Show switch for \"pause\"",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "appId": {
+              "title": "To get the app ID simply open an app on your TV and check the homebridge console.",
+              "type": "string",
+              "required": true
+            },
+            "name": {
+              "title": "The name of the entry we want to have",
+              "type": "string",
+              "required": true
+            }
+          }
+        },
+        "default": false,
+        "required": true
+      },
+      "channelButtons": {
+        "title": "Whether the channel buttons service is enabled. This allows to create switches for the channels of your choice. This way you can quickly switch between favorite channels.",
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "required": false
+      },
+      "notificationButtons": {
+        "title": "Whether the notification buttons service is enabled. This allows to create buttons which when pressed display the specified text on the TV screen. Useful for HomeKit automation or to display text on TV for viewers.",
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "required": false
+      },
+      "remoteControlButtons": {
+        "title": "Whether the remote control buttons service is enabled. This allows to emulate remote control buttons.",
+        "type": "array",
+        "items": {
+          "type": "string",
+          "enum": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "0",
+            "LIST",
+            "AD",
+            "DASH",
+            "MUTE",
+            "VOLUMEUP",
+            "VOLUMEDOWN",
+            "CHANNELUP",
+            "CHANNELDOWN",
+            "HOME",
+            "MENU",
+            "UP",
+            "DOWN",
+            "LEFT",
+            "RIGHT",
+            "CLICK",
+            "BACK",
+            "EXIT",
+            "PROGRAM",
+            "ENTER",
+            "INFO",
+            "RED",
+            "GREEN",
+            "YELLOW",
+            "BLUE",
+            "LIVE_ZOOM",
+            "CC",
+            "PLAY",
+            "PAUSE",
+            "REWIND",
+            "FASTFORWARD"
+          ]
+        },
+        "required": false
+      }
+    }
+  }
+}
