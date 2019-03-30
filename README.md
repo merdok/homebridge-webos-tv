@@ -16,8 +16,6 @@ The idea is that the TV should be controlled completely from the native HomeKit 
 * Show notifications
 * Emulate remote control
 
-Since version 1.5.0 the new HomeKit TV integration is supported which was introduced in iOS 12.2. This is a work in progress and might change. 
-
 ## Installation
 
 If you are new to Homebridge, please first read the Homebridge [documentation](https://www.npmjs.com/package/homebridge).
@@ -121,6 +119,8 @@ Example configuration new tv service (HomeKit TV integration, requires iOS 12.2 
 
 You also need to enable **mobile TV on** on your TV for the turn on feature to work correctly.
 
+This is located on your TV under `Settings > General > Mobile TV On`
+
 On newer TVs **LG Connect Apps** under the network settings needs to be enabled.
 
 ### Configuration fields
@@ -141,7 +141,7 @@ The directory where input names and TV model info should be saved. **Default: "~
 - `pollingInterval` [optional]
 The TV state background polling interval in seconds. **Default: 5**
 - `tvService` [optional]
-Wheter to use the new TV service introduced in iOS 12.2. This way you can use the native iOS TV integration to control your TV. This is still in beta.  **Default: false**  
+Wheter to use the new TV service. This way you can use the native iOS TV integration to control your TV. Requires iOS 12.2 or higher.  **Default: false**  
 - `inputs` [optional] 
 When using the new TV service the inputs will appear under the *Inputs* list, with the emulated service this will create switches for the inputs and apps of your choice. **Default: "" (disabled)**
   - Set an array of app IDs or objects as the value. An object needs to have the *appId* and *name* property
