@@ -170,7 +170,25 @@
           ]
         },
         "required": false
+      },
+       "soundOutputButtons": {
+        "title": "Sound output buttons",
+        "type": "array",
+        "items": {
+          "type": "string",
+          "enum": [
+            "tv_speaker",
+            "external_optical",
+            "external_arc",
+            "lineout",
+            "headphone",
+            "tv_external_speaker",
+	    "tv_speaker_headphone"
+          ]
+        },
+        "required": false
       }
     }
   }
 }
+
