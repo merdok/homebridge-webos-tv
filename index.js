@@ -318,7 +318,7 @@ webosTvAccessory.prototype.prepareInformationService = function() {
         .setCharacteristic(Characteristic.Manufacturer, 'LG Electronics Inc.')
         .setCharacteristic(Characteristic.Model, modelName)
         .setCharacteristic(Characteristic.SerialNumber, this.mac)
-        .setCharacteristic(Characteristic.FirmwareRevision, '1.5.5');
+        .setCharacteristic(Characteristic.FirmwareRevision, '1.5.6');
 
     this.enabledServices.push(this.informationService);
 
