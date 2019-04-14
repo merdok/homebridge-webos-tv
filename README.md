@@ -72,6 +72,11 @@ Example configuration old service:
          "HOME",
          "LIST",
          "EXIT"
+      ],
+      "soundOutputButtons": [
+         "tv_speaker",
+         "external_optical",
+         "headphone"
       ]
     }
   ]  
@@ -181,6 +186,16 @@ Wheter the remote control buttons service is enabled. This allows to emulate rem
     - *UP*, *DOWN*, *LEFT*, *RIGHT*, *CLICK*, *BACK*, *EXIT*, *PROGRAM*, *ENTER*, *INFO*
     - *RED*, *GREEN*, *YELLOW*, *BLUE*, *LIVE_ZOOM*, *CC*, *PLAY*, *PAUSE*, *REWIND*, *FASTFORWARD*
   - Most probably there are also other values possible which i didn't find yet (like settings or voice command), you can try typing some other values and if you find some that work then please let me know
+- `soundOutputButtons` [optional] 
+Wheter the sound output buttons service is enabled. This allows to switch between sound outputs on the TV. **Default: "" (disabled)**
+  - Set an array of sound outputs as the value. Possible values are:
+    - *tv_speaker* - internal tv speaker,
+    - *external_optical* - optical audio, 
+    - *external_arc* - hdmi arc, 
+    - *lineout* - line out, 
+    - *headphone* - headphones, 
+    - *tv_external_speaker* tv speaker and optical, 
+    - *tv_speaker_headphone* - tv speaker and headphones, 
   
 ## Troubleshooting
 If you have any issues with the plugin or TV services then you can run homebridge in debug mode, which will provide some additional information. This might be useful for debugging issues. 
