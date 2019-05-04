@@ -546,6 +546,12 @@ webosTvAccessory.prototype.prepareVolumeService = function() {
             });
 
         this.enabledServices.push(this.volumeDownService);
+        
+        this.volumeUpTriggerService = new Service.StatelessProgrammableSwitch(this.name + " Volume Up Trigger", "volumeUpTrigger");
+        this.volumeDownTriggerService = new Service.StatelessProgrammableSwitch(this.name + " Volume Down Trigger", "volumeDownTrigger");
+        this.enabledServices.push(this.volumeUpTriggerService);
+        this.enabledServices.push(this.volumeDownTriggerService);
+        
     }
 
 };
@@ -812,7 +818,24 @@ webosTvAccessory.prototype.setMuteStateManually = function(value) {
 };
 
 webosTvAccessory.prototype.setVolumeManually = function(value) {
-    if (this.volumeService) this.volumeService.getCharacteristic(Characteristic.Brightness).updateValue(value);
+    if (this.volumeService) {
+        var volBrightness = this.volumeService.getCharacteristic(Characteristic.Brightness);
+        
+        // Trigger programmable switch
+        var oldVol = volBrightness.value;
+        var volTrigger = null;
+        if(value > oldVol) volTrigger = this.volumeUpTriggerService.getCharacteristic(Characteristic.ProgrammableSwitchEvent);
+        else if(value < oldVol) volTrigger = this.volumeDownTriggerService.getCharacteristic(Characteristic.ProgrammableSwitchEvent);
+        
+        // Could be null when value == oldVol, would be strange though
+        if(volTrigger != null) {
+            volTrigger.updateValue(Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS);
+            setTimeout(function(){volTrigger.setValue(undefined);}, 10);
+        }
+        
+        // Set new value
+        volBrightness.updateValue(value);
+    }
 };
 
 webosTvAccessory.prototype.setAppSwitchManually = function(error, value, appId) {
