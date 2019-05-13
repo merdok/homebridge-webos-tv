@@ -200,7 +200,7 @@ Wheter the remote control buttons service is enabled. This allows to emulate rem
 - `remoteSequenceButtons` [optional] 
 Wheter the remote sequence buttons service is enabled. This allows to run a sequence of remote control button presses. **Default: "" (disabled)**
   - Set an array of objects as the value. An object needs to have the following properties:
-    - *sequence* - an array of remote control keys. For possible values see `remoteControlButtons` ,
+    - *sequence* - an array of remote control keys. For possible values see `remoteControlButtons` above,
     - *name* - an optional name, 
     - *interval* - an optional interval beetwen sequence actions. Default is 500ms
 - `soundOutputButtons` [optional] 
