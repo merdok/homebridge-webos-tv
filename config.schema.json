@@ -197,6 +197,10 @@
             "sequence": {
               "title": "sequence",
               "type": "array",
+	      "items": {
+		  "type": "string",
+		  "required": true
+	       },
               "required": true
             },
             "name": {
@@ -214,7 +218,7 @@
         },
         "default": false,
         "required": false
-      },
+      }
     }
   }
 }
