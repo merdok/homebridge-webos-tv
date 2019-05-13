@@ -822,7 +822,6 @@ webosTvAccessory.prototype.prepareRemoteSequenceButtonsService = function() {
     this.remoteSequenceButtons.forEach((value, i) => {
 
         let tmpSeq = value;
-
         if (tmpSeq === null || tmpSeq === undefined || tmpSeq.sequence === undefined || Array.isArray(tmpSeq.sequence) == false) {
             return;
         }
@@ -1464,9 +1463,7 @@ webosTvAccessory.prototype.setRemoteSequenceButtonState = function(state, callba
         if (seqObj.interval != undefined && isNaN(seqObj.interval) == false) {
             tmpInterval = parseInt(seqObj.interval);
         }
-
         this.log.debug('webOS - remote sequence button service - emulating remote control sequence: %s with interval %d ms', seqObj.sequence.join(), tmpInterval);
-
         let curRemoteKeyNum = 0;
         let remoteKeyFunc = () => {
             let curRemoteKey = seqObj.sequence[curRemoteKeyNum];
@@ -1477,10 +1474,7 @@ webosTvAccessory.prototype.setRemoteSequenceButtonState = function(state, callba
                 setTimeout(remoteKeyFunc, tmpInterval);
             }
         };
-
         remoteKeyFunc();
-
-
     }
     setTimeout(() => {
         this.disableAllRemoteSequenceButtons();
