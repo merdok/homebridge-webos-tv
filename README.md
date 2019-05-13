@@ -77,6 +77,17 @@ Example configuration old service:
          "tv_speaker",
          "external_optical",
          "headphone"
+      ],
+       "remoteSequenceButtons": [
+          {
+              "sequence": ["HOME","RIGHT","RIGHT","RIGHT","ENTER"],
+              "name": "screen_share_seq"
+          },
+          {
+              "sequence": ["VOLUMEUP","VOLUMEDOWN","MUTE","MUTE"],
+              "name": "volume_seq",
+              "interval": 1000
+          }
       ]
     }
   ]  
@@ -186,6 +197,12 @@ Wheter the remote control buttons service is enabled. This allows to emulate rem
     - *UP*, *DOWN*, *LEFT*, *RIGHT*, *CLICK*, *BACK*, *EXIT*, *PROGRAM*, *ENTER*, *INFO*
     - *RED*, *GREEN*, *YELLOW*, *BLUE*, *LIVE_ZOOM*, *CC*, *PLAY*, *PAUSE*, *REWIND*, *FASTFORWARD*
   - Most probably there are also other values possible which i didn't find yet (like settings or voice command), you can try typing some other values and if you find some that work then please let me know
+- `remoteSequenceButtons` [optional] 
+Wheter the remote sequence buttons service is enabled. This allows to run a sequence of remote control button presses. **Default: "" (disabled)**
+  - Set an array of objects as the value. An object needs to have the following properties:
+    - *sequence* - an array of remote control keys. For possible values see `remoteControlButtons` ,
+    - *name* - an optional name, 
+    - *interval* - an optional interval beetwen sequence actions. Default is 500ms
 - `soundOutputButtons` [optional] 
 Wheter the sound output buttons service is enabled. This allows to switch between sound outputs on the TV. **Default: "" (disabled)**
   - Set an array of sound outputs as the value. Example values are:
@@ -195,7 +212,7 @@ Wheter the sound output buttons service is enabled. This allows to switch betwee
     - *lineout* - line out, 
     - *headphone* - headphones, 
     - *tv_external_speaker* - tv speaker and optical, 
-    - *tv_speaker_headphone* - tv speaker and headphones, 
+    - *tv_speaker_headphone* - tv speaker and headphones
    - Depending on the TV and connected devices to the TV there might also be other values. In that case just switch sound outputs on the TV and check the homebridge log.
   
 ## Troubleshooting
