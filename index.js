@@ -58,6 +58,7 @@ function webosTvAccessory(log, config, api) {
     this.remoteControlButtons = config['remoteControlButtons'];
     this.inputs = config['inputs'];
     this.soundOutputButtons = config['soundOutputButtons'];
+    this.remoteSequenceButtons = config['remoteSequenceButtons'];
 
     // prepare variables
     this.url = 'ws://' + this.ip + ':' + this.port;
@@ -380,6 +381,7 @@ webosTvAccessory.prototype.prepareNewTvService = function() {
     this.prepareNotificationButtonService();
     this.prepareRemoteControlButtonService();
     this.prepareSoundOutputButtonService();
+    this.prepareRemoteSequenceButtonsService();
 
 };
 
@@ -501,6 +503,7 @@ webosTvAccessory.prototype.prepareLegacyService = function() {
     this.prepareNotificationButtonService();
     this.prepareRemoteControlButtonService();
     this.prepareSoundOutputButtonService();
+    this.prepareRemoteSequenceButtonsService();
 
 };
 
@@ -735,7 +738,7 @@ webosTvAccessory.prototype.prepareNotificationButtonService = function() {
         tmpNotification
             .getCharacteristic(Characteristic.On)
             .on('get', (callback) => {
-                this.getNotificationButtonState(callback, this.notificationButtons[i]);
+                this.getNotificationButtonState(callback);
             })
             .on('set', (state, callback) => {
                 this.setNotificationButtonState(state, callback, this.notificationButtons[i]);
@@ -764,7 +767,7 @@ webosTvAccessory.prototype.prepareRemoteControlButtonService = function() {
         tmpRemoteControl
             .getCharacteristic(Characteristic.On)
             .on('get', (callback) => {
-                this.getRemoteControlButtonState(callback, this.remoteControlButtons[i]);
+                this.getRemoteControlButtonState(callback);
             })
             .on('set', (state, callback) => {
                 this.setRemoteControlButtonState(state, callback, this.remoteControlButtons[i]);
@@ -801,6 +804,48 @@ webosTvAccessory.prototype.prepareSoundOutputButtonService = function() {
 
         this.enabledServices.push(tmpSoundOutput);
         this.soundOutputButtonService.push(tmpSoundOutput);
+    });
+
+};
+
+webosTvAccessory.prototype.prepareRemoteSequenceButtonsService = function() {
+
+    if (this.remoteSequenceButtons == undefined || this.remoteSequenceButtons == null || this.remoteSequenceButtons.length <= 0) {
+        return;
+    }
+
+    if (Array.isArray(this.remoteSequenceButtons) == false) {
+        return;
+    }
+
+    this.remoteSequenceButtonsService = new Array();
+    this.remoteSequenceButtons.forEach((value, i) => {
+
+        let tmpSeq = value;
+
+        if (tmpSeq === null || tmpSeq === undefined || tmpSeq.sequence === undefined || Array.isArray(tmpSeq.sequence) == false) {
+            return;
+        }
+
+        // get sequence name
+        let sequenceName = this.name + ' Sequence ' + i;
+        if (tmpSeq.name) {
+            sequenceName = tmpSeq.name;
+        }
+
+        let tmpRemoteSequence = new Service.Switch(sequenceName, 'remoteSequenceButtonsService' + i);
+        tmpRemoteSequence
+            .getCharacteristic(Characteristic.On)
+            .on('get', (callback) => {
+                this.getRemoteSequenceButtonState(callback);
+            })
+            .on('set', (state, callback) => {
+                this.setRemoteSequenceButtonState(state, callback, tmpSeq);
+            });
+
+        this.enabledServices.push(tmpRemoteSequence);
+        this.remoteSequenceButtonsService.push(tmpRemoteSequence);
+
     });
 
 };
@@ -871,16 +916,24 @@ webosTvAccessory.prototype.setSoundOutputManually = function(error, value, sound
 
 webosTvAccessory.prototype.disableAllNotificationButtons = function() {
     if (this.notificationButtonService) {
-        this.notificationButtons.forEach((tmpVal, i) => {
-            this.notificationButtonService[i].getCharacteristic(Characteristic.On).updateValue(false);
+        this.notificationButtonService.forEach((tmpNotificationButton, i) => {
+            tmpNotificationButton.getCharacteristic(Characteristic.On).updateValue(false);
         });
     }
 };
 
 webosTvAccessory.prototype.disableAllRemoteControlButtons = function() {
     if (this.remoteControlButtonService) {
-        this.remoteControlButtons.forEach((tmpVal, i) => {
-            this.remoteControlButtonService[i].getCharacteristic(Characteristic.On).updateValue(false);
+        this.remoteControlButtonService.forEach((tmpRemoteControlButton, i) => {
+            tmpRemoteControlButton.getCharacteristic(Characteristic.On).updateValue(false);
+        });
+    }
+};
+
+webosTvAccessory.prototype.disableAllRemoteSequenceButtons = function() {
+    if (this.remoteSequenceButtonsService) {
+        this.remoteSequenceButtonsService.forEach((tmpRemoteSequenceButton, i) => {
+            tmpRemoteSequenceButton.getCharacteristic(Characteristic.On).updateValue(false);
         });
     }
 };
@@ -1304,7 +1357,9 @@ webosTvAccessory.prototype.setRemoteControlButtonState = function(state, callbac
     setTimeout(() => {
         this.disableAllRemoteControlButtons();
     }, 10);
-    callback(); // always report success, if i return an error here then siri will respond with 'Some device are not responding' which is bad for automation or scenes
+    if (callback != null) { // only if callback is not null, when a sequence is fired then the sequence button press calls the callback and not this one!
+        callback(); // always report success, if i return an error here then siri will respond with 'Some device are not responding' which is bad for automation or scenes	
+    }
 };
 
 webosTvAccessory.prototype.remoteKeyPress = function(remoteKey, callback) {
@@ -1397,6 +1452,40 @@ webosTvAccessory.prototype.setSoundOutputButtonState = function(state, callback,
     } else {
         callback(new Error('webOS - sound output service - TV is not connected, cannot change channel'));
     }
+};
+
+webosTvAccessory.prototype.getRemoteSequenceButtonState = function(callback) {
+    callback(null, false);
+};
+
+webosTvAccessory.prototype.setRemoteSequenceButtonState = function(state, callback, seqObj) {
+    if (this.connected && this.pointerInputSocket) {
+        let tmpInterval = 500;
+        if (seqObj.interval != undefined && isNaN(seqObj.interval) == false) {
+            tmpInterval = parseInt(seqObj.interval);
+        }
+
+        this.log.debug('webOS - remote sequence button service - emulating remote control sequence: %s with interval %d ms', seqObj.sequence.join(), tmpInterval);
+
+        let curRemoteKeyNum = 0;
+        let remoteKeyFunc = () => {
+            let curRemoteKey = seqObj.sequence[curRemoteKeyNum];
+            this.setRemoteControlButtonState(true, null, curRemoteKey);
+
+            if (curRemoteKeyNum < seqObj.sequence.length - 1) {
+                curRemoteKeyNum++;
+                setTimeout(remoteKeyFunc, tmpInterval);
+            }
+        };
+
+        remoteKeyFunc();
+
+
+    }
+    setTimeout(() => {
+        this.disableAllRemoteSequenceButtons();
+    }, 10);
+    callback(); // always report success, if i return an error here then siri will respond with 'Some device are not responding' which is bad for automation or scenes
 };
 
 webosTvAccessory.prototype.getServices = function() {
