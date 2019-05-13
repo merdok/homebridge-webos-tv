@@ -187,7 +187,34 @@
           ]
         },
         "required": false
-      }
+      },
+       "remoteSequenceButtons": {
+	"title": "Remote sequence buttons",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "sequence": {
+              "title": "sequence",
+              "type": "array",
+              "required": true
+            },
+            "name": {
+              "title": "name",
+              "type": "string",
+              "required": false 
+            },
+            "interval": {
+              "title": "interval",
+              "type": "number",
+	      "default": 500,
+              "required": false 
+            }
+          }
+        },
+        "default": false,
+        "required": false
+      },
     }
   }
 }
