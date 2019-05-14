@@ -5,16 +5,18 @@ The idea is that the TV should be controlled completely from the native HomeKit 
 
 ### Features
 * HomeKit TV integration
-* Power status
-* Turn on / off
-* Mute Status (as light bulb)
-* Mute / Unmute (as light bulb)
-* Volume control (as light bulb and switches)
-* Open apps (switch between apps of your choice and live tv)
+* HomeKit automation
+* Turn TV on / off
+* Mute / Unmute
+* Volume control (as light bulb, switches or through iOS remote app)
+* Change sound output
+* Switch inputs
+* Open apps
 * Channel control
 * Media control
 * Show notifications
 * Emulate remote control
+* Run sequences of remote control button presses
 
 ## Installation
 
@@ -173,7 +175,7 @@ When using the new TV service the inputs will appear under the *Inputs* list, wi
     - *com.webos.app.externalinput.av1*
   - Inputs and apps can also be switched when the TV is off, in that case an attempt to power on the TV and switch to the chosen input will be made
 - `inputButtons` [optional]
-Wheter to show input as buttons when using the tv service. Useful for automation. **Default: false**
+Wheter to additionally show inputs as buttons when using the tv service. Useful for automation. **Default: false**
 - `volumeControl` [optional]
 Wheter the volume control service is enabled. **Default: true**  
 Available values:
