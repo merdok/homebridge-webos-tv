@@ -46,6 +46,12 @@
       "tvService": {
         "title": "Use TV service (requires iOS 12.2)",
         "type": "boolean",
+        "default": true,
+        "required": false
+      },
+      "inputButtons": {
+        "title": "Show input buttons with tv service",
+        "type": "boolean",
         "default": false,
         "required": false
       },
