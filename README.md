@@ -18,6 +18,8 @@ The idea is that the TV should be controlled completely from the native HomeKit 
 * Emulate remote control
 * Run sequences of remote control button presses
 
+To fully use the plugin iOS 12.2 or higher is recommended. If your iOS device is not running at least on iOS12.2 then you should use the legacy tv service.
+
 ## Installation
 
 If you are new to Homebridge, please first read the Homebridge [documentation](https://www.npmjs.com/package/homebridge).
@@ -37,7 +39,7 @@ sudo npm install -g homebridge-webos-tv
 
 Add the accessory in `config.json` in your home directory inside `.homebridge`.
 
-Example configuration new tv service (HomeKit TV integration, requires iOS 12.2 or newer):
+Example configuration:
 
 ```js
 {
@@ -49,7 +51,6 @@ Example configuration new tv service (HomeKit TV integration, requires iOS 12.2 
       "mac": "ab:cd:ef:fe:dc:ba",
       "keyFile": "/home/pi/.homebridge/lgtvKeyFile",
       "pollingInterval": 10,
-      "tvService": true,
       "inputs": [
           {
             "appId": "com.webos.app.livetv",
@@ -69,7 +70,7 @@ Example configuration new tv service (HomeKit TV integration, requires iOS 12.2 
           }
       ],
       "inputButtons": true,
-      "volumeControl": false,
+      "volumeControl": "buttons",
       "channelControl": false,
       "mediaControl": false,
       "channelButtons": [3,5,7,8],
@@ -103,40 +104,6 @@ Example configuration new tv service (HomeKit TV integration, requires iOS 12.2 
 }
 ```
 
-Example configuration old service:
-
-```js
-{
-  "accessories": [
-    {
-      "accessory": "webostv",
-      "name": "My webOS tv",
-      "ip": "192.168.0.40",
-      "mac": "ab:cd:ef:fe:dc:ba",
-      "keyFile": "/home/pi/.homebridge/lgtvKeyFile",
-      "pollingInterval": 10,
-      "tvService": false,
-      "volumeControl": "buttons",
-      "mediaControl": false,
-      "inputs":[
-          {
-            "appId": "com.webos.app.livetv",
-            "name": "Live TV"
-          },
-          {
-            "appId": "com.webos.app.hdmi1",
-            "name": "PS4"
-          },
-          {
-            "appId": "youtube.leanback.v4",
-            "name": "YouTube"
-          }
-      ]
-    }
-  ]  
-}
-```
-
 You also need to enable **mobile TV on** on your TV for the turn on feature to work correctly.
 
 This is located on your TV under `Settings > General > Mobile TV On`
@@ -160,10 +127,10 @@ To prevent the TV from asking for permission when you reboot homebridge, specify
 The directory where input names and TV model info should be saved. **Default: "~/.webosTv"**
 - `pollingInterval` [optional]
 The TV state background polling interval in seconds. **Default: 5**
-- `tvService` [optional]
-Wheter to use the new TV service. This way you can use the native iOS TV integration to control your TV. Requires iOS 12.2 or higher.  **Default: true**  
+- `legacyTvService` [optional]
+Wheter to use the legacy TV service. Should be used if your iOS device is not running on iOS12.2 or newer. TV will be emulated as a switch.  **Default: false**  
 - `inputs` [optional] 
-When using the new TV service the inputs will appear under the *Inputs* list, with the emulated service this will create buttons for the inputs and apps of your choice. **Default: "" (disabled)**
+Inputs which should appear under the *Inputs* list on yor TV accessory. When you use the legacy tv service, buttons for the inputs will be created. **Default: "" (disabled)**
   - Set an array of app IDs or objects as the value. An object needs to have the *appId* and *name* property
   - To get the app ID simply open an app on your TV and check the homebridge console. The app ID of the opened app will be printed.
   - Some of the default TV inputs which can be used:
@@ -175,7 +142,7 @@ When using the new TV service the inputs will appear under the *Inputs* list, wi
     - *com.webos.app.externalinput.av1*
   - Inputs and apps can also be switched when the TV is off, in that case an attempt to power on the TV and switch to the chosen input will be made
 - `inputButtons` [optional]
-Wheter to additionally show inputs as buttons when using the tv service. Useful for automation. **Default: false**
+Wheter to additionally show inputs as buttons. Useful for automation. **Default: false**
 - `volumeControl` [optional]
 Wheter the volume control service is enabled. **Default: true**  
 Available values:
