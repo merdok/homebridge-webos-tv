@@ -18,7 +18,7 @@ The idea is that the TV should be controlled completely from the native HomeKit 
 * Emulate remote control
 * Run sequences of remote control button presses
 
-To fully use the plugin iOS 12.2 or higher is recommended. If your iOS device is not running at least on iOS12.2 then you should use the legacy tv service.
+To use the plugin iOS 12.2 or higher is recommended. If your iOS device is not running at least on iOS12.2 then you should use the legacy tv service.
 
 ## Installation
 
