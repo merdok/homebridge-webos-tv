@@ -35,9 +35,9 @@ function webosTvAccessory(log, config, api) {
     if (this.isLegacyTvService == undefined) {
         this.isLegacyTvService = false;
     }
-    this.isInputButtons = config['inputButtons'];
-    if (this.isInputButtons == undefined) {
-        this.isInputButtons = false;
+    this.showInputButtons = config['showInputButtons'];
+    if (this.showInputButtons == undefined) {
+        this.showInputButtons = false;
     }
     this.volumeControl = config['volumeControl'];
     if (this.volumeControl == undefined) {
@@ -388,7 +388,7 @@ webosTvAccessory.prototype.prepareTvService = function() {
     this.prepareRemoteSequenceButtonsService();
 
     // add additional input buttons 
-    if (this.isInputButtons === true) {
+    if (this.showInputButtons === true) {
         this.prepareInputButtonService();
     }
 
@@ -1495,3 +1495,4 @@ webosTvAccessory.prototype.setRemoteSequenceButtonState = function(state, callba
 webosTvAccessory.prototype.getServices = function() {
     return this.enabledServices;
 };
+
