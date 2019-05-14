@@ -33,7 +33,11 @@ function webosTvAccessory(log, config, api) {
     this.prefsDir = config['prefsDir'] || ppath('webosTv/');
     this.isTvService = config['tvService'];
     if (this.isTvService == undefined) {
-        this.isTvService = false;
+        this.isTvService = true;
+    }
+    this.isInputButtons = config['inputButtons'];
+    if (this.isInputButtons == undefined) {
+        this.isInputButtons = false;
     }
     this.volumeControl = config['volumeControl'];
     if (this.volumeControl == undefined) {
@@ -382,6 +386,11 @@ webosTvAccessory.prototype.prepareNewTvService = function() {
     this.prepareRemoteControlButtonService();
     this.prepareSoundOutputButtonService();
     this.prepareRemoteSequenceButtonsService();
+
+    // add additional input buttons with the new tv service 
+    if (this.isInputButtons === true) {
+        this.prepareInputLegacyService();
+    }
 
 };
 
