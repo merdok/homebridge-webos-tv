@@ -47,6 +47,7 @@ Example configuration old service:
       "mac": "ab:cd:ef:fe:dc:ba",
       "keyFile": "/home/pi/.homebridge/lgtvKeyFile",
       "pollingInterval": 10,
+      "tvService": false,
       "volumeControl": "switch",
       "mediaControl": false,
       "inputs":[
@@ -125,6 +126,7 @@ Example configuration new tv service (HomeKit TV integration, requires iOS 12.2 
             "name": "Photo Video"
           }
       ],
+      "inputButtons": true,
       "volumeControl": false,
       "channelControl": false,
       "mediaControl": false
@@ -157,7 +159,7 @@ The directory where input names and TV model info should be saved. **Default: "~
 - `pollingInterval` [optional]
 The TV state background polling interval in seconds. **Default: 5**
 - `tvService` [optional]
-Wheter to use the new TV service. This way you can use the native iOS TV integration to control your TV. Requires iOS 12.2 or higher.  **Default: false**  
+Wheter to use the new TV service. This way you can use the native iOS TV integration to control your TV. Requires iOS 12.2 or higher.  **Default: true**  
 - `inputs` [optional] 
 When using the new TV service the inputs will appear under the *Inputs* list, with the emulated service this will create switches for the inputs and apps of your choice. **Default: "" (disabled)**
   - Set an array of app IDs or objects as the value. An object needs to have the *appId* and *name* property
@@ -170,6 +172,8 @@ When using the new TV service the inputs will appear under the *Inputs* list, wi
     - *com.webos.app.externalinput.component*
     - *com.webos.app.externalinput.av1*
   - Inputs and apps can also be switched when the TV is off, in that case an attempt to power on the TV and switch to the chosen input will be made
+- `inputButtons` [optional]
+Wheter to show input as buttons when using the tv service. Useful for automation. **Default: false**
 - `volumeControl` [optional]
 Wheter the volume control service is enabled. **Default: true**  
 Available values:
