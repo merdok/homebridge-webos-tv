@@ -537,8 +537,8 @@ webosTvAccessory.prototype.prepareVolumeService = function() {
         this.enabledServices.push(this.volumeService);
     }
 
-    // up/down switches
-    if (this.volumeControl == true || this.volumeControl === 'switch') {
+    // volume up/down buttons
+    if (this.volumeControl == true || this.volumeControl === 'buttons') {
         this.volumeUpService = new Service.Switch(this.name + ' Volume Up', 'volumeUpService');
         this.volumeUpService
             .getCharacteristic(Characteristic.On)
