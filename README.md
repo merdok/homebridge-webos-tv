@@ -69,7 +69,7 @@ Example configuration:
             "name": "Photo Video"
           }
       ],
-      "inputButtons": true,
+      "showInputButtons": true,
       "volumeControl": "buttons",
       "channelControl": false,
       "mediaControl": false,
@@ -141,7 +141,7 @@ Inputs which should appear under the *Inputs* list on yor TV accessory. When you
     - *com.webos.app.externalinput.component*
     - *com.webos.app.externalinput.av1*
   - Inputs and apps can also be switched when the TV is off, in that case an attempt to power on the TV and switch to the chosen input will be made
-- `inputButtons` [optional]
+- `showInputButtons` [optional]
 Wheter to additionally show inputs as buttons. Useful for automation. **Default: false**
 - `volumeControl` [optional]
 Wheter the volume control service is enabled. **Default: true**  
