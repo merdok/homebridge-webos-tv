@@ -43,10 +43,10 @@
         "default": 5,
         "required": false
       },
-      "tvService": {
-        "title": "Use TV service (requires iOS 12.2)",
+      "legacyTvService": {
+        "title": "Emulate the TV as a switch",
         "type": "boolean",
-        "default": true,
+        "default": false,
         "required": false
       },
       "inputButtons": {
