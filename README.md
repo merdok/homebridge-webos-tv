@@ -8,7 +8,7 @@ The idea is that the TV should be controlled completely from the native HomeKit 
 * HomeKit automation
 * Turn TV on / off
 * Mute / Unmute
-* Volume control (as light bulb, switches or through iOS remote app)
+* Volume control (as light bulb, buttons or through iOS remote app)
 * Change sound output
 * Switch inputs
 * Open apps
@@ -50,7 +50,7 @@ Example configuration old service:
       "keyFile": "/home/pi/.homebridge/lgtvKeyFile",
       "pollingInterval": 10,
       "tvService": false,
-      "volumeControl": "switch",
+      "volumeControl": "buttons",
       "mediaControl": false,
       "inputs":[
           {
@@ -163,7 +163,7 @@ The TV state background polling interval in seconds. **Default: 5**
 - `tvService` [optional]
 Wheter to use the new TV service. This way you can use the native iOS TV integration to control your TV. Requires iOS 12.2 or higher.  **Default: true**  
 - `inputs` [optional] 
-When using the new TV service the inputs will appear under the *Inputs* list, with the emulated service this will create switches for the inputs and apps of your choice. **Default: "" (disabled)**
+When using the new TV service the inputs will appear under the *Inputs* list, with the emulated service this will create buttons for the inputs and apps of your choice. **Default: "" (disabled)**
   - Set an array of app IDs or objects as the value. An object needs to have the *appId* and *name* property
   - To get the app ID simply open an app on your TV and check the homebridge console. The app ID of the opened app will be printed.
   - Some of the default TV inputs which can be used:
@@ -179,9 +179,9 @@ Wheter to additionally show inputs as buttons when using the tv service. Useful 
 - `volumeControl` [optional]
 Wheter the volume control service is enabled. **Default: true**  
 Available values:
-  - *true* - slider and switches 
+  - *true* - slider and buttons 
   - *"slider"* - just slider
-  - *"switch"* - just switches
+  - *"buttons"* - just buttons
 - `volumeLimit` [optional]
 The max allowed volume which can be set using the volume service. Range 1-100. **Default: 100**
 - `channelControl` [optional]
@@ -189,7 +189,7 @@ Wheter the channel control service is enabled. **Default: true**
 - `mediaControl` [optional]
 Wheter the media control service is enabled. Buttons: play, pause, stop, rewind, fast forward. **Default: false**
 - `channelButtons` [optional] 
-Wheter the channel buttons service is enabled. This allows to create switches for the channels of your choice. This way you can quickly switch between favorite channels. **Default: "" (disabled)**
+Wheter the channel buttons service is enabled. This allows to create buttons for the channels of your choice. This way you can quickly switch between favorite channels. **Default: "" (disabled)**
   - Set an array of channel numbers as the value
   - Channels can also be opened when the TV is off, in that case an attempt to power on the TV and afterwards open the chosen channel will be made.
 - `notificationButtons` [optional] 
