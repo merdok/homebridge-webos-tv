@@ -37,66 +37,6 @@ sudo npm install -g homebridge-webos-tv
 
 Add the accessory in `config.json` in your home directory inside `.homebridge`.
 
-Example configuration old service:
-
-```js
-{
-  "accessories": [
-    {
-      "accessory": "webostv",
-      "name": "My webOS tv",
-      "ip": "192.168.0.40",
-      "mac": "ab:cd:ef:fe:dc:ba",
-      "keyFile": "/home/pi/.homebridge/lgtvKeyFile",
-      "pollingInterval": 10,
-      "tvService": false,
-      "volumeControl": "buttons",
-      "mediaControl": false,
-      "inputs":[
-          {
-            "appId": "com.webos.app.livetv",
-            "name": "Live TV"
-          },
-          {
-            "appId": "com.webos.app.hdmi1",
-            "name": "PS4"
-          },
-          {
-            "appId": "youtube.leanback.v4",
-            "name": "YouTube"
-          }
-      ],
-      "channelButtons": [3,5,7,8],
-      "notificationButtons": [
-         "Motion detected - living room",
-         "Motion detected - kitchen"
-      ],
-      "remoteControlButtons": [
-         "HOME",
-         "LIST",
-         "EXIT"
-      ],
-      "soundOutputButtons": [
-         "tv_speaker",
-         "external_optical",
-         "headphone"
-      ],
-       "remoteSequenceButtons": [
-          {
-              "sequence": ["HOME","RIGHT","RIGHT","RIGHT","ENTER"],
-              "name": "screen_share_seq"
-          },
-          {
-              "sequence": ["VOLUMEUP","VOLUMEDOWN","MUTE","MUTE"],
-              "name": "volume_seq",
-              "interval": 1000
-          }
-      ]
-    }
-  ]  
-}
-```
-
 Example configuration new tv service (HomeKit TV integration, requires iOS 12.2 or newer):
 
 ```js
@@ -131,7 +71,67 @@ Example configuration new tv service (HomeKit TV integration, requires iOS 12.2 
       "inputButtons": true,
       "volumeControl": false,
       "channelControl": false,
-      "mediaControl": false
+      "mediaControl": false,
+      "channelButtons": [3,5,7,8],
+      "notificationButtons": [
+         "Motion detected - living room",
+         "Motion detected - kitchen"
+      ],
+      "remoteControlButtons": [
+         "HOME",
+         "LIST",
+         "EXIT"
+      ],
+      "soundOutputButtons": [
+         "tv_speaker",
+         "external_optical",
+         "headphone"
+      ],
+       "remoteSequenceButtons": [
+          {
+              "sequence": ["HOME","RIGHT","RIGHT","RIGHT","ENTER"],
+              "name": "screen_share_seq"
+          },
+          {
+              "sequence": ["VOLUMEUP","VOLUMEDOWN","MUTE","MUTE"],
+              "name": "volume_seq",
+              "interval": 1000
+          }
+      ]
+    }
+  ]  
+}
+```
+
+Example configuration old service:
+
+```js
+{
+  "accessories": [
+    {
+      "accessory": "webostv",
+      "name": "My webOS tv",
+      "ip": "192.168.0.40",
+      "mac": "ab:cd:ef:fe:dc:ba",
+      "keyFile": "/home/pi/.homebridge/lgtvKeyFile",
+      "pollingInterval": 10,
+      "tvService": false,
+      "volumeControl": "buttons",
+      "mediaControl": false,
+      "inputs":[
+          {
+            "appId": "com.webos.app.livetv",
+            "name": "Live TV"
+          },
+          {
+            "appId": "com.webos.app.hdmi1",
+            "name": "PS4"
+          },
+          {
+            "appId": "youtube.leanback.v4",
+            "name": "YouTube"
+          }
+      ]
     }
   ]  
 }
