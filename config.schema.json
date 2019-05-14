@@ -49,8 +49,8 @@
         "default": false,
         "required": false
       },
-      "inputButtons": {
-        "title": "Show input buttons with tv service",
+      "showInputButtons": {
+        "title": "Show input buttons",
         "type": "boolean",
         "default": false,
         "required": false
