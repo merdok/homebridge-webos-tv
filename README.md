@@ -186,6 +186,7 @@ Wheter the sound output buttons service is enabled. This allows to switch betwee
     - *headphone* - headphones, 
     - *tv_external_speaker* - tv speaker and optical, 
     - *tv_speaker_headphone* - tv speaker and headphones
+    - *bt_soundbar* - bluetooth soundbar and bluetooth devices
    - Depending on the TV and connected devices to the TV there might also be other values. In that case just switch sound outputs on the TV and check the homebridge log.
   
 ## Troubleshooting
