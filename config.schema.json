@@ -189,7 +189,8 @@
             "lineout",
             "headphone",
             "tv_external_speaker",
-	    "tv_speaker_headphone"
+            "tv_speaker_headphone",
+            "bt_soundbar"
           ]
         },
         "required": false
