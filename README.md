@@ -188,6 +188,8 @@ Wheter the sound output buttons service is enabled. This allows to switch betwee
     - *tv_speaker_headphone* - tv speaker and headphones
     - *bt_soundbar* - bluetooth soundbar and bluetooth devices
    - Depending on the TV and connected devices to the TV there might also be other values. In that case just switch sound outputs on the TV and check the homebridge log.
+- `infoButtonAction` [optional]
+The action (button press emulation) for the info button press on the remote control in iOS control center. For possible values see the `remoteControlButtons` property above. **Default: "INFO"**
   
 ## Troubleshooting
 If you have any issues with the plugin or TV services then you can run homebridge in debug mode, which will provide some additional information. This might be useful for debugging issues. 
