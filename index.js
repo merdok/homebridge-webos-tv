@@ -63,6 +63,10 @@ function webosTvAccessory(log, config, api) {
     this.inputs = config['inputs'];
     this.soundOutputButtons = config['soundOutputButtons'];
     this.remoteSequenceButtons = config['remoteSequenceButtons'];
+    this.infoButtonAction = config['infoButtonAction'];
+    if (this.infoButtonAction == undefined || this.infoButtonAction.length == 0) {
+        this.infoButtonAction = 'INFO';
+    }
 
     // prepare variables
     this.url = 'ws://' + this.ip + ':' + this.port;
@@ -1422,7 +1426,7 @@ webosTvAccessory.prototype.remoteKeyPress = function(remoteKey, callback) {
             this.isPaused = !this.isPaused;
             break;
         case Characteristic.RemoteKey.INFORMATION:
-            this.setRemoteControlButtonState(true, callback, 'INFO');
+            this.setRemoteControlButtonState(true, callback, this.infoButtonAction);
             break;
     }
 
@@ -1495,4 +1499,3 @@ webosTvAccessory.prototype.setRemoteSequenceButtonState = function(state, callba
 webosTvAccessory.prototype.getServices = function() {
     return this.enabledServices;
 };
-

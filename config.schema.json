@@ -91,7 +91,7 @@
         "required": false
       },
       "inputs": {
-	"title": "Inputs",
+        "title": "Inputs",
         "type": "array",
         "items": {
           "type": "object",
@@ -104,7 +104,7 @@
             "name": {
               "title": "name",
               "type": "string",
-              "required": false 
+              "required": false
             }
           }
         },
@@ -177,7 +177,7 @@
         },
         "required": false
       },
-       "soundOutputButtons": {
+      "soundOutputButtons": {
         "title": "Sound output buttons",
         "type": "array",
         "items": {
@@ -195,8 +195,8 @@
         },
         "required": false
       },
-       "remoteSequenceButtons": {
-	"title": "Remote sequence buttons",
+      "remoteSequenceButtons": {
+        "title": "Remote sequence buttons",
         "type": "array",
         "items": {
           "type": "object",
@@ -204,29 +204,34 @@
             "sequence": {
               "title": "sequence",
               "type": "array",
-	      "items": {
-		  "type": "string",
-		  "required": true
-	       },
+              "items": {
+                "type": "string",
+                "required": true
+              },
               "required": true
             },
             "name": {
               "title": "name",
               "type": "string",
-              "required": false 
+              "required": false
             },
             "interval": {
               "title": "interval",
               "type": "number",
-	      "default": 500,
-              "required": false 
+              "default": 500,
+              "required": false
             }
           }
         },
         "default": false,
         "required": false
+      },
+      "infoButtonAction": {
+        "title": "Action for the info button on the remote control in the iOS control center",
+        "type": "string",
+        "default": "INFO",
+        "required": false
       }
     }
   }
 }
-
