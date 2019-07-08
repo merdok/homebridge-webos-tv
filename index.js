@@ -251,9 +251,12 @@ webosTvAccessory.prototype.subscribeToServices = function() {
         } else {
             this.log.info('webOS - audio status changed');
 
+            // check if volumeUp or volumeDown was pressed, holds volumeUp or volumeDown if one of those was pressed or is not present if not
+            let statusCause = (res && res.cause ? res.cause : null);
+
             // volume state
             this.tvVolume = res.volume;
-            this.setVolumeManually(this.tvVolume);
+            this.setVolumeManually(this.tvVolume, statusCause);
             this.log.info('webOS - current volume: %s', res.volume);
 
             // mute state
@@ -869,8 +872,27 @@ webosTvAccessory.prototype.setMuteStateManually = function(value) {
     if (this.volumeService) this.volumeService.getCharacteristic(Characteristic.On).updateValue(value);
 };
 
-webosTvAccessory.prototype.setVolumeManually = function(value) {
+webosTvAccessory.prototype.setVolumeManually = function(value, statusCause) {
     if (this.volumeService) this.volumeService.getCharacteristic(Characteristic.Brightness).updateValue(value);
+
+    // automation trigger for volume up button
+    if (statusCause === 'volumeUp' && this.volumeUpService) {
+        this.volumeUpService.getCharacteristic(Characteristic.On).updateValue(true);
+        setTimeout(() => {
+            this.volumeUpService.getCharacteristic(Characteristic.On).updateValue(false);
+        }, 300);
+
+    }
+
+    // automation trigger for volume down button
+    if (statusCause === 'volumeDown' && this.volumeDownService) {
+        this.volumeDownService.getCharacteristic(Characteristic.On).updateValue(true);
+        setTimeout(() => {
+            this.volumeDownService.getCharacteristic(Characteristic.On).updateValue(false);
+        }, 300);
+
+    }
+
 };
 
 webosTvAccessory.prototype.setAppSwitchManually = function(error, value, appId) {
@@ -955,7 +977,6 @@ webosTvAccessory.prototype.updateAccessoryStatus = function() {
     if (this.inputButtonService) this.checkForegroundApp(this.setAppSwitchManually.bind(this));
     if (this.channelButtonService) this.checkCurrentChannel(this.setChannelButtonManually.bind(this));
     if (this.soundOutputButtonService) this.checkSoundOutput(this.setSoundOutputManually.bind(this));
-
 };
 
 webosTvAccessory.prototype.updateTvStatus = function(error, tvStatus) {
