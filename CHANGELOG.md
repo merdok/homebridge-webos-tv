@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - VolumeUp and VolumeDown buttons now send home automation triggers
 - Optimized code
 
+### Changed
+
+### Removed
+
 
 ## [1.6.1] - 2019-05-15
 ### Added
