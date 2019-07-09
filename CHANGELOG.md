@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.2] - 2019-07-09
+### Added
+- New property `infoButtonAction ` - manually configure the info button on the control center remote
+- VolumeUp and VolumeDown buttons now send home automation triggers
+- Optimized code
+
+
 ## [1.6.1] - 2019-05-15
 ### Added
 - New property `remoteSequenceButtons` - run a sequence of remote control button presses
