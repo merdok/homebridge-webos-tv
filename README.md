@@ -1,6 +1,6 @@
 # homebridge-webos-tv
 
-`homebridge-webos-tv` is a plugin for HomeBridge which allows you to control your webOS TV! It should work with all TVs that support webOS2 and newer.
+`homebridge-webos-tv` is a plugin for Homebridge which allows you to control your webOS TV! It should work with all TVs that support webOS2 and newer.
 The idea is that the TV should be controlled completely from the native HomeKit iOS app and Siri, that is why volume appears as a light bulb or external input as a switch.
 
 ### Features
