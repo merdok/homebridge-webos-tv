@@ -202,6 +202,6 @@ homebridge -D
 ## Special thanks
 [lgtv2](https://github.com/hobbyquaker/lgtv2) - the Node.js remote control module for LG WebOS smart TVs.
 
-[homebridge-lgtv2](https://github.com/alessiodionisi/homebridge-lgtv2) & [homebridge-webos2](https://github.com/zwerch/homebridge-webos2) - the basic idea for the plugin.
+[homebridge-webos2](https://github.com/zwerch/homebridge-webos2) - the basic idea for the plugin.
 
 [HAP-NodeJS](https://github.com/KhaosT/HAP-NodeJS) & [homebridge](https://github.com/nfarina/homebridge) - for making this possible.
