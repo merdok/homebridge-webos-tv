@@ -1,4 +1,4 @@
-const lgtv2 = require('lgtv2');
+const Lgtv2 = require('lgtv2');
 const wol = require('wake_on_lan');
 const tcpp = require('tcp-ping');
 const fs = require('fs');
@@ -97,7 +97,7 @@ class webosTvAccessory {
 		this.tvInfoFile = this.prefsDir + 'info_' + this.mac.split(':').join('');
 
 		// create the lgtv instance
-		this.lgtv = new lgtv2({
+		this.lgtv = new Lgtv2({
 			url: this.url,
 			timeout: 5000,
 			reconnect: 3000,
