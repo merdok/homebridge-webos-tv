@@ -146,7 +146,8 @@ Wheter to additionally show inputs as buttons. Useful for automation. **Default:
 - `volumeControl` [optional]
 Wheter the volume control service is enabled. **Default: true**  
 Available values:
-  - *true* - slider and buttons 
+  - *true* - slider and buttons
+  - *false* - no volume control
   - *"slider"* - just slider
   - *"buttons"* - just buttons
 - `volumeLimit` [optional]
