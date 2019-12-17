@@ -111,17 +111,22 @@ class webosTvAccessory {
 
 		//register to listeners
 		this.lgtv.on('connect', () => {
-			this.log.info('webOS - connected to TV');
-			this.getTvInformation();
-			this.connected = true;
-			this.updateTvStatus(null, true);
-			this.subscribeToServices();
-			this.connectToPointerInputSocket();
-			this.updateAccessoryStatus();
+			this.log.debug('webOS - connected to TV, checking power status');
+			this.lgtv.request('ssap://com.webos.service.tvpower/power/getPowerState', (err, res) => {
+				if (err || (res && res.state && res.state === 'Active Standby')) {
+					this.log.debug('webOS - power status - TV is Off or Pixel Refresher is running, disconnecting');
+					this.connected = false;
+					this.lgtv.disconnect();
+				} else {
+					this.log.debug('webOS - power status - TV is On');
+					this.connected = true;
+					this.connect();
+				}
+			});
 		});
 
 		this.lgtv.on('close', () => {
-			this.log.info('webOS - disconnected from TV');
+			this.log.debug('webOS - disconnected from TV');
 			this.connected = false;
 			this.pointerInputSocket = null;
 			this.updateTvStatus(null, false);
@@ -150,6 +155,34 @@ class webosTvAccessory {
 		} else {
 			this.prepareTvService();
 		}
+	}
+
+
+	// --== CONNECT/DISCONNECT METHODS ==--	
+	connect() {
+		this.log.info('webOS - connected to TV');
+		this.getTvInformation();
+		this.connected = true;
+		this.updateTvStatus(null, true);
+		this.subscribeToServices();
+		this.connectToPointerInputSocket();
+		this.updateAccessoryStatus();
+	}
+
+	disconnect() {
+		this.log.info('webOS - disconnected from TV');
+		this.lgtv.disconnect();
+		this.connected = false;
+		this.updateTvStatus(null, false);
+	}
+
+	connectToPointerInputSocket() {
+		this.log.debug('webOS - connecting to remote control socket');
+		this.lgtv.getSocket('ssap://com.webos.service.networkinput/getPointerInputSocket', (err, sock) => {
+			if (!err) {
+				this.pointerInputSocket = sock;
+			}
+		});
 	}
 
 
@@ -202,6 +235,37 @@ class webosTvAccessory {
 	subscribeToServices() {
 		this.log.debug('webOS - subscribing to TV services');
 
+		// power status
+		this.lgtv.subscribe('ssap://com.webos.service.tvpower/power/getPowerState', (err, res) => {
+			if (!res || err) {
+				this.log.error('webOS - TV power status - error while getting power status');
+			} else {
+				let statusState = (res && res.state ? res.state : null);
+				let statusProcessing = (res && res.processing ? res.processing : null);
+				let statusPowerOnReason = (res && res.powerOnReason ? res.powerOnReason : null);
+				let powerState = '';
+
+				if (statusState) {
+					powerState = powerState + ' state: ' + statusState + ',';
+				}
+
+				if (statusProcessing) {
+					powerState = powerState + ' processing: ' + statusProcessing + ',';
+				}
+
+				if (statusPowerOnReason) {
+					powerState = powerState + ' power on reason: ' + statusPowerOnReason + ',';
+				}
+
+				this.log.debug('webOS - TV power status changed, status: %s', powerState);
+
+				// if pixel refresher is running then disconnect from TV
+				if (statusState === 'Active Standby') {
+					this.disconnect();
+				}
+			}
+		});
+
 		// foreground app info
 		this.lgtv.subscribe('ssap://com.webos.applicationManager/getForegroundAppInfo', (err, res) => {
 			if (!res || err) {
@@ -214,7 +278,7 @@ class webosTvAccessory {
 					if (this.channelButtonService) {
 						if (this.tvCurrentAppId === 'com.webos.app.livetv') {
 							// if the launchLiveTvChannel variable is not empty then switch to the specified channel and set the varaible to null
-							if (this.launchLiveTvChannel !== undefined || this.launchLiveTvChannel !== null || this.launchLiveTvChannel.length > 0) {
+							if (this.launchLiveTvChannel !== undefined && this.launchLiveTvChannel !== null && this.launchLiveTvChannel.length > 0) {
 								this.openChannel(this.launchLiveTvChannel);
 								this.launchLiveTvChannel = null;
 							}
@@ -288,16 +352,6 @@ class webosTvAccessory {
 					this.setSoundOutputManually(null, true, res.soundOutput);
 					this.log.info('webOS - current sound output: %s', res.soundOutput);
 				}
-			}
-		});
-	}
-
-	connectToPointerInputSocket() {
-		this.log.debug('webOS - connecting to remote control socket');
-
-		this.lgtv.getSocket('ssap://com.webos.service.networkinput/getPointerInputSocket', (err, sock) => {
-			if (!err) {
-				this.pointerInputSocket = sock;
 			}
 		});
 	}
@@ -935,6 +989,7 @@ class webosTvAccessory {
 			if (this.volumeService) this.volumeService.getCharacteristic(Characteristic.On).updateValue(false);
 			this.setAppSwitchManually(null, false, null);
 			this.setChannelButtonManually(null, false, null);
+			this.setMuteStateManually(false);
 			this.setSoundOutputManually(null, false, null);
 		} else {
 			if (this.powerService) this.powerService.getCharacteristic(Characteristic.On).updateValue(true);
@@ -972,14 +1027,13 @@ class webosTvAccessory {
 	checkTVState(callback) {
 		tcpp.probe(this.ip, this.port, (err, isAlive) => {
 			if (!isAlive && this.connected) {
-				this.connected = false;
-				this.lgtv.disconnect();
+				this.log.debug('webOS - TV state: Off');
+				this.disconnect();
+				callback(null, false);
 			} else if (isAlive && !this.connected) {
 				this.lgtv.connect(this.url);
-				this.connected = true;
+				this.log.debug('webOS - TV state: got response from TV, connecting...');
 			}
-			this.log.debug('webOS - TV state: %s', this.connected ? 'On' : 'Off');
-			callback(null, this.connected);
 		});
 	}
 
@@ -1088,12 +1142,7 @@ class webosTvAccessory {
 			if (this.connected) {
 				this.log.debug('webOS - power service - TV turned off');
 				this.lgtv.request('ssap://system/turnOff', (err, res) => {
-					this.lgtv.disconnect();
-					this.connected = false;
-					this.setAppSwitchManually(null, false, null);
-					this.setChannelButtonManually(null, false, null);
-					this.setMuteStateManually(false);
-					this.setSoundOutputManually(null, false, null);
+					this.disconnect();
 				})
 			}
 			callback();
@@ -1457,7 +1506,7 @@ class webosTvAccessory {
 		callback(); // always report success, if i return an error here then siri will respond with 'Some device are not responding' which is bad for automation or scenes
 	}
 
-	
+
 	getServices() {
 		return this.enabledServices;
 	}
