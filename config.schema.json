@@ -105,7 +105,13 @@
               "title": "name",
               "type": "string",
               "required": false
+            },
+            "params": {
+              "title": "params",
+              "type": "object",
+              "required": false
             }
+
           }
         },
         "default": false,

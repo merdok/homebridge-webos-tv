@@ -376,7 +376,7 @@ class webosTvAccessory {
             .setCharacteristic(Characteristic.Manufacturer, 'LG Electronics Inc.')
             .setCharacteristic(Characteristic.Model, modelName)
             .setCharacteristic(Characteristic.SerialNumber, this.mac)
-            .setCharacteristic(Characteristic.FirmwareRevision, '1.6.3');
+            .setCharacteristic(Characteristic.FirmwareRevision, '1.6.4');
 
         this.enabledServices.push(this.informationService);
     }

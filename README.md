@@ -62,7 +62,10 @@ Example configuration:
           },
           {
             "appId": "youtube.leanback.v4",
-            "name": "YouTube"
+            "name": "YouTube",
+            "params":{
+		"contentTarget": "https://www.youtube.com/tv?v=Bey4XXJAqS8"
+            }
           },
           {
             "appId": "com.webos.app.photovideo",
@@ -132,6 +135,7 @@ Wheter to use the legacy TV service. Should be used if your iOS device is not ru
 - `inputs` [optional] 
 Inputs which should appear under the *Inputs* list on yor TV accessory. When you use the legacy tv service, buttons for the inputs will be created. **Default: "" (disabled)**
   - Set an array of app IDs or objects as the value. An object needs to have the *appId* and *name* property
+  - You can optionally specifiy the *params* property as key/value object to launch the applciation with the specified parameters
   - To get the app ID simply open an app on your TV and check the homebridge console. The app ID of the opened app will be printed.
   - Some of the default TV inputs which can be used:
     - *com.webos.app.livetv*

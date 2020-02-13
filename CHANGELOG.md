@@ -6,6 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.4] - 2010-02-13
+### Added
+- Apps can now be lanuched with parameters. You can specify the launch parameters using the "params" argument per app in the inputs list
+
+### Changed
+
+### Removed
+
+
 ## [1.6.3] - 2019-12-17
 ### Added
 - The plugin can now detect if the Pixel Refresher is running on OLED TVs and display the TV as off at that times
