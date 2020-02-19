@@ -772,9 +772,22 @@ class webosTvAccessory {
 
         this.channelButtonService = new Array();
         this.channelButtons.forEach((value, i) => {
-            this.channelButtons[i] = this.channelButtons[i].toString();
-            let tmpChannel = new Service.Switch(this.name + ' Channel: ' + value, 'channelButtonService' + i);
-            tmpChannel
+			let tmpChannel;
+            if (value.title) {
+				let channelNumber = this.channelButtons[i].number.toString();
+                tmpChannel = new Service.Switch(this.name + ' ' + value.title, 'channelButtonService' + i);
+                tmpChannel
+                .getCharacteristic(Characteristic.On)
+                .on('get', (callback) => {
+                    this.getChannelButtonState(callback, channelNumber);
+                })
+                .on('set', (state, callback) => {
+                    this.setChannelButtonState(state, callback, channelNumber);
+                });
+            } else {
+				this.channelButtons[i] = this.channelButtons[i].toString();
+                tmpChannel = new Service.Switch(this.name + ' Channel: ' + value, 'channelButtonService' + i);
+                tmpChannel
                 .getCharacteristic(Characteristic.On)
                 .on('get', (callback) => {
                     this.getChannelButtonState(callback, this.channelButtons[i]);
@@ -782,6 +795,8 @@ class webosTvAccessory {
                 .on('set', (state, callback) => {
                     this.setChannelButtonState(state, callback, this.channelButtons[i]);
                 });
+            }
+            
 
             this.enabledServices.push(tmpChannel);
             this.channelButtonService.push(tmpChannel);
