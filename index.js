@@ -66,6 +66,10 @@ class webosTvAccessory {
         if (this.infoButtonAction === undefined || this.infoButtonAction.length === 0) {
             this.infoButtonAction = 'INFO';
         }
+		this.virtualChannelList = config['virtualChannelList'];
+		if (this.virtualChannelList === undefined) {
+			this.virtualChannelList = false;
+		}
 
         // prepare variables
         this.url = 'ws://' + this.ip + ':' + this.port;
@@ -81,6 +85,7 @@ class webosTvAccessory {
         this.isPaused = false;
         this.tvCurrentSoundOutput = '';
         this.inputParams = {};
+		this.channelMap = {};
 
 
         // check if prefs directory ends with a /, if not then add it
@@ -124,6 +129,19 @@ class webosTvAccessory {
                     this.connect();
                 }
             });
+			
+			
+			this.log.debug('webOS - Building channel list');
+			this.lgtv.request('ssap://tv/getChannelList', (err, res) => {
+				if (!err && res.channelList) {
+					res.channelList.forEach((channel) => {
+						this.channelMap[parseInt(channel.channelNumber)] = channel.channelId;
+					});
+					this.log.debug('webOS - Channel list built');
+				} else {
+					this.log.error('webOS - %s', err);
+				}
+			});
         });
 
         this.lgtv.on('close', () => {
@@ -1111,20 +1129,38 @@ class webosTvAccessory {
 
     openChannel(channelNum) {
         if (this.connected && this.lgtv) {
-            this.lgtv.request('ssap://tv/openChannel', {
-                channelNumber: channelNum
-            }, (err, res) => {
-                if (!res || err || res.errorCode || !res.returnValue) {
-                    this.log.debug('webOS - open channel - error while switching channel');
-                    if (res && res.errorText) {
-                        this.log.debug('webOS - open channel - error message: %s', res.errorText);
-                    }
-                } else {
-                    this.log.debug('webOS - open channel - channel switched successfully');
-                }
-            });
+			if (this.channelMap && this.channelMap[channelNum]) this.openChannelById(this.channelMap[channelNum]);
+			else {
+				this.lgtv.request('ssap://tv/openChannel', {
+					channelNumber: channelNum
+				}, (err, res) => {
+					if (!res || err || res.errorCode || !res.returnValue) {
+						this.log.debug('webOS - open channel - error while switching channel');
+						if (res && res.errorText) {
+							this.log.debug('webOS - open channel - error message: %s', res.errorText);
+						}
+					} else {
+						this.log.debug('webOS - open channel - channel switched successfully');
+					}
+				});
+			}
         }
     }
+	
+	openChannelById(channelId) {
+		this.lgtv.request('ssap://tv/openChannel', {
+			channelId: channelId
+		}, (err, res) => {
+			if (!res || err || res.errorCode || !res.returnValue) {
+				this.log.debug('webOS - open channel by id - error while switching channel');
+				if (res && res.errorText) {
+					this.log.debug('webOS - open channel by id - error message: %s', res.errorText);
+				}
+			} else {
+				this.log.debug('webOS - open channel by id - channel switched successfully');
+			}
+		});
+	}
 
 
     // --== HOMEBRIDGE STATE SETTERS/GETTERS ==--
