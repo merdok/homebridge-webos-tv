@@ -66,6 +66,10 @@ class webosTvAccessory {
         if (this.infoButtonAction === undefined || this.infoButtonAction.length === 0) {
             this.infoButtonAction = 'INFO';
         }
+		this.virtualChannelList = config['virtualChannelList'];
+		if (this.virtualChannelList === undefined) {
+			this.virtualChannelList = false;
+		}
 
         // prepare variables
         this.url = 'ws://' + this.ip + ':' + this.port;
@@ -972,7 +976,7 @@ class webosTvAccessory {
                 });
             } else {
                 this.channelButtonService.forEach((tmpChannelButton, i) => {
-                    if (channelNumber === this.channelButtons[i]) {
+                    if (channelNumber === this.channelButtons[i] || channelNumber === this.channelButtons[i].number.toString()) {
                         tmpChannelButton.getCharacteristic(Characteristic.On).updateValue(value);
                     } else {
                         tmpChannelButton.getCharacteristic(Characteristic.On).updateValue(false);
