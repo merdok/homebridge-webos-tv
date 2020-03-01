@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.6.4] - 2010-02-13
+## [1.6.4] - 2020-02-13
 ### Added
 - Apps can now be lanuched with parameters. You can specify the launch parameters using the "params" argument per app in the inputs list
 
