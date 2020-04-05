@@ -874,6 +874,21 @@ class webosTvAccessory {
                 sequenceName = tmpSeq.name;
             }
 
+            // get/adjust sequence interval
+            if (tmpSeq.interval !== undefined && tmpSeq.interval !== null) {
+                if (Array.isArray(tmpSeq.interval) === false) {
+                    if (isNaN(tmpSeq.interval) === false) {
+                        tmpSeq.interval = [parseInt(tmpSeq.interval)];
+                    } else {
+                        tmpSeq.interval = undefined;
+                    }
+                }
+            }
+
+            if (tmpSeq.interval === undefined || tmpSeq.interval === null) { // if sequence interval still not set use default value
+                tmpSeq.interval = [500]; // default value, interval 500ms
+            }
+
             let tmpRemoteSequence = new Service.Switch(sequenceName, 'remoteSequenceButtonsService' + i);
             tmpRemoteSequence
                 .getCharacteristic(Characteristic.On)
@@ -1501,19 +1516,16 @@ class webosTvAccessory {
 
     setRemoteSequenceButtonState(state, callback, seqObj) {
         if (this.connected && this.pointerInputSocket) {
-            let tmpInterval = 500;
-            if (seqObj.interval !== undefined && isNaN(seqObj.interval) === false) {
-                tmpInterval = parseInt(seqObj.interval);
-            }
-            this.log.debug('webOS - remote sequence button service - emulating remote control sequence: %s with interval %d ms', seqObj.sequence.join(), tmpInterval);
+            this.log.debug('webOS - remote sequence button service - emulating remote control sequence: %s with interval %s ms', seqObj.sequence.join(), seqObj.interval.join());
             let curRemoteKeyNum = 0;
             let remoteKeyFunc = () => {
                 let curRemoteKey = seqObj.sequence[curRemoteKeyNum];
                 this.setRemoteControlButtonState(true, null, curRemoteKey);
 
                 if (curRemoteKeyNum < seqObj.sequence.length - 1) {
+                    let curInterval = seqObj.interval[curRemoteKeyNum] || seqObj.interval[seqObj.interval.length - 1];
                     curRemoteKeyNum++;
-                    setTimeout(remoteKeyFunc, tmpInterval);
+                    setTimeout(remoteKeyFunc, curInterval);
                 }
             };
             remoteKeyFunc();

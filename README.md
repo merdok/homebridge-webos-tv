@@ -180,7 +180,7 @@ Wheter the remote sequence buttons service is enabled. This allows to run a sequ
   - Set an array of objects as the value. An object needs to have the following properties:
     - *sequence* - an array of remote control keys. For possible values see `remoteControlButtons` above,
     - *name* - an optional name, 
-    - *interval* - an optional interval beetwen sequence actions. Default is 500ms
+    - *interval* - an optional interval beetwen sequence actions. Can be a single value or an array of values. Default is 500ms
 - `soundOutputButtons` [optional] 
 Wheter the sound output buttons service is enabled. This allows to switch between sound outputs on the TV. **Default: "" (disabled)**
   - Set an array of sound outputs as the value. Example values are:

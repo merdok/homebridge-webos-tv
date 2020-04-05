@@ -222,7 +222,10 @@
             },
             "interval": {
               "title": "interval",
-              "type": "number",
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
               "default": 500,
               "required": false
             }
