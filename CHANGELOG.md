@@ -6,6 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.5] - 2020-04-05
+### Added
+
+### Changed
+- Remote button sequence interval can now be an array. This can help to reduce sequence run time since not all actions take the same amount of time
+
+### Removed
+
+
 ## [1.6.4] - 2020-02-13
 ### Added
 - Apps can now be lanuched with parameters. You can specify the launch parameters using the "params" argument per app in the inputs list
