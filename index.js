@@ -10,6 +10,7 @@ let lgtv, pointerInputSocket;
 
 const PLUGIN_NAME = 'homebridge-webos-tv';
 const PLATFORM_NAME = 'webostv';
+const PLUGIN_VERSION = '1.6.5';
 const TV_WEBSOCKET_PORT = 3000;
 
 module.exports = (homebridge) => {
@@ -205,7 +206,7 @@ class webosTvAccessory {
                     this.log.debug('webOS - system info - error while getting system info');
                 } else {
                     delete res['returnValue'];
-                    this.log.debug('webOS - system info:' + '\n' + JSON.stringify(res, null, 2));
+                    this.log.debug('webOS - system info: \n' + JSON.stringify(res, null, 2));
                     // save the tv info to a file if does not exists
                     if (fs.existsSync(this.tvInfoFile) === false) {
                         fs.writeFile(this.tvInfoFile, JSON.stringify(res), (err) => {
@@ -226,7 +227,7 @@ class webosTvAccessory {
                     this.log.debug('webOS - sw information - error while getting sw information');
                 } else {
                     delete res['returnValue'];
-                    this.log.debug('webOS - sw information:' + '\n' + JSON.stringify(res, null, 2));
+                    this.log.debug('webOS - sw information: \n' + JSON.stringify(res, null, 2));
                 }
             });
 
@@ -235,7 +236,7 @@ class webosTvAccessory {
                     this.log.debug('webOS - service list - error while getting service list');
                 } else {
                     delete res['returnValue'];
-                    this.log.debug('webOS - service list:' + '\n' + JSON.stringify(res, null, 2));
+                    this.log.debug('webOS - service list: \n' + JSON.stringify(res, null, 2));
                 }
             });
         }, 100);
@@ -384,7 +385,7 @@ class webosTvAccessory {
             .setCharacteristic(Characteristic.Manufacturer, 'LG Electronics Inc.')
             .setCharacteristic(Characteristic.Model, modelName)
             .setCharacteristic(Characteristic.SerialNumber, this.mac)
-            .setCharacteristic(Characteristic.FirmwareRevision, '1.6.5');
+            .setCharacteristic(Characteristic.FirmwareRevision, PLUGIN_VERSION);
 
         this.enabledServices.push(this.informationService);
     }
@@ -1627,6 +1628,5 @@ class webosTvDevice extends webosTvAccessory {
         }
 
         this.api.publishExternalAccessories(PLUGIN_NAME, [this.tvAccesory]);
-
     }
 }
