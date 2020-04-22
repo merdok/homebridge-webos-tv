@@ -5,70 +5,78 @@ const fs = require('fs');
 const ppath = require('persist-path');
 const mkdirp = require('mkdirp');
 
-let Service;
-let Characteristic;
+let Service, Characteristic, Homebridge, Accessory;
+let lgtv, pointerInputSocket;
 
-let lgtv;
-let pointerInputSocket;
+const PLUGIN_NAME = 'homebridge-webos-tv';
+const PLATFORM_NAME = 'webostv';
+const TV_WEBSOCKET_PORT = 3000;
 
-module.exports = function(homebridge) {
+module.exports = (homebridge) => {
     Service = homebridge.hap.Service;
     Characteristic = homebridge.hap.Characteristic;
-    homebridge.registerAccessory('homebridge-webos-tv', 'webostv', webosTvAccessory);
+    Homebridge = homebridge;
+    Accessory = homebridge.platformAccessory;
+    homebridge.registerAccessory(PLUGIN_NAME, PLATFORM_NAME, webosTvAccessory);
+    homebridge.registerPlatform(PLUGIN_NAME, PLATFORM_NAME, webosTvPlatform, true);
 };
 
 
 class webosTvAccessory {
     constructor(log, config, api) {
         this.log = log;
-        this.port = 3000;
+        this.api = api;
+
+        // check if we have mandatory device info
+        if (!config.ip) throw new Error(`tv ip address is required for ${this.config.name}`);
+        if (!config.mac) throw new Error(`tv mac address is required for ${this.config.name}`);
 
         // configuration
-        this.ip = config['ip'];
-        this.name = config['name'] || 'webOS TV';
-        this.mac = config['mac'];
-        this.broadcastAdr = config['broadcastAdr'] || '255.255.255.255';
-        this.keyFile = config['keyFile'];
-        this.prefsDir = config['prefsDir'] || ppath('webosTv/');
-        this.isLegacyTvService = config['legacyTvService'];
+        this.name = config.name || 'webOS TV';
+        this.ip = config.ip;
+        this.mac = config.mac;
+        this.broadcastAdr = config.broadcastAdr || '255.255.255.255';
+        this.keyFile = config.keyFile;
+        this.prefsDir = config.prefsDir || ppath('webosTv/');
+        this.isLegacyTvService = config.legacyTvService;
         if (this.isLegacyTvService === undefined) {
             this.isLegacyTvService = false;
         }
-        this.showInputButtons = config['showInputButtons'];
+        this.showInputButtons = config.showInputButtons;
         if (this.showInputButtons === undefined) {
             this.showInputButtons = false;
         }
-        this.volumeControl = config['volumeControl'];
+        this.volumeControl = config.volumeControl;
         if (this.volumeControl === undefined) {
             this.volumeControl = true;
         }
-        this.volumeLimit = config['volumeLimit'];
+        this.volumeLimit = config.volumeLimit;
         if (this.volumeLimit === undefined || isNaN(this.volumeLimit) || this.volumeLimit < 0) {
             this.volumeLimit = 100;
         }
-        this.channelControl = config['channelControl'];
+        this.channelControl = config.channelControl;
         if (this.channelControl === undefined) {
             this.channelControl = true;
         }
-        this.mediaControl = config['mediaControl'];
+        this.mediaControl = config.mediaControl;
         if (this.mediaControl === undefined) {
             this.mediaControl = false;
         }
-        this.alivePollingInterval = config['pollingInterval'] || 5;
+        this.alivePollingInterval = config.pollingInterval || 5;
         this.alivePollingInterval = this.alivePollingInterval * 1000;
-        this.channelButtons = config['channelButtons'];
-        this.notificationButtons = config['notificationButtons'];
-        this.remoteControlButtons = config['remoteControlButtons'];
-        this.inputs = config['inputs'];
-        this.soundOutputButtons = config['soundOutputButtons'];
-        this.remoteSequenceButtons = config['remoteSequenceButtons'];
-        this.infoButtonAction = config['infoButtonAction'];
+        this.channelButtons = config.channelButtons;
+        this.notificationButtons = config.notificationButtons;
+        this.remoteControlButtons = config.remoteControlButtons;
+        this.inputs = config.inputs;
+        this.soundOutputButtons = config.soundOutputButtons;
+        this.remoteSequenceButtons = config.remoteSequenceButtons;
+        this.infoButtonAction = config.infoButtonAction;
         if (this.infoButtonAction === undefined || this.infoButtonAction.length === 0) {
             this.infoButtonAction = 'INFO';
         }
 
         // prepare variables
-        this.url = 'ws://' + this.ip + ':' + this.port;
+        this.url = 'ws://' + this.ip + ':' + TV_WEBSOCKET_PORT;
         this.enabledServices = [];
         this.connected = false;
         this.checkCount = 0;
@@ -1046,7 +1054,7 @@ class webosTvAccessory {
     }
 
     checkTVState(callback) {
-        tcpp.probe(this.ip, this.port, (err, isAlive) => {
+        tcpp.probe(this.ip, TV_WEBSOCKET_PORT, (err, isAlive) => {
             if (!isAlive && this.connected) {
                 this.log.debug('webOS - TV state: Off');
                 this.disconnect();
@@ -1539,4 +1547,66 @@ class webosTvAccessory {
         return this.enabledServices;
     }
 
+}
+
+
+// --== PLATFORM STUFF  ==--
+class webosTvPlatform {
+    constructor(log, config, api) {
+        if (!config) {
+            return;
+        }
+
+        this.log = log;
+        this.api = api;
+        this.config = config;
+
+        if (this.api) {
+            this.api.on('didFinishLaunching', this.initDevices.bind(this));
+        }
+
+    }
+
+    initDevices() {
+        this.log.info('init - initializing devices');
+        for (let device of this.config.devices) {
+            if (device) {
+                new webosTvDevice(this.log, device, this.api);
+            }
+        }
+    }
+
+    configureAccessory(platformAccessory) {
+        // Won't be invoked
+    }
+
+    removeAccessory(platformAccessory) {
+        this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [platformAccessory]);
+    }
+}
+
+
+class webosTvDevice extends webosTvAccessory {
+    constructor(log, config, api) {
+        super(log, config, api);
+
+        this.log.info(`init - initializing device with name: ${this.name}`);
+
+        // generate uuid
+        this.UUID = Homebridge.hap.uuid.generate(config.mac + config.ip);
+
+        // prepare the tv accessory
+        this.tvAccesory = new Accessory(this.name, this.UUID, Homebridge.hap.Accessory.Categories.TELEVISION);
+
+        // remove the preconstructed information service, since i will be adding my own
+        this.tvAccesory.removeService(this.tvAccesory.getService(Service.AccessoryInformation));
+
+        // add all the services to the accessory
+        for (let service of this.enabledServices) {
+            this.tvAccesory.addService(service);
+        }
+
+        this.api.publishExternalAccessories(PLUGIN_NAME, [this.tvAccesory]);
+
+    }
 }

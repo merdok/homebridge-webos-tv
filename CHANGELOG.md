@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- You can now configure this plugin to run as a platform with multiple TVs
+
+### Changed
+
+### Removed
+
+
 ## [1.6.5] - 2020-04-05
 ### Added
 
