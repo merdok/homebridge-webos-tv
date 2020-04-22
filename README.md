@@ -190,7 +190,7 @@ This is located on your TV under `Settings > General > Mobile TV On`
 
 On newer TVs **LG Connect Apps** under the network settings needs to be enabled.
 
-### Adding the TV to Home App when using platform
+### Adding the TV to Home app when using platform
 Since HomeKit expects only one TV per bridge they will be declared as external accessories and acts as a bridge.  
 This means that a TV will not appear in your Home app until you add it!
 
