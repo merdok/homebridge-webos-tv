@@ -1,7 +1,7 @@
 # homebridge-webos-tv
 
-`homebridge-webos-tv` is a plugin for Homebridge which allows you to control your webOS TV! It should work with all TVs that support webOS2 and newer.
-The idea is that the TV should be controlled completely from the native HomeKit iOS app and Siri, that is why volume appears as a light bulb or external input as a switch.
+`homebridge-webos-tv` is a plugin for Homebridge which allows you to control your LG webOS TV from your Home app! It should work with all TVs that support webOS2 and newer.  
+If you are already running a TV with native Homekit integration then you can still use this plugin to add even more features and functionality to your TV. 
 
 ### Features
 * HomeKit TV integration
@@ -18,7 +18,7 @@ The idea is that the TV should be controlled completely from the native HomeKit 
 * Emulate remote control
 * Run sequences of remote control button presses
 
-To use the plugin iOS 12.2 or higher is recommended. If your iOS device is not running at least on iOS12.2 then you should use the legacy tv service.
+The legacy TV service is only recommended if your iOS device is not running on iOS12.2 or newer. It emulates the TV as a simple on/off switch.
 
 ## Installation
 
@@ -39,7 +39,7 @@ sudo npm install -g homebridge-webos-tv
 
 Add the accessory in `config.json` in your home directory inside `.homebridge`.
 
-Example configuration:
+Example configuration accessory:
 
 ```js
 {
@@ -107,11 +107,101 @@ Example configuration:
 }
 ```
 
+Example configuration platform:
+
+```js
+{
+  "platform": "webostv",
+  "devices": [
+    {
+      "name": "My webOS tv",
+      "ip": "192.168.0.40",
+      "mac": "ab:cd:ef:fe:dc:ba",
+      "pollingInterval": 10,
+      "inputs": [
+        {
+          "appId": "com.webos.app.livetv",
+          "name": "Live TV"
+        },
+        {
+          "appId": "com.webos.app.hdmi1",
+          "name": "PS4"
+        },
+        {
+          "appId": "youtube.leanback.v4",
+          "name": "YouTube",
+          "params": {
+            "contentTarget": "https://www.youtube.com/tv?v=Bey4XXJAqS8"
+          }
+        }
+      ],
+      "showInputButtons": true,
+      "volumeControl": "buttons",
+      "channelControl": false,
+      "mediaControl": false,
+      "channelButtons": [
+        3,
+        5,
+        7
+      ],
+      "notificationButtons": [
+        "Motion detected - living room",
+        "Motion detected - kitchen"
+      ],
+      "remoteControlButtons": [
+        "HOME",
+        "EXIT"
+      ],
+      "soundOutputButtons": [
+        "tv_speaker",
+        "external_optical",
+        "headphone"
+      ],
+      "remoteSequenceButtons": [
+        {
+          "sequence": [
+            "HOME",
+            "RIGHT",
+            "RIGHT",
+            "RIGHT",
+            "ENTER"
+          ],
+          "name": "screen_share_seq"
+        },
+        {
+          "sequence": [
+            "VOLUMEUP",
+            "VOLUMEDOWN",
+            "MUTE",
+            "MUTE"
+          ],
+          "name": "volume_seq",
+          "interval": 1000
+        }
+      ]
+    }
+  ]
+}
+```
+
 You also need to enable **mobile TV on** on your TV for the turn on feature to work correctly.
 
 This is located on your TV under `Settings > General > Mobile TV On`
 
 On newer TVs **LG Connect Apps** under the network settings needs to be enabled.
+
+### Adding the TV to Home App when using platform
+Since HomeKit expects only one TV per bridge they will be declared as external accessories and acts as a bridge.  
+This means that a TV will not appear in your Home app until you add it!
+
+To add TV to HomeKit this follow this steps:
+
+- Open the Home app
+- Select **Add Accessory**
+- Tap on **Don't Have a Code or Can't Scan?**
+- The TV should appear on the accessory list
+- Tap on it and follow the steps
+- When you are asked for a **pin** then just use the **pin from the bridge section** in your **config.json**
 
 ### Configuration fields
 - `accessory` [required]
@@ -206,7 +296,5 @@ homebridge -D
 
 ## Special thanks
 [lgtv2](https://github.com/hobbyquaker/lgtv2) - the Node.js remote control module for LG WebOS smart TVs.
-
-[homebridge-webos2](https://github.com/zwerch/homebridge-webos2) - the basic idea for the plugin.
 
 [HAP-NodeJS](https://github.com/KhaosT/HAP-NodeJS) & [homebridge](https://github.com/nfarina/homebridge) - for making this possible.
