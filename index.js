@@ -1568,11 +1568,31 @@ class webosTvPlatform {
     }
 
     initDevices() {
-        this.log.info('init - initializing devices');
-        for (let device of this.config.devices) {
-            if (device) {
-                new webosTvDevice(this.log, device, this.api);
+        this.log.info('webOS - init - initializing devices');
+
+        // read from config.devices
+        if (this.config.devices) {
+            for (let device of this.config.devices) {
+                if (device) {
+                    new webosTvDevice(this.log, device, this.api);
+                }
             }
+        }
+
+        // also read from config.tvs
+        if (this.config.tvs) {
+            for (let tv of this.config.tvs) {
+                if (tv) {
+                    new webosTvDevice(this.log, tv, this.api);
+                }
+            }
+        }
+
+        if (!this.config.devices && !this.config.tvs) {
+            this.log.info('-------------------------------------------');
+            this.log.info('webOS - init - no tv configuration found');
+            this.log.info('Missing devices or tvs in your platform config');
+            this.log.info('-------------------------------------------');
         }
     }
 
@@ -1590,7 +1610,7 @@ class webosTvDevice extends webosTvAccessory {
     constructor(log, config, api) {
         super(log, config, api);
 
-        this.log.info(`init - initializing device with name: ${this.name}`);
+        this.log.info(`webOS - init - initializing device with name: ${this.name}`);
 
         // generate uuid
         this.UUID = Homebridge.hap.uuid.generate(config.mac + config.ip);
