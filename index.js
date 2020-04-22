@@ -10,7 +10,7 @@ let lgtv, pointerInputSocket;
 
 const PLUGIN_NAME = 'homebridge-webos-tv';
 const PLATFORM_NAME = 'webostv';
-const PLUGIN_VERSION = '1.6.5';
+const PLUGIN_VERSION = '1.7.0';
 const TV_WEBSOCKET_PORT = 3000;
 
 module.exports = (homebridge) => {
