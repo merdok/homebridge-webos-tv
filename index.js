@@ -29,8 +29,8 @@ class webosTvAccessory {
         this.api = api;
 
         // check if we have mandatory device info
-        if (!config.ip) throw new Error(`tv ip address is required for ${this.config.name}`);
-        if (!config.mac) throw new Error(`tv mac address is required for ${this.config.name}`);
+        if (!config.ip) throw new Error(`tv ip address is required for ${config.name}`);
+        if (!config.mac) throw new Error(`tv mac address is required for ${config.name}`);
 
         // configuration
         this.name = config.name || 'webOS TV';

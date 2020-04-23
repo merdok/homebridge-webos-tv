@@ -1,245 +1,252 @@
 {
   "pluginAlias": "webostv",
   "pluginType": "platform",
-  "singular": false,
+  "singular": true,
   "schema": {
-    "type": "object",
-    "properties": {
-      "name": {
-        "title": "Name",
-        "type": "string",
-        "default": "My LG TV",
-        "minLength": 1,
-        "required": true
-      },
-      "ip": {
-        "title": "TV ip address",
-        "type": "string",
-        "required": true
-      },
-      "mac": {
-        "title": "TV mac address",
-        "type": "string",
-        "required": true
-      },
-      "broadcastAdr": {
-        "title": "Broadcast address",
-        "type": "string",
-        "required": false
-      },
-      "keyFile": {
-        "title": "Key file location",
-        "type": "string",
-        "required": false
-      },
-      "prefsDir": {
-        "title": "Prefs directory",
-        "type": "string",
-        "default": "~/.webosTv",
-        "required": false
-      },
-      "pollingInterval": {
-        "title": "Background polling interval in seconds",
-        "type": "number",
-        "default": 5,
-        "required": false
-      },
-      "legacyTvService": {
-        "title": "Emulate the TV as a switch",
-        "type": "boolean",
-        "default": false,
-        "required": false
-      },
-      "showInputButtons": {
-        "title": "Show input buttons",
-        "type": "boolean",
-        "default": false,
-        "required": false
-      },
-      "volumeControl": {
-        "title": "Volume control service",
-        "type": [
-          "boolean",
-          "string"
-        ],
-        "enum": [
-          true,
-          false,
-          "slider",
-          "switch"
-        ],
-        "default": true,
-        "required": true
-      },
-      "volumeLimit": {
-        "title": "Volume limit for volume service",
-        "type": "number",
-        "default": 100,
-        "maximum": 100,
-        "minimum": 1,
-        "required": false
-      },
-      "channelControl": {
-        "title": "Channel control service",
-        "type": "boolean",
-        "default": true,
-        "required": false
-      },
-      "mediaControl": {
-        "title": "Media control service",
-        "type": "boolean",
-        "default": false,
-        "required": false
-      },
-      "inputs": {
-        "title": "Inputs",
-        "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "appId": {
-              "title": "appId",
-              "type": "string",
-              "required": false
-            },
-            "name": {
-              "title": "name",
-              "type": "string",
-              "required": false
-            },
-            "params": {
-              "title": "params",
+    "devices": {
+      "title": "Devices",
+      "type": "array",
+      "required": true,
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string",
+            "default": "My LG TV",
+            "minLength": 1,
+            "required": true
+          },
+          "ip": {
+            "title": "TV ip address",
+            "type": "string",
+            "required": true
+          },
+          "mac": {
+            "title": "TV mac address",
+            "type": "string",
+            "required": true
+          },
+          "broadcastAdr": {
+            "title": "Broadcast address",
+            "type": "string",
+            "required": false
+          },
+          "keyFile": {
+            "title": "Key file location",
+            "type": "string",
+            "required": false
+          },
+          "prefsDir": {
+            "title": "Prefs directory",
+            "type": "string",
+            "default": "~/.webosTv",
+            "required": false
+          },
+          "pollingInterval": {
+            "title": "Background polling interval in seconds",
+            "type": "number",
+            "default": 5,
+            "required": false
+          },
+          "legacyTvService": {
+            "title": "Emulate the TV as a switch",
+            "type": "boolean",
+            "default": false,
+            "required": false
+          },
+          "showInputButtons": {
+            "title": "Show input buttons",
+            "type": "boolean",
+            "default": false,
+            "required": false
+          },
+          "volumeControl": {
+            "title": "Volume control service",
+            "type": [
+              "boolean",
+              "string"
+            ],
+            "enum": [
+              true,
+              false,
+              "slider",
+              "switch"
+            ],
+            "default": true,
+            "required": true
+          },
+          "volumeLimit": {
+            "title": "Volume limit for volume service",
+            "type": "number",
+            "default": 100,
+            "maximum": 100,
+            "minimum": 1,
+            "required": false
+          },
+          "channelControl": {
+            "title": "Channel control service",
+            "type": "boolean",
+            "default": true,
+            "required": false
+          },
+          "mediaControl": {
+            "title": "Media control service",
+            "type": "boolean",
+            "default": false,
+            "required": false
+          },
+          "inputs": {
+            "title": "Inputs",
+            "type": "array",
+            "items": {
               "type": "object",
-              "required": false
-            }
-          }
-        },
-        "default": false,
-        "required": false
-      },
-      "channelButtons": {
-        "title": "Channel buttons",
-        "type": "array",
-        "items": {
-          "type": "string"
-        },
-        "required": false
-      },
-      "notificationButtons": {
-        "title": "Notification buttons",
-        "type": "array",
-        "items": {
-          "type": "string"
-        },
-        "required": false
-      },
-      "remoteControlButtons": {
-        "title": "Remote control buttons",
-        "type": "array",
-        "items": {
-          "type": "string",
-          "enum": [
-            "1",
-            "2",
-            "3",
-            "4",
-            "5",
-            "6",
-            "7",
-            "8",
-            "9",
-            "0",
-            "LIST",
-            "AD",
-            "DASH",
-            "MUTE",
-            "VOLUMEUP",
-            "VOLUMEDOWN",
-            "CHANNELUP",
-            "CHANNELDOWN",
-            "HOME",
-            "MENU",
-            "UP",
-            "DOWN",
-            "LEFT",
-            "RIGHT",
-            "CLICK",
-            "BACK",
-            "EXIT",
-            "PROGRAM",
-            "ENTER",
-            "INFO",
-            "RED",
-            "GREEN",
-            "YELLOW",
-            "BLUE",
-            "LIVE_ZOOM",
-            "CC",
-            "PLAY",
-            "PAUSE",
-            "REWIND",
-            "FASTFORWARD"
-          ]
-        },
-        "required": false
-      },
-      "soundOutputButtons": {
-        "title": "Sound output buttons",
-        "type": "array",
-        "items": {
-          "type": "string",
-          "enum": [
-            "tv_speaker",
-            "external_optical",
-            "external_arc",
-            "lineout",
-            "headphone",
-            "tv_external_speaker",
-            "tv_speaker_headphone",
-            "bt_soundbar"
-          ]
-        },
-        "required": false
-      },
-      "remoteSequenceButtons": {
-        "title": "Remote sequence buttons",
-        "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "sequence": {
-              "title": "sequence",
-              "type": "array",
-              "items": {
-                "type": "string",
-                "required": true
-              },
-              "required": true
+              "properties": {
+                "appId": {
+                  "title": "appId",
+                  "type": "string",
+                  "required": false
+                },
+                "name": {
+                  "title": "name",
+                  "type": "string",
+                  "required": false
+                },
+                "params": {
+                  "title": "params",
+                  "type": "object",
+                  "required": false
+                }
+              }
             },
-            "name": {
-              "title": "name",
+            "default": false,
+            "required": false
+          },
+          "channelButtons": {
+            "title": "Channel buttons",
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "required": false
+          },
+          "notificationButtons": {
+            "title": "Notification buttons",
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "required": false
+          },
+          "remoteControlButtons": {
+            "title": "Remote control buttons",
+            "type": "array",
+            "items": {
               "type": "string",
-              "required": false
+              "enum": [
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+                "0",
+                "LIST",
+                "AD",
+                "DASH",
+                "MUTE",
+                "VOLUMEUP",
+                "VOLUMEDOWN",
+                "CHANNELUP",
+                "CHANNELDOWN",
+                "HOME",
+                "MENU",
+                "UP",
+                "DOWN",
+                "LEFT",
+                "RIGHT",
+                "CLICK",
+                "BACK",
+                "EXIT",
+                "PROGRAM",
+                "ENTER",
+                "INFO",
+                "RED",
+                "GREEN",
+                "YELLOW",
+                "BLUE",
+                "LIVE_ZOOM",
+                "CC",
+                "PLAY",
+                "PAUSE",
+                "REWIND",
+                "FASTFORWARD"
+              ]
             },
-            "interval": {
-              "title": "interval",
-              "type": "array",
-              "items": {
-                "type": "number"
-              },
-              "default": 500,
-              "required": false
-            }
+            "required": false
+          },
+          "soundOutputButtons": {
+            "title": "Sound output buttons",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "tv_speaker",
+                "external_optical",
+                "external_arc",
+                "lineout",
+                "headphone",
+                "tv_external_speaker",
+                "tv_speaker_headphone",
+                "bt_soundbar"
+              ]
+            },
+            "required": false
+          },
+          "remoteSequenceButtons": {
+            "title": "Remote sequence buttons",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "sequence": {
+                  "title": "sequence",
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "required": true
+                },
+                "name": {
+                  "title": "name",
+                  "type": "string",
+                  "required": false
+                },
+                "interval": {
+                  "title": "interval",
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "default": 500,
+                  "required": false
+                }
+              }
+            },
+            "default": false,
+            "required": false
+          },
+          "infoButtonAction": {
+            "title": "Action for the info button on the remote control in the iOS control center",
+            "type": "string",
+            "default": "INFO",
+            "required": false
           }
-        },
-        "default": false,
-        "required": false
-      },
-      "infoButtonAction": {
-        "title": "Action for the info button on the remote control in the iOS control center",
-        "type": "string",
-        "default": "INFO",
-        "required": false
+        }
       }
     }
   }
