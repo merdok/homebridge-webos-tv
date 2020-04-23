@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [1.7.1] - 2020-04-23
+
+### Added
+
+### Changed
+- Adjusted config.schema.json to be able to handle the new platform
+- Fixed a small issue
+
+### Removed
+
+
 ## [1.7.0] - 2020-04-22
 
 ### Added
