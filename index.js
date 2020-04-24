@@ -1118,8 +1118,8 @@ class webosTvAccessory {
                     this.log.debug('webOS - sound output - error while getting current sound output');
                     callback(null, false, null); // disable all switches
                 } else {
-                    this.log.debug('webOS - TV current sound outputl: %s', res.soundOutput);
-                    if (soundOutput === undefined || soundOutput === null) { // if output undefined or null then i am checking which sound outpt is currently set; if set then continue normally
+                    this.log.debug('webOS - TV current sound output: %s', res.soundOutput);
+                    if (soundOutput === undefined || soundOutput === null) { // if output undefined or null then i am checking which sound output is currently set; if set then continue normally
                         callback(null, true, res.soundOutput);
                     } else if (res.soundOutput === soundOutput) {
                         callback(null, true, soundOutput);
