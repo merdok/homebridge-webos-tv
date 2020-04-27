@@ -111,72 +111,76 @@ Example configuration platform:
 
 ```js
 {
-  "platform": "webostv",
-  "devices": [
+  "platforms": [
     {
-      "name": "My webOS tv",
-      "ip": "192.168.0.40",
-      "mac": "ab:cd:ef:fe:dc:ba",
-      "pollingInterval": 10,
-      "inputs": [
+      "platform": "webostv",
+      "devices": [
         {
-          "appId": "com.webos.app.livetv",
-          "name": "Live TV"
-        },
-        {
-          "appId": "com.webos.app.hdmi1",
-          "name": "PS4"
-        },
-        {
-          "appId": "youtube.leanback.v4",
-          "name": "YouTube",
-          "params": {
-            "contentTarget": "https://www.youtube.com/tv?v=Bey4XXJAqS8"
-          }
-        }
-      ],
-      "showInputButtons": true,
-      "volumeControl": "buttons",
-      "channelControl": false,
-      "mediaControl": false,
-      "channelButtons": [
-        3,
-        5,
-        7
-      ],
-      "notificationButtons": [
-        "Motion detected - living room",
-        "Motion detected - kitchen"
-      ],
-      "remoteControlButtons": [
-        "HOME",
-        "EXIT"
-      ],
-      "soundOutputButtons": [
-        "tv_speaker",
-        "external_optical",
-        "headphone"
-      ],
-      "remoteSequenceButtons": [
-        {
-          "sequence": [
+          "name": "My webOS tv",
+          "ip": "192.168.0.40",
+          "mac": "ab:cd:ef:fe:dc:ba",
+          "pollingInterval": 10,
+          "inputs": [
+            {
+              "appId": "com.webos.app.livetv",
+              "name": "Live TV"
+            },
+            {
+              "appId": "com.webos.app.hdmi1",
+              "name": "PS4"
+            },
+            {
+              "appId": "youtube.leanback.v4",
+              "name": "YouTube",
+              "params": {
+                "contentTarget": "https://www.youtube.com/tv?v=Bey4XXJAqS8"
+              }
+            }
+          ],
+          "showInputButtons": true,
+          "volumeControl": "buttons",
+          "channelControl": false,
+          "mediaControl": false,
+          "channelButtons": [
+            3,
+            5,
+            7
+          ],
+          "notificationButtons": [
+            "Motion detected - living room",
+            "Motion detected - kitchen"
+          ],
+          "remoteControlButtons": [
             "HOME",
-            "RIGHT",
-            "RIGHT",
-            "RIGHT",
-            "ENTER"
+            "EXIT"
           ],
-          "name": "screen_share_seq"
-        },
-        {
-          "sequence": [
-            "VOLUMEUP",
-            "VOLUMEDOWN",
-            "MUTE",
-            "MUTE"
+          "soundOutputButtons": [
+            "tv_speaker",
+            "external_optical",
+            "headphone"
           ],
-          "name": "volume_seq",
-          "interval": 1000
+          "remoteSequenceButtons": [
+            {
+              "sequence": [
+                "HOME",
+                "RIGHT",
+                "RIGHT",
+                "RIGHT",
+                "ENTER"
+              ],
+              "name": "screen_share_seq"
+            },
+            {
+              "sequence": [
+                "VOLUMEUP",
+                "VOLUMEDOWN",
+                "MUTE",
+                "MUTE"
+              ],
+              "name": "volume_seq",
+              "interval": 1000
+            }
+          ]
         }
       ]
     }
