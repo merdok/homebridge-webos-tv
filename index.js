@@ -2,6 +2,7 @@ const Lgtv2 = require('lgtv2');
 const wol = require('wake_on_lan');
 const tcpp = require('tcp-ping');
 const fs = require('fs');
+const path = require('path');
 const ppath = require('persist-path');
 const mkdirp = require('mkdirp');
 
@@ -37,7 +38,7 @@ class webosTvAccessory {
         this.ip = config.ip;
         this.mac = config.mac;
         this.broadcastAdr = config.broadcastAdr || '255.255.255.255';
-        this.keyFile = config.keyFile;
+        this.keyFile = config.keyFile || path.join(api.user.storagePath(), 'lgtvKeyFile');
         this.prefsDir = config.prefsDir || ppath('webosTv/');
         this.isLegacyTvService = config.legacyTvService;
         if (this.isLegacyTvService === undefined) {
