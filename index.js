@@ -370,7 +370,7 @@ class webosTvAccessory {
     // --== SETUP SERVICES  ==--
     prepareInformationService() {
         // currently i save the tv info in a file and load if it exists
-        let modelName = this.name;
+        let modelName = "Unknown model";
         try {
             let infoArr = JSON.parse(fs.readFileSync(this.tvInfoFile));
             modelName = infoArr.modelName;
@@ -380,14 +380,15 @@ class webosTvAccessory {
 
         // there is currently no way to update the AccessoryInformation service after it was added to the service list
         // when this is fixed in homebridge, update the informationService with the TV info?
-        this.informationService = new Service.AccessoryInformation();
-        this.informationService
+        let informationService = new Service.AccessoryInformation();
+        informationService
+            .setCharacteristic(Characteristic.Name, this.name)
             .setCharacteristic(Characteristic.Manufacturer, 'LG Electronics Inc.')
             .setCharacteristic(Characteristic.Model, modelName)
             .setCharacteristic(Characteristic.SerialNumber, this.mac)
             .setCharacteristic(Characteristic.FirmwareRevision, PLUGIN_VERSION);
 
-        this.enabledServices.push(this.informationService);
+        this.enabledServices.push(informationService);
     }
 
     // tv integration services ----------------------------------------------------------------
