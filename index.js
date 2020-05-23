@@ -29,8 +29,8 @@ class webosTvAccessory {
         this.api = api;
 
         // check if we have mandatory device info
-        if (!config.ip) throw new Error(`tv ip address is required for ${config.name}`);
-        if (!config.mac) throw new Error(`tv mac address is required for ${config.name}`);
+        if (!config.ip) throw new Error(`TV ip address is required for ${config.name}`);
+        if (!config.mac) throw new Error(`TV mac address is required for ${config.name}`);
 
         // configuration
         this.name = config.name || 'webOS TV';
@@ -121,14 +121,14 @@ class webosTvAccessory {
 
         //register to listeners
         this.lgtv.on('connect', () => {
-            this.log.debug('webOS - connected to TV, checking power status');
+            this.logDebug('Connected to TV, checking power status');
             this.lgtv.request('ssap://com.webos.service.tvpower/power/getPowerState', (err, res) => {
                 if (err || (res && res.state && res.state === 'Active Standby')) {
-                    this.log.debug('webOS - power status - TV is Off or Pixel Refresher is running, disconnecting');
+                    this.logDebug('Power status - TV is Off or Pixel Refresher is running, disconnecting');
                     this.connected = false;
                     this.lgtv.disconnect();
                 } else {
-                    this.log.debug('webOS - power status - TV is On');
+                    this.logDebug('Power status - TV is On');
                     this.connected = true;
                     this.connect();
                 }
@@ -136,23 +136,23 @@ class webosTvAccessory {
         });
 
         this.lgtv.on('close', () => {
-            this.log.debug('webOS - disconnected from TV');
+            this.logDebug('Disconnected from TV');
             this.connected = false;
             this.pointerInputSocket = null;
             this.updateTvStatus(null, false);
         });
 
         this.lgtv.on('error', (error) => {
-            this.log.error('webOS - %s', error);
+            this.logError('Error - %s', error);
         });
 
         this.lgtv.on('prompt', () => {
-            this.log.info('webOS - prompt for confirmation');
+            this.logInfo('Prompt for confirmation');
             this.connected = false;
         });
 
         this.lgtv.on('connecting', () => {
-            this.log.debug('webOS - connecting to TV');
+            this.logDebug('Connecting to TV');
             this.connected = false;
         });
 
@@ -170,7 +170,7 @@ class webosTvAccessory {
 
     // --== CONNECT/DISCONNECT METHODS ==--	
     connect() {
-        this.log.info('webOS - connected to TV');
+        this.logInfo('Connected to TV');
         this.getTvInformation();
         this.connected = true;
         this.updateTvStatus(null, true);
@@ -180,17 +180,19 @@ class webosTvAccessory {
     }
 
     disconnect() {
-        this.log.info('webOS - disconnected from TV');
+        this.logInfo('Disconnected from TV');
         this.lgtv.disconnect();
         this.connected = false;
         this.updateTvStatus(null, false);
     }
 
     connectToPointerInputSocket() {
-        this.log.debug('webOS - connecting to remote control socket');
+        this.logDebug('Connecting to remote control socket');
         this.lgtv.getSocket('ssap://com.webos.service.networkinput/getPointerInputSocket', (err, sock) => {
             if (!err) {
                 this.pointerInputSocket = sock;
+            } else {
+                this.logError('Remote control socket error - %s', error);
             }
         });
     }
@@ -199,56 +201,56 @@ class webosTvAccessory {
     // --== INIT HELPER METHODS ==--
     getTvInformation() {
         setTimeout(() => {
-            this.log.debug('webOS - requesting TV information');
+            this.logDebug('Requesting TV information');
 
             this.lgtv.request('ssap://system/getSystemInfo', (err, res) => {
                 if (!res || err || res.errorCode) {
-                    this.log.debug('webOS - system info - error while getting system info');
+                    this.logRequestError('System info - error while getting system info', err, res);
                 } else {
                     delete res['returnValue'];
-                    this.log.debug('webOS - system info: \n' + JSON.stringify(res, null, 2));
+                    this.logDebug('System info: \n' + JSON.stringify(res, null, 2));
                     // save the tv info to a file if does not exists
                     if (fs.existsSync(this.tvInfoFile) === false) {
                         fs.writeFile(this.tvInfoFile, JSON.stringify(res), (err) => {
                             if (err) {
-                                this.log.debug('webOS - error occured could not write tv info %s', err);
+                                this.logError('Error occured, could not write TV info %s', err);
                             } else {
-                                this.log.debug('webOS - tv info successfully saved!');
+                                this.logDebug('TV info successfully saved!');
                             }
                         });
                     } else {
-                        this.log.debug('webOS - tv info file already exists, not saving!');
+                        this.logDebug('TV info file already exists, not saving!');
                     }
                 }
             });
 
             this.lgtv.request('ssap://com.webos.service.update/getCurrentSWInformation', (err, res) => {
                 if (!res || err || res.errorCode) {
-                    this.log.debug('webOS - sw information - error while getting sw information');
+                    this.logRequestError('Sw information - error while getting sw information', err, res);
                 } else {
                     delete res['returnValue'];
-                    this.log.debug('webOS - sw information: \n' + JSON.stringify(res, null, 2));
+                    this.logDebug('Sw information: \n' + JSON.stringify(res, null, 2));
                 }
             });
 
             this.lgtv.request('ssap://api/getServiceList', (err, res) => {
                 if (!res || err || res.errorCode) {
-                    this.log.debug('webOS - service list - error while getting service list');
+                    this.logRequestError('Service list - error while getting service list', err, res);
                 } else {
                     delete res['returnValue'];
-                    this.log.debug('webOS - service list: \n' + JSON.stringify(res, null, 2));
+                    this.logDebug('Service list: \n' + JSON.stringify(res, null, 2));
                 }
             });
         }, 100);
     }
 
     subscribeToServices() {
-        this.log.debug('webOS - subscribing to TV services');
+        this.logDebug('Subscribing to TV services');
 
         // power status
         this.lgtv.subscribe('ssap://com.webos.service.tvpower/power/getPowerState', (err, res) => {
-            if (!res || err) {
-                this.log.error('webOS - TV power status - error while getting power status');
+            if (!res || err || res.errorCode) {
+                this.logRequestError('TV power status - error while getting power status', err, res);
             } else {
                 let statusState = (res && res.state ? res.state : null);
                 let statusProcessing = (res && res.processing ? res.processing : null);
@@ -267,7 +269,7 @@ class webosTvAccessory {
                     powerState = powerState + ' power on reason: ' + statusPowerOnReason + ',';
                 }
 
-                this.log.debug('webOS - TV power status changed, status: %s', powerState);
+                this.logDebug('TV power status changed, status: %s', powerState);
 
                 // if pixel refresher is running then disconnect from TV
                 if (statusState === 'Active Standby') {
@@ -278,13 +280,13 @@ class webosTvAccessory {
 
         // foreground app info
         this.lgtv.subscribe('ssap://com.webos.applicationManager/getForegroundAppInfo', (err, res) => {
-            if (!res || err) {
-                this.log.error('webOS - TV app check - error while getting current app');
+            if (!res || err || res.errorCode) {
+                this.logRequestError('TV app check - error while getting current app', err, res);
             } else {
                 if (res.appId) {
                     this.tvCurrentAppId = res.appId;
                     this.setAppSwitchManually(null, true, this.tvCurrentAppId);
-                    this.log.info('webOS - app launched, current appId: %s', res.appId);
+                    this.logInfo('App launched, current appId: %s', res.appId);
                     if (this.channelButtonService) {
                         if (this.tvCurrentAppId === 'com.webos.app.livetv') {
                             // if the launchLiveTvChannel variable is not empty then switch to the specified channel and set the varaible to null
@@ -305,7 +307,7 @@ class webosTvAccessory {
                         let inputIdentifier = this.inputAppIds.indexOf(res.appId);
                         if (inputIdentifier === -1) {
                             inputIdentifier = 9999999; // select with id that does not exists
-                            this.log.debug('webOS - input not found in the input list, not selecting any input');
+                            this.logDebug('Input not found in the input list, not selecting any input');
                         }
                         this.tvService.getCharacteristic(Characteristic.ActiveIdentifier).updateValue(inputIdentifier);
                     }
@@ -315,10 +317,10 @@ class webosTvAccessory {
 
         // audio status
         this.lgtv.subscribe('ssap://audio/getStatus', (err, res) => {
-            if (!res || err) {
-                this.log.error('webOS - TV audio status - error while getting current audio status');
+            if (!res || err || res.errorCode) {
+                this.logRequestError('TV audio status - error while getting current audio status', err, res);
             } else {
-                this.log.info('webOS - audio status changed');
+                this.logInfo('Audio status changed');
 
                 // check if volumeUp or volumeDown was pressed, holds volumeUp or volumeDown if one of those was pressed or is not present if not
                 let statusCause = (res && res.cause ? res.cause : null);
@@ -326,41 +328,41 @@ class webosTvAccessory {
                 // volume state
                 this.tvVolume = res.volume;
                 this.setVolumeManually(this.tvVolume, statusCause);
-                this.log.info('webOS - current volume: %s', res.volume);
+                this.logInfo('Current volume: %s', res.volume);
 
                 // mute state
                 this.tvMuted = res.mute;
                 this.setMuteStateManually(!this.tvMuted);
-                this.log.info('webOS - muted: %s', res.mute ? 'Yes' : 'No');
+                this.logInfo('Muted: %s', res.mute ? 'Yes' : 'No');
             }
         });
 
         // current channel
         this.lgtv.subscribe('ssap://tv/getCurrentChannel', (err, res) => {
-            if (!res || err) {
-                this.log.error('webOS - TV channel status - error while getting current channel status');
+            if (!res || err || res.errorCode) {
+                this.logRequestError('TV channel status - error while getting current channel status', err, res);
             } else {
                 if (this.tvCurrentChannel !== res.channelNumber) {
-                    this.log.info('webOS - current channel status changed');
+                    this.logInfo('Current channel status changed');
                     // channel changed
                     this.tvCurrentChannel = res.channelNumber;
                     this.setChannelButtonManually(null, true, res.channelNumber);
-                    this.log.info('webOS - current channel: %s, %s', res.channelNumber, res.channelName);
+                    this.logInfo('Current channel: %s, %s', res.channelNumber, res.channelName);
                 }
             }
         });
 
         // sound output
         this.lgtv.subscribe('ssap://com.webos.service.apiadapter/audio/getSoundOutput', (err, res) => {
-            if (!res || err) {
-                this.log.error('webOS - TV sound output - error while getting current sound output status');
+            if (!res || err || res.errorCode) {
+                this.logRequestError('TV sound output - error while getting current sound output status', err, res);
             } else {
                 if (this.tvCurrentSoundOutput !== res.soundOutput) {
-                    this.log.info('webOS - sound output changed');
+                    this.logInfo('Sound output changed');
                     // sound output changed
                     this.tvCurrentSoundOutput = res.soundOutput;
                     this.setSoundOutputManually(null, true, res.soundOutput);
-                    this.log.info('webOS - current sound output: %s', res.soundOutput);
+                    this.logInfo('Current sound output: %s', res.soundOutput);
                 }
             }
         });
@@ -375,7 +377,7 @@ class webosTvAccessory {
             let infoArr = JSON.parse(fs.readFileSync(this.tvInfoFile));
             modelName = infoArr.modelName;
         } catch (err) {
-            this.log.debug('webOS - input names file does not exist');
+            this.logDebug('Input names file does not exist');
         }
 
         // there is currently no way to update the AccessoryInformation service after it was added to the service list
@@ -407,7 +409,7 @@ class webosTvAccessory {
         this.tvService
             .getCharacteristic(Characteristic.ActiveIdentifier)
             .on('set', (inputIdentifier, callback) => {
-                this.log.debug('webOS - input source changed, new input source identifier: %d, source appId: %s', inputIdentifier, this.inputAppIds[inputIdentifier]);
+                this.logDebug('Input source changed, new input source identifier: %d, source appId: %s', inputIdentifier, this.inputAppIds[inputIdentifier]);
                 this.setAppSwitchState(true, callback, this.inputAppIds[inputIdentifier]);
             });
         this.tvService
@@ -416,7 +418,7 @@ class webosTvAccessory {
         this.tvService
             .getCharacteristic(Characteristic.PowerModeSelection)
             .on('set', (newValue, callback) => {
-                this.log.debug('webOS - requested tv settings (PowerModeSelection): ' + newValue);
+                this.logDebug('Requested tv settings (PowerModeSelection): ' + newValue);
                 this.setRemoteControlButtonState(true, callback, 'MENU');
             });
 
@@ -462,7 +464,7 @@ class webosTvAccessory {
         this.tvSpeakerService
             .getCharacteristic(Characteristic.VolumeSelector)
             .on('set', (state, callback) => {
-                this.log.debug('webOS - volume change over the remote control (VolumeSelector), pressed: %s', state === 1 ? 'Down' : 'Up');
+                this.logDebug('Volume change over the remote control (VolumeSelector), pressed: %s', state === 1 ? 'Down' : 'Up');
                 this.setVolumeSwitch(state, callback, !state);
             });
         this.tvSpeakerService
@@ -491,7 +493,7 @@ class webosTvAccessory {
         try {
             savedNames = JSON.parse(fs.readFileSync(this.inputNamesFile));
         } catch (err) {
-            this.log.debug('webOS - input names file does not exist');
+            this.logDebug('Input names file does not exist');
         }
 
         this.inputAppIds = new Array();
@@ -538,9 +540,9 @@ class webosTvAccessory {
                         savedNames[appId] = name;
                         fs.writeFile(this.inputNamesFile, JSON.stringify(savedNames), (err) => {
                             if (err) {
-                                this.log.debug('webOS - error occured could not write input name %s', err);
+                                this.logError('Error occured, could not write input name %s', err);
                             } else {
-                                this.log.debug('webOS - input name successfully saved! New name: %s AppId: %s', name, appId);
+                                this.logDebug('Input name successfully saved! New name: %s AppId: %s', name, appId);
                             }
                         });
                         callback()
@@ -1033,18 +1035,18 @@ class webosTvAccessory {
             'address': this.broadcastAdr
         }, (error) => {
             if (error) {
-                this.log.info('webOS - wake on lan error');
+                this.logError('Wake on lan error');
                 return;
             }
             let x = 0;
             let appLaunchInterval = setInterval(() => {
                 if (this.connected) {
-                    this.log.debug('webOS - power on callback - connected to tv, running callback');
+                    this.logDebug('Power on callback - connected to tv, running callback');
                     setTimeout(callback.bind(this), 1000);
                     clearInterval(appLaunchInterval);
                     return;
                 }
-                this.log.debug('webOS - power on callback - trying to connect to tv...');
+                this.logDebug('Power on callback - trying to connect to tv...');
                 this.lgtv.connect(this.url);
 
                 if (x++ === 7) {
@@ -1058,12 +1060,12 @@ class webosTvAccessory {
     checkTVState(callback) {
         tcpp.probe(this.ip, TV_WEBSOCKET_PORT, (err, isAlive) => {
             if (!isAlive && this.connected) {
-                this.log.debug('webOS - TV state: Off');
+                this.logDebug('TV state: Off');
                 this.disconnect();
                 callback(null, false);
             } else if (isAlive && !this.connected) {
                 this.lgtv.connect(this.url);
-                this.log.debug('webOS - TV state: got response from TV, connecting...');
+                this.logDebug('TV state: got response from TV, connecting...');
             }
         });
     }
@@ -1072,10 +1074,10 @@ class webosTvAccessory {
         if (this.connected) {
             this.lgtv.request('ssap://com.webos.applicationManager/getForegroundAppInfo', (err, res) => {
                 if (!res || err || res.errorCode || res.appId === '') {
-                    this.log.debug('webOS - current app - error while getting current app info');
+                    this.logRequestError('Current app - error while getting current app info', err, res);
                     callback(null, false, null); // disable all switches
                 } else {
-                    this.log.debug('webOS - TV current appId: %s', res.appId);
+                    this.logDebug('TV current appId: %s', res.appId);
                     if (appId === undefined || appId === null) { // if appId undefined or null then i am checking which app is currently running; if set then continue normally
                         callback(null, true, res.appId);
                     } else if (res.appId === appId) {
@@ -1094,10 +1096,10 @@ class webosTvAccessory {
         if (this.connected) {
             this.lgtv.request('ssap://tv/getCurrentChannel', (err, res) => {
                 if (!res || err || res.errorCode) {
-                    this.log.debug('webOS - current channel - error while getting current channel info');
+                    this.logRequestError('Current channel - error while getting current channel info', err, res);
                     callback(null, false, null); // disable all switches
                 } else {
-                    this.log.debug('webOS - TV current channel: %s, %s', res.channelNumber, res.channelName);
+                    this.logDebug('TV current channel: %s, %s', res.channelNumber, res.channelName);
                     if (channelNum === undefined || channelNum === null) { // if channelNum undefined or null then i am checking which channel is currently running; if set then continue normally
                         callback(null, true, res.channelNumber);
                     } else if (res.channelNumber === channelNum) {
@@ -1116,10 +1118,10 @@ class webosTvAccessory {
         if (this.connected) {
             this.lgtv.request('ssap://com.webos.service.apiadapter/audio/getSoundOutput', (err, res) => {
                 if (!res || err || res.errorCode) {
-                    this.log.debug('webOS - sound output - error while getting current sound output');
+                    this.logRequestError('Sound output - error while getting current sound output', err, res);
                     callback(null, false, null); // disable all switches
                 } else {
-                    this.log.debug('webOS - TV current sound output: %s', res.soundOutput);
+                    this.logDebug('TV current sound output: %s', res.soundOutput);
                     if (soundOutput === undefined || soundOutput === null) { // if output undefined or null then i am checking which sound output is currently set; if set then continue normally
                         callback(null, true, res.soundOutput);
                     } else if (res.soundOutput === soundOutput) {
@@ -1140,12 +1142,9 @@ class webosTvAccessory {
                 channelNumber: channelNum
             }, (err, res) => {
                 if (!res || err || res.errorCode || !res.returnValue) {
-                    this.log.debug('webOS - open channel - error while switching channel');
-                    if (res && res.errorText) {
-                        this.log.debug('webOS - open channel - error message: %s', res.errorText);
-                    }
+                    this.logRequestError('Open channel - error while switching channel', err, res);
                 } else {
-                    this.log.debug('webOS - open channel - channel switched successfully');
+                    this.logDebug('Open channel - channel switched successfully');
                 }
             });
         }
@@ -1159,19 +1158,19 @@ class webosTvAccessory {
 
     setPowerState(state, callback) {
         if (state) {
-            this.log.debug('webOS - power service - Trying to power on tv, sending magic packet');
+            this.logDebug('Power service - Trying to power on tv, sending magic packet');
             wol.wake(this.mac, {
                 'address': this.broadcastAdr
             }, (error) => {
                 if (error) {
-                    this.log.info('webOS - wake on lan error');
-                    return callback(new Error('webOS - wake on lan error'));
+                    this.logError('Wake on lan error');
+                    return callback(new Error(`[${this.name}] Wake on lan error`));
                 }
             })
             callback();
         } else {
             if (this.connected) {
-                this.log.debug('webOS - power service - TV turned off');
+                this.logDebug('Power service - TV turned off');
                 this.lgtv.request('ssap://system/turnOff', (err, res) => {
                     this.disconnect();
                 })
@@ -1190,7 +1189,7 @@ class webosTvAccessory {
 
     setMuteState(state, callback) {
         if (this.connected) {
-            this.log.debug('webOS - volume service - TV %s', !state ? 'Muted' : 'Unmuted');
+            this.logDebug('Volume service - TV %s', !state ? 'Muted' : 'Unmuted');
             this.lgtv.request('ssap://audio/setMute', {
                 mute: !state
             });
@@ -1201,7 +1200,7 @@ class webosTvAccessory {
                 this.volumeService.getCharacteristic(Characteristic.On).updateValue(false);
             }, 10);
             callback(); // respond with success when tv is off
-            // callback(new Error('webOS - is not connected, cannot set mute state'));
+            // callback(new Error(`[${this.name}] Is not connected, cannot set mute state`));
         }
     }
 
@@ -1215,7 +1214,7 @@ class webosTvAccessory {
 
     setVolume(level, callback) {
         if (this.connected) {
-            this.log.debug('webOS - volume service - setting volume to %s, limit: %s', level, this.volumeLimit);
+            this.logDebug('Volume service - setting volume to %s, limit: %s', level, this.volumeLimit);
             if (level > this.volumeLimit) {
                 level = this.volumeLimit;
             }
@@ -1224,7 +1223,7 @@ class webosTvAccessory {
             });
             callback();
         } else {
-            callback(new Error('webOS - TV is not connected, cannot set volume'));
+            callback(new Error(`[${this.name}] TV is not connected, cannot set volume`));
         }
     }
 
@@ -1234,7 +1233,7 @@ class webosTvAccessory {
 
     setVolumeSwitch(state, callback, isUp) {
         if (this.connected) {
-            this.log.debug('webOS - volume service - volume %s pressed, current volume: %s, limit: %s', isUp ? 'Up' : 'Down', this.tvVolume, this.volumeLimit);
+            this.logDebug('Volume service - volume %s pressed, current volume: %s, limit: %s', isUp ? 'Up' : 'Down', this.tvVolume, this.volumeLimit);
             let volLevel = this.tvVolume;
             if (isUp) {
                 if (volLevel < this.volumeLimit) {
@@ -1249,7 +1248,7 @@ class webosTvAccessory {
             }, 10);
             callback();
         } else {
-            callback(new Error('webOS - volume service - TV is not connected, cannot set volume'));
+            callback(new Error(`[${this.name}] Volume service - TV is not connected, cannot set volume`));
         }
     }
 
@@ -1259,7 +1258,7 @@ class webosTvAccessory {
 
     setChannelSwitch(state, callback, isUp) {
         if (this.connected) {
-            this.log.debug('webOS - channel service - channel %s pressed', isUp ? 'Up' : 'Down');
+            this.logDebug('Channel service - channel %s pressed', isUp ? 'Up' : 'Down');
             if (isUp) {
                 this.lgtv.request('ssap://tv/channelUp');
             } else {
@@ -1271,7 +1270,7 @@ class webosTvAccessory {
             }, 10);
             callback();
         } else {
-            callback(new Error('webOS - channel service - TV is not connected, cannot change channel'));
+            callback(new Error(`[${this.name}] Channel service - TV is not connected, cannot change channel`));
         }
     }
 
@@ -1286,10 +1285,10 @@ class webosTvAccessory {
     setAppSwitchState(state, callback, appId) {
         if (this.connected) {
             if (state) {
-                this.log.debug('webOS - app switch service - launching app with id %s', appId);
+                this.logDebug('App switch service - launching app with id %s', appId);
                 if (this.inputParams[appId]) {
                     // launch with input params
-                    this.log.debug('webOS - app switch service - params specified, adding params: %s', JSON.stringify(this.inputParams[appId]));
+                    this.logDebug('App switch service - params specified, adding params: %s', JSON.stringify(this.inputParams[appId]));
                     this.lgtv.request('ssap://com.webos.applicationManager/launch', {
                         id: appId,
                         params: this.inputParams[appId]
@@ -1310,9 +1309,9 @@ class webosTvAccessory {
             callback();
         } else {
             if (state) {
-                this.log.info('webOS - app switch service - Trying to launch %s but TV is off, attempting to power on the TV', appId);
+                this.logInfo('App switch service - Trying to launch %s but TV is off, attempting to power on the TV', appId);
                 this.powerOnTvWithCallback(() => {
-                    this.log.debug('webOS - app switch service - tv powered on, launching app with id: %s', appId);
+                    this.logDebug('App switch service - tv powered on, launching app with id: %s', appId);
                     this.lgtv.request('ssap://system.launcher/launch', {
                         id: appId
                     });
@@ -1328,7 +1327,7 @@ class webosTvAccessory {
 
     setMediaControlSwitch(state, callback, action) {
         if (this.connected) {
-            this.log.debug('webOS - media control service - current media %s', action);
+            this.logDebug('Media control service - current media %s', action);
             if (action === 'play') {
                 this.lgtv.request('ssap://media.controls/play');
             } else if (action === 'pause') {
@@ -1349,7 +1348,7 @@ class webosTvAccessory {
             }, 10);
             callback();
         } else {
-            callback(new Error('webOS - media control service - is not connected, cannot control media'));
+            callback(new Error(`[${this.name}] Media control service - is not connected, cannot control media`));
         }
     }
 
@@ -1365,10 +1364,10 @@ class webosTvAccessory {
         if (this.connected) {
             if (state) {
                 if (this.tvCurrentAppId === 'com.webos.app.livetv') { // it is only possible to switch channels when we are in the livetv app
-                    this.log.debug('webOS - channel button service - switching to channel number %s', channelNum);
+                    this.logDebug('Channel button service - switching to channel number %s', channelNum);
                     this.openChannel(channelNum);
                 } else { // if we are not in the livetv app, then switch to the livetv app and set launchLiveTvChannel, after the app is switched the channel will be switched to the selected
-                    this.log.debug('webOS - channel button service - trying to switch to channel %s but the livetv app is not running, switching to livetv app', channelNum);
+                    this.logDebug('Channel button service - trying to switch to channel %s but the livetv app is not running, switching to livetv app', channelNum);
                     this.launchLiveTvChannel = channelNum;
                     this.lgtv.request('ssap://system.launcher/launch', {
                         id: 'com.webos.app.livetv'
@@ -1384,9 +1383,9 @@ class webosTvAccessory {
             callback();
         } else {
             if (state) {
-                this.log.info('webOS - channel button service - Trying to open channel number %s but TV is off, attempting to power on the TV', channelNum);
+                this.logInfo('Channel button service - Trying to open channel number %s but TV is off, attempting to power on the TV', channelNum);
                 this.powerOnTvWithCallback(() => {
-                    this.log.debug('webOS - channel button service - tv powered on, switching to channel: %s', channelNum);
+                    this.logDebug('Channel button service - tv powered on, switching to channel: %s', channelNum);
                     this.openChannel(channelNum);
                     callback();
                 });
@@ -1400,7 +1399,7 @@ class webosTvAccessory {
 
     setNotificationButtonState(state, callback, notification) {
         if (this.connected) {
-            this.log.debug('webOS - notification button service - displaying notification with message: %s', notification);
+            this.logDebug('Notification button service - displaying notification with message: %s', notification);
             this.lgtv.request('ssap://system.notifications/createToast', {
                 message: notification
             });
@@ -1415,7 +1414,7 @@ class webosTvAccessory {
 
     setRemoteControlButtonState(state, callback, rcButton) {
         if (this.connected && this.pointerInputSocket) {
-            this.log.debug('webOS - remote control button service - emulating remote control %s press', rcButton);
+            this.logDebug('Remote control button service - emulating remote control %s press', rcButton);
             if (rcButton === 'CLICK') {
                 this.pointerInputSocket.send('click');
             } else {
@@ -1431,7 +1430,7 @@ class webosTvAccessory {
     }
 
     remoteKeyPress(remoteKey, callback) {
-        this.log.debug('webOS - remote key pressed: %d', remoteKey);
+        this.logDebug('Remote key pressed: %d', remoteKey);
 
         switch (remoteKey) {
             case Characteristic.RemoteKey.REWIND:
@@ -1442,12 +1441,12 @@ class webosTvAccessory {
                 break;
             case Characteristic.RemoteKey.NEXT_TRACK:
                 // does a endpoint call exist?
-                this.log.info('webOS - next track remote key not supported');
+                this.logInfo('Next track remote key not supported');
                 callback();
                 break;
             case Characteristic.RemoteKey.PREVIOUS_TRACK:
                 // does a endpoint call exist?
-                this.log.info('webOS - previous track remote key not supported');
+                this.logInfo('Previous track remote key not supported');
                 callback();
                 break;
             case Characteristic.RemoteKey.ARROW_UP:
@@ -1500,12 +1499,9 @@ class webosTvAccessory {
                     output: soundOutput
                 }, (err, res) => {
                     if (!res || err || res.errorCode || !res.returnValue) {
-                        this.log.debug('webOS - sound output - error while changing sound output');
-                        if (res && res.errorText) {
-                            this.log.debug('webOS - sound output - error message: %s', res.errorText);
-                        }
+                        this.logRequestError('Sound output - error while changing sound output', err, res);
                     } else {
-                        this.log.debug('webOS - sound output - sound output changed successfully');
+                        this.logDebug('Sound output - sound output changed successfully');
                     }
                 });
                 this.setSoundOutputManually(null, true, soundOutput); // enable the selected channel switch and disable all other
@@ -1516,7 +1512,7 @@ class webosTvAccessory {
             }
             callback();
         } else {
-            callback(new Error('webOS - sound output service - TV is not connected, cannot change channel'));
+            callback(new Error(`[${this.name}] Sound output service - TV is not connected, cannot change channe`));
         }
     }
 
@@ -1526,7 +1522,7 @@ class webosTvAccessory {
 
     setRemoteSequenceButtonState(state, callback, seqObj) {
         if (this.connected && this.pointerInputSocket) {
-            this.log.debug('webOS - remote sequence button service - emulating remote control sequence: %s with interval %s ms', seqObj.sequence.join(), seqObj.interval.join());
+            this.logDebug('Remote sequence button service - emulating remote control sequence: %s with interval %s ms', seqObj.sequence.join(), seqObj.interval.join());
             let curRemoteKeyNum = 0;
             let remoteKeyFunc = () => {
                 let curRemoteKey = seqObj.sequence[curRemoteKeyNum];
@@ -1547,6 +1543,30 @@ class webosTvAccessory {
 
     getServices() {
         return this.enabledServices;
+    }
+
+    logInfo(message, ...args) {
+        this.log.info(`[${this.name}] ` + message, ...args);
+    }
+
+    logDebug(message, ...args) {
+        this.log.debug(`[${this.name}] ` + message, ...args);
+    }
+
+    logError(message, ...args) {
+        this.log.error(`[${this.name}] ` + message, ...args);
+    }
+
+    logRequestError(message, err, res) {
+        this.logError(message);
+
+        if (err) {
+            this.logError('Error: %s', err);
+        }
+
+        if (res && res.errorText) {
+            this.logError('Error message: %s', res.errorText);
+        }
     }
 
 }
@@ -1570,7 +1590,7 @@ class webosTvPlatform {
     }
 
     initDevices() {
-        this.log.info('webOS - init - initializing devices');
+        this.log.info('Init - initializing devices');
 
         // read from config.devices
         if (this.config.devices) {
@@ -1592,7 +1612,7 @@ class webosTvPlatform {
 
         if (!this.config.devices && !this.config.tvs) {
             this.log.info('-------------------------------------------');
-            this.log.info('webOS - init - no tv configuration found');
+            this.log.info('Init - no tv configuration found');
             this.log.info('Missing devices or tvs in your platform config');
             this.log.info('-------------------------------------------');
         }
@@ -1612,7 +1632,7 @@ class webosTvDevice extends webosTvAccessory {
     constructor(log, config, api) {
         super(log, config, api);
 
-        this.log.info(`webOS - init - initializing device with name: ${this.name}`);
+        this.log.info(`Init - initializing device with name: ${this.name}`);
 
         // generate uuid
         this.UUID = Homebridge.hap.uuid.generate(config.mac + config.ip);
@@ -1631,3 +1651,4 @@ class webosTvDevice extends webosTvAccessory {
         this.api.publishExternalAccessories(PLUGIN_NAME, [this.tvAccesory]);
     }
 }
+
