@@ -103,7 +103,6 @@ class webosTvAccessory {
         }
 
         // prepare file paths
-        this.inputNamesFile = this.prefsDir + 'inputs_' + this.mac.split(':').join('');
         this.tvInfoFile = this.prefsDir + 'info_' + this.mac.split(':').join('');
 
         // create the lgtv instance
@@ -489,13 +488,6 @@ class webosTvAccessory {
             this.inputs = [this.inputs];
         }
 
-        let savedNames = {};
-        try {
-            savedNames = JSON.parse(fs.readFileSync(this.inputNamesFile));
-        } catch (err) {
-            this.logDebug('Input names file does not exist');
-        }
-
         this.inputAppIds = new Array();
         this.inputs.forEach((value, i) => {
 
@@ -511,9 +503,7 @@ class webosTvAccessory {
             // get name		
             let inputName = appId;
 
-            if (savedNames && savedNames[appId]) {
-                inputName = savedNames[appId];
-            } else if (value.name) {
+            if (value.name) {
                 inputName = value.name;
             }
 
@@ -533,20 +523,6 @@ class webosTvAccessory {
                     .setCharacteristic(Characteristic.IsConfigured, Characteristic.IsConfigured.CONFIGURED)
                     .setCharacteristic(Characteristic.InputSourceType, Characteristic.InputSourceType.APPLICATION)
                     .setCharacteristic(Characteristic.CurrentVisibilityState, Characteristic.CurrentVisibilityState.SHOWN);
-
-                tmpInput
-                    .getCharacteristic(Characteristic.ConfiguredName)
-                    .on('set', (name, callback) => {
-                        savedNames[appId] = name;
-                        fs.writeFile(this.inputNamesFile, JSON.stringify(savedNames), (err) => {
-                            if (err) {
-                                this.logError('Error occured, could not write input name %s', err);
-                            } else {
-                                this.logDebug('Input name successfully saved! New name: %s AppId: %s', name, appId);
-                            }
-                        });
-                        callback()
-                    });
 
                 this.tvService.addLinkedService(tmpInput);
                 this.enabledServices.push(tmpInput);

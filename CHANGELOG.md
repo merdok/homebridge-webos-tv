@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved logging
 
 ### Removed
+- Input names are no longer beeing saved in a file, renaming should be done in the config.json
 
 
 ## [1.7.1] - 2020-04-23
