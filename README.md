@@ -257,6 +257,9 @@ Wheter the media control service is enabled. Buttons: play, pause, stop, rewind,
 - `channelButtons` [optional] 
 Wheter the channel buttons service is enabled. This allows to create buttons for the channels of your choice. This way you can quickly switch between favorite channels. **Default: "" (disabled)**
   - Set an array of channel numbers as the value
+  - You can also set an array of objects as the value. An object can have the following properties:
+    - *channelNumber* - the channel number,
+    - *name* - an optional channel name, 
   - Channels can also be opened when the TV is off, in that case an attempt to power on the TV and afterwards open the chosen channel will be made.
 - `notificationButtons` [optional] 
 Wheter the notification buttons service is enabled. This allows to create buttons which when pressed display the specified text on the TV screen. Useful for HomeKit automation or to display text on TV for viewers. **Default: "" (disabled)**
@@ -271,7 +274,7 @@ Wheter the remote control buttons service is enabled. This allows to emulate rem
   - Most probably there are also other values possible which i didn't find yet (like settings or voice command), you can try typing some other values and if you find some that work then please let me know
 - `remoteSequenceButtons` [optional] 
 Wheter the remote sequence buttons service is enabled. This allows to run a sequence of remote control button presses. **Default: "" (disabled)**
-  - Set an array of objects as the value. An object needs to have the following properties:
+  - Set an array of objects as the value. An object can have the following properties:
     - *sequence* - an array of remote control keys. For possible values see `remoteControlButtons` above,
     - *name* - an optional name, 
     - *interval* - an optional interval beetwen sequence actions. Can be a single value or an array of values. Default is 500ms

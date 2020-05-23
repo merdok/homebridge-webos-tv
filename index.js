@@ -89,7 +89,6 @@ class webosTvAccessory {
         this.launchLiveTvChannel = null;
         this.isPaused = false;
         this.tvCurrentSoundOutput = '';
-        this.inputParams = {};
 
 
         // check if prefs directory ends with a /, if not then add it
@@ -489,6 +488,7 @@ class webosTvAccessory {
         }
 
         this.inputAppIds = new Array();
+		this.inputParams = {};
         this.inputs.forEach((value, i) => {
 
             // get appid
@@ -642,6 +642,7 @@ class webosTvAccessory {
 
                 this.enabledServices.push(tmpInput);
                 this.inputButtonService.push(tmpInput);
+				// store all input appIds
                 this.inputAppIdsButton.push(appId);
             }
 
@@ -741,16 +742,39 @@ class webosTvAccessory {
         }
 
         this.channelButtonService = new Array();
+		this.channelNumbers = new Array();
         this.channelButtons.forEach((value, i) => {
-            this.channelButtons[i] = this.channelButtons[i].toString();
-            let tmpChannel = new Service.Switch(this.name + ' Channel: ' + value, 'channelButtonService' + i);
+			
+			// get channelNumber
+			let channelNumber = null;
+
+			if (value.channelNumber !== undefined) {
+				channelNumber = value.channelNumber;
+			} else {
+				channelNumber = value;
+			}
+			
+			// convert to string if the channel number was not a string
+			channelNumber = channelNumber.toString();
+
+			// get name		
+			let channelName = this.name + ' Channel: ' + channelNumber;
+
+			if (value.name) {
+				channelName = value.name;
+			}
+			
+			// store all channel numbers
+			this.channelNumbers.push(channelNumber);
+			
+            let tmpChannel = new Service.Switch(channelName, 'channelButtonService' + i);
             tmpChannel
                 .getCharacteristic(Characteristic.On)
                 .on('get', (callback) => {
-                    this.getChannelButtonState(callback, this.channelButtons[i]);
+                    this.getChannelButtonState(callback, channelNumber);
                 })
                 .on('set', (state, callback) => {
-                    this.setChannelButtonState(state, callback, this.channelButtons[i]);
+                    this.setChannelButtonState(state, callback, channelNumber);
                 });
 
             this.enabledServices.push(tmpChannel);
@@ -946,7 +970,7 @@ class webosTvAccessory {
                 });
             } else {
                 this.channelButtonService.forEach((tmpChannelButton, i) => {
-                    if (channelNumber === this.channelButtons[i]) {
+                    if (channelNumber === this.channelNumbers[i]) {
                         tmpChannelButton.getCharacteristic(Characteristic.On).updateValue(value);
                     } else {
                         tmpChannelButton.getCharacteristic(Characteristic.On).updateValue(false);

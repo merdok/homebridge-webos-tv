@@ -7,11 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Extended the channelButtonService with an optional name
 
 ### Changed
 - Updated README
 - Fixed missing AccessoryInformation.Name warning
 - Improved logging
+- The channelButtonService now also accepts an array of objects as value
 
 ### Removed
 - Input names are no longer beeing saved in a file, renaming should be done in the config.json
