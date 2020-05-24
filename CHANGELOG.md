@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [1.8.1] - 2020-05-25
+
+### Added
+- Additional checks when requesting tv information and initializing devices
+
+### Changed
+- Updated README
+
+### Removed
+
+
 ## [1.8.0] - 2020-05-24
 
 ### Added
