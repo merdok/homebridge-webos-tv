@@ -251,7 +251,6 @@ class webosTvDevice {
             });
         }));
 
-
         tvInfoPromises.push(new Promise((resolve, reject) => {
             this.lgtv.request('ssap://api/getServiceList', (err, res) => {
                 if (!res || err || res.errorCode) {
@@ -265,20 +264,23 @@ class webosTvDevice {
             });
         }));
 
-
         tvInfoPromises.push(new Promise((resolve, reject) => {
             this.lgtv.request('ssap://com.webos.applicationManager/listLaunchPoints', (err, res) => {
                 if (!res || err || res.errorCode) {
                     this.logRequestError('Launch points list - error while getting the launch points list', err, res);
                     reject(new Error(`[${this.name}] Failed to get launch points`));
                 } else {
-                    for (let launchPoint of res.launchPoints) {
-                        let newObj = {};
-                        newObj.appId = launchPoint.id;
-                        newObj.name = launchPoint.title;
-                        this.launchPointsList.push(newObj);
+                    if (res && res.launchPoints && Array.isArray(res.launchPoints)) {
+                        for (let launchPoint of res.launchPoints) {
+                            let newObj = {};
+                            newObj.appId = launchPoint.id;
+                            newObj.name = launchPoint.title;
+                            this.launchPointsList.push(newObj);
+                        }
+                        this.logDebug('Launch points (inputs, apps): \n' + JSON.stringify(this.launchPointsList, null, 2));
+                    } else {
+                        this.logDebug('Launch points list - error while parsing the launch point list \n' + JSON.stringify(res, null, 2));
                     }
-                    this.logDebug('Launch points (inputs, apps): \n' + JSON.stringify(this.launchPointsList, null, 2));
                     resolve();
                 }
             });
@@ -290,16 +292,20 @@ class webosTvDevice {
                     this.logRequestError('Channel list - error while getting the channel list', err, res);
                     reject(new Error(`[${this.name}] Failed to get channel list`));
                 } else {
-                    for (let channelInfo of res.channelList) {
-                        let newObj = {};
-                        if (channelInfo.Radio == false) { // skip radio stations
-                            newObj.channelId = channelInfo.channelId;
-                            newObj.channelNumber = channelInfo.channelNumber;
-                            newObj.channelName = channelInfo.channelName;
-                            this.channelList.push(newObj);
+                    if (res && res.channelList && Array.isArray(res.channelList)) {
+                        for (let channelInfo of res.channelList) {
+                            let newObj = {};
+                            if (channelInfo.Radio == false) { // skip radio stations
+                                newObj.channelId = channelInfo.channelId;
+                                newObj.channelNumber = channelInfo.channelNumber;
+                                newObj.channelName = channelInfo.channelName;
+                                this.channelList.push(newObj);
+                            }
                         }
+                        //	this.logDebug('Channel list: \n' + JSON.stringify(this.channelList, null, 2));
+                    } else {
+                        this.logDebug('Channel list - error while parsing channel list \n' + JSON.stringify(res, null, 2));
                     }
-                    //	this.logDebug('Channel list: \n' + JSON.stringify(this.channelList, null, 2));
                     resolve();
                 }
             });
@@ -1685,7 +1691,7 @@ class webosTvPlatform {
         this.log.info('Init - initializing devices');
 
         // read from config.devices
-        if (this.config.devices) {
+        if (this.config.devices && Array.isArray(this.config.devices)) {
             for (let device of this.config.devices) {
                 if (device) {
                     new webosTvPlatformDevice(this.log, device, this.api);
@@ -1694,7 +1700,7 @@ class webosTvPlatform {
         }
 
         // also read from config.tvs
-        if (this.config.tvs) {
+        if (this.config.tvs && Array.isArray(this.config.tvs)) {
             for (let tv of this.config.tvs) {
                 if (tv) {
                     new webosTvPlatformDevice(this.log, tv, this.api);
