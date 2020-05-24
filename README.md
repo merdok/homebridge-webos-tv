@@ -181,11 +181,12 @@ Inputs which should appear under the *Inputs* list on yor TV accessory. When you
 Wheter to additionally show inputs as buttons. Useful for automation. **Default: false**
 - `volumeControl` [optional]
 Wheter the volume control service is enabled. **Default: true**  
-Available values:
-  - *true* - slider and buttons (slider is not supported for a ARC sound output)
-  - *false* - no volume control
-  - *"slider"* - just slider (not supported for a ARC sound output)
-  - *"buttons"* - just buttons
+  - Available values:
+    - *true* - slider and buttons
+    - *false* - no volume control
+    - *"slider"* - just slider
+    - *"buttons"* - just buttons
+  - The slider volume control is not supported for ARC sound outputs
 - `volumeLimit` [optional]
 The max allowed volume which can be set using the volume service. Range 1-100. **Default: 100**
 - `channelControl` [optional]
