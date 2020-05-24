@@ -13,6 +13,8 @@ const PLATFORM_NAME = 'webostv';
 const PLUGIN_VERSION = '1.7.1';
 const TV_WEBSOCKET_PORT = 3000;
 
+const WEBOS_LIVE_TV_APP_ID = 'com.webos.app.livetv';
+
 module.exports = (homebridge) => {
     Service = homebridge.hap.Service;
     Characteristic = homebridge.hap.Characteristic;
@@ -89,6 +91,9 @@ class webosTvAccessory {
         this.launchLiveTvChannel = null;
         this.isPaused = false;
         this.tvCurrentSoundOutput = '';
+
+        this.launchPointsList = [];
+        this.channelList = [];
 
 
         // check if prefs directory ends with a /, if not then add it
@@ -169,12 +174,17 @@ class webosTvAccessory {
     // --== CONNECT/DISCONNECT METHODS ==--	
     connect() {
         this.logInfo('Connected to TV');
-        this.getTvInformation();
         this.connected = true;
-        this.updateTvStatus(null, true);
-        this.subscribeToServices();
-        this.connectToPointerInputSocket();
-        this.updateAccessoryStatus();
+        let tmpInfoPromises = this.getTvInformation();
+
+        Promise.all(tmpInfoPromises).then(values => {
+            this.logDebug('Got TV information proceeding with launch');
+            this.updateTvStatus(null, true);
+            this.subscribeToServices();
+            this.connectToPointerInputSocket();
+            this.updateAccessoryStatus();
+        });
+
     }
 
     disconnect() {
@@ -198,12 +208,16 @@ class webosTvAccessory {
 
     // --== INIT HELPER METHODS ==--
     getTvInformation() {
-        setTimeout(() => {
-            this.logDebug('Requesting TV information');
 
+        this.logDebug('Requesting TV information');
+
+        let tvInfoPromises = [];
+
+        tvInfoPromises.push(new Promise((resolve, reject) => {
             this.lgtv.request('ssap://system/getSystemInfo', (err, res) => {
                 if (!res || err || res.errorCode) {
                     this.logRequestError('System info - error while getting system info', err, res);
+                    reject(new Error(`[${this.name}] Failed to get system info`));
                 } else {
                     delete res['returnValue'];
                     this.logDebug('System info: \n' + JSON.stringify(res, null, 2));
@@ -219,27 +233,79 @@ class webosTvAccessory {
                     } else {
                         this.logDebug('TV info file already exists, not saving!');
                     }
+                    resolve();
                 }
             });
+        }));
 
+        tvInfoPromises.push(new Promise((resolve, reject) => {
             this.lgtv.request('ssap://com.webos.service.update/getCurrentSWInformation', (err, res) => {
                 if (!res || err || res.errorCode) {
                     this.logRequestError('Sw information - error while getting sw information', err, res);
+                    reject(new Error(`[${this.name}] Failed to get software information`));
                 } else {
                     delete res['returnValue'];
                     this.logDebug('Sw information: \n' + JSON.stringify(res, null, 2));
+                    resolve();
                 }
             });
+        }));
 
+
+        tvInfoPromises.push(new Promise((resolve, reject) => {
             this.lgtv.request('ssap://api/getServiceList', (err, res) => {
                 if (!res || err || res.errorCode) {
                     this.logRequestError('Service list - error while getting service list', err, res);
+                    reject(new Error(`[${this.name}] Failed to get service list`));
                 } else {
                     delete res['returnValue'];
                     this.logDebug('Service list: \n' + JSON.stringify(res, null, 2));
+                    resolve();
                 }
             });
-        }, 100);
+        }));
+
+
+        tvInfoPromises.push(new Promise((resolve, reject) => {
+            this.lgtv.request('ssap://com.webos.applicationManager/listLaunchPoints', (err, res) => {
+                if (!res || err || res.errorCode) {
+                    this.logRequestError('Launch points list - error while getting the launch points list', err, res);
+                    reject(new Error(`[${this.name}] Failed to get launch points`));
+                } else {
+                    for (let launchPoint of res.launchPoints) {
+                        let newObj = {};
+                        newObj.appId = launchPoint.id;
+                        newObj.name = launchPoint.title;
+                        this.launchPointsList.push(newObj);
+                    }
+                    this.logDebug('Launch points (inputs, apps): \n' + JSON.stringify(this.launchPointsList, null, 2));
+                    resolve();
+                }
+            });
+        }));
+
+        tvInfoPromises.push(new Promise((resolve, reject) => {
+            this.lgtv.request('ssap://tv/getChannelList', (err, res) => {
+                if (!res || err || res.errorCode) {
+                    this.logRequestError('Channel list - error while getting the channel list', err, res);
+                    reject(new Error(`[${this.name}] Failed to get channel list`));
+                } else {
+                    for (let channelInfo of res.channelList) {
+                        let newObj = {};
+                        if (channelInfo.Radio == false) { // skip radio stations
+                            newObj.channelId = channelInfo.channelId;
+                            newObj.channelNumber = channelInfo.channelNumber;
+                            newObj.channelName = channelInfo.channelName;
+                            this.channelList.push(newObj);
+                        }
+                    }
+                    //	this.logDebug('Channel list: \n' + JSON.stringify(this.channelList, null, 2));
+                    resolve();
+                }
+            });
+        }));
+
+        return tvInfoPromises;
     }
 
     subscribeToServices() {
@@ -286,7 +352,7 @@ class webosTvAccessory {
                     this.setAppSwitchManually(null, true, this.tvCurrentAppId);
                     this.logInfo('App launched, current appId: %s', res.appId);
                     if (this.channelButtonService) {
-                        if (this.tvCurrentAppId === 'com.webos.app.livetv') {
+                        if (this.tvCurrentAppId === WEBOS_LIVE_TV_APP_ID) {
                             // if the launchLiveTvChannel variable is not empty then switch to the specified channel and set the varaible to null
                             if (this.launchLiveTvChannel !== undefined && this.launchLiveTvChannel !== null && this.launchLiveTvChannel.length > 0) {
                                 this.openChannel(this.launchLiveTvChannel);
@@ -345,7 +411,7 @@ class webosTvAccessory {
                     // channel changed
                     this.tvCurrentChannel = res.channelNumber;
                     this.setChannelButtonManually(null, true, res.channelNumber);
-                    this.logInfo('Current channel: %s, %s', res.channelNumber, res.channelName);
+                    this.logInfo('Current channel: %s, %s, channelId: %s', res.channelNumber, res.channelName, res.channelId);
                 }
             }
         });
@@ -488,7 +554,7 @@ class webosTvAccessory {
         }
 
         this.inputAppIds = new Array();
-		this.inputParams = {};
+        this.inputParams = {};
         this.inputs.forEach((value, i) => {
 
             // get appid
@@ -642,7 +708,7 @@ class webosTvAccessory {
 
                 this.enabledServices.push(tmpInput);
                 this.inputButtonService.push(tmpInput);
-				// store all input appIds
+                // store all input appIds
                 this.inputAppIdsButton.push(appId);
             }
 
@@ -742,31 +808,31 @@ class webosTvAccessory {
         }
 
         this.channelButtonService = new Array();
-		this.channelNumbers = new Array();
+        this.channelNumbers = new Array();
         this.channelButtons.forEach((value, i) => {
-			
-			// get channelNumber
-			let channelNumber = null;
 
-			if (value.channelNumber !== undefined) {
-				channelNumber = value.channelNumber;
-			} else {
-				channelNumber = value;
-			}
-			
-			// convert to string if the channel number was not a string
-			channelNumber = channelNumber.toString();
+            // get channelNumber
+            let channelNumber = null;
 
-			// get name		
-			let channelName = this.name + ' Channel: ' + channelNumber;
+            if (value.channelNumber !== undefined) {
+                channelNumber = value.channelNumber;
+            } else {
+                channelNumber = value;
+            }
 
-			if (value.name) {
-				channelName = value.name;
-			}
-			
-			// store all channel numbers
-			this.channelNumbers.push(channelNumber);
-			
+            // convert to string if the channel number was not a string
+            channelNumber = channelNumber.toString();
+
+            // get name		
+            let channelName = this.name + ' Channel: ' + channelNumber;
+
+            if (value.name) {
+                channelName = value.name;
+            }
+
+            // store all channel numbers
+            this.channelNumbers.push(channelNumber);
+
             let tmpChannel = new Service.Switch(channelName, 'channelButtonService' + i);
             tmpChannel
                 .getCharacteristic(Characteristic.On)
@@ -1363,18 +1429,18 @@ class webosTvAccessory {
     setChannelButtonState(state, callback, channelNum) {
         if (this.connected) {
             if (state) {
-                if (this.tvCurrentAppId === 'com.webos.app.livetv') { // it is only possible to switch channels when we are in the livetv app
+                if (this.tvCurrentAppId === WEBOS_LIVE_TV_APP_ID) { // it is only possible to switch channels when we are in the livetv app
                     this.logDebug('Channel button service - switching to channel number %s', channelNum);
                     this.openChannel(channelNum);
                 } else { // if we are not in the livetv app, then switch to the livetv app and set launchLiveTvChannel, after the app is switched the channel will be switched to the selected
                     this.logDebug('Channel button service - trying to switch to channel %s but the livetv app is not running, switching to livetv app', channelNum);
                     this.launchLiveTvChannel = channelNum;
                     this.lgtv.request('ssap://system.launcher/launch', {
-                        id: 'com.webos.app.livetv'
+                        id: WEBOS_LIVE_TV_APP_ID
                     });
                 }
                 this.setChannelButtonManually(null, true, channelNum); // enable the selected channel switch and disable all other
-                this.setAppSwitchManually(null, true, 'com.webos.app.livetv'); // disable all appswitches if active, except live tv
+                this.setAppSwitchManually(null, true, WEBOS_LIVE_TV_APP_ID); // disable all appswitches if active, except live tv
             } else { // prevent turning off the switch, since this is the current channel we should not turn off the switch
                 setTimeout(() => {
                     this.setChannelButtonManually(null, true, channelNum);
