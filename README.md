@@ -196,12 +196,15 @@ Wheter the media control service is enabled. Buttons: play, pause, stop, rewind,
 Wheter the channel buttons service is enabled. This allows to create buttons for the channels of your choice. This way you can quickly switch between favorite channels. **Default: "" (disabled)**
   - Set an array of channel numbers as the value
   - You can also set an array of objects as the value. An object can have the following properties:
-    - *channelNumber* - the channel number,
-    - *name* - an optional channel name, 
+    - *channelNumber* - [required] the channel number,
+    - *name* - [optional] the channel name, 
   - Channels can also be opened when the TV is off, in that case an attempt to power on the TV and afterwards open the chosen channel will be made.
 - `notificationButtons` [optional] 
 Wheter the notification buttons service is enabled. This allows to create buttons which when pressed display the specified text on the TV screen. Useful for HomeKit automation or to display text on TV for viewers. **Default: "" (disabled)**
   - Set an array of notification texts as the value
+  - You can also set an array of objects as the value. An object can have the following properties:
+    - *message* - [required] the message to display in the notification,
+    - *name* - [optional]  the notification name, 
 - `remoteControlButtons` [optional] 
 Wheter the remote control buttons service is enabled. This allows to emulate remote control buttons. **Default: "" (disabled)**
   - Set an array of commands as the value. Possible values are:
@@ -213,9 +216,9 @@ Wheter the remote control buttons service is enabled. This allows to emulate rem
 - `remoteSequenceButtons` [optional] 
 Wheter the remote sequence buttons service is enabled. This allows to run a sequence of remote control button presses. **Default: "" (disabled)**
   - Set an array of objects as the value. An object can have the following properties:
-    - *sequence* - an array of remote control keys. For possible values see `remoteControlButtons` above,
-    - *name* - an optional name, 
-    - *interval* - an optional interval beetwen sequence actions. Can be a single value or an array of values. Default is 500ms
+    - *sequence* - [required] an array of remote control keys. For possible values see `remoteControlButtons` above,
+    - *name* - [optional] the sequence name, 
+    - *interval* - [optional] the interval beetwen sequence actions. Can be a single value or an array of values. Default is 500ms
 - `soundOutputButtons` [optional] 
 Wheter the sound output buttons service is enabled. This allows to switch between sound outputs on the TV. **Default: "" (disabled)**
   - Set an array of sound outputs as the value. Example values are:

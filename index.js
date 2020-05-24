@@ -859,15 +859,32 @@ class webosTvDevice {
 
         this.notificationButtonService = new Array();
         this.notificationButtons.forEach((value, i) => {
+
+            // get the notification message
+            let notificationMsg = null;
+
+            if (value.message !== undefined) {
+                notificationMsg = value.message;
+            } else {
+                notificationMsg = value;
+            }
+
+            // get name		
+            let norificationName = this.name + ' Notification: ' + notificationMsg;
+
+            if (value.name) {
+                norificationName = value.name;
+            }
+
             this.notificationButtons[i] = this.notificationButtons[i].toString();
-            let tmpNotification = new Service.Switch(this.name + ' Notification: ' + value, 'notificationButtonService' + i);
+            let tmpNotification = new Service.Switch(norificationName, 'notificationButtonService' + i);
             tmpNotification
                 .getCharacteristic(Characteristic.On)
                 .on('get', (callback) => {
                     this.getNotificationButtonState(callback);
                 })
                 .on('set', (state, callback) => {
-                    this.setNotificationButtonState(state, callback, this.notificationButtons[i]);
+                    this.setNotificationButtonState(state, callback, notificationMsg);
                 });
 
             this.enabledServices.push(tmpNotification);
@@ -1165,7 +1182,7 @@ class webosTvDevice {
                     this.logRequestError('Current channel - error while getting current channel info', err, res);
                     callback(null, false, null); // disable all switches
                 } else {
-                    this.logDebug('TV current channel: %s, %s', res.channelNumber, res.channelName);
+                    this.logDebug('TV current channel: %s, %s, channelId: %s', res.channelNumber, res.channelName, res.channelId);
                     if (channelNum === undefined || channelNum === null) { // if channelNum undefined or null then i am checking which channel is currently running; if set then continue normally
                         callback(null, true, res.channelNumber);
                     } else if (res.channelNumber === channelNum) {
