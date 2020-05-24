@@ -182,9 +182,9 @@ Wheter to additionally show inputs as buttons. Useful for automation. **Default:
 - `volumeControl` [optional]
 Wheter the volume control service is enabled. **Default: true**  
 Available values:
-  - *true* - slider and buttons
+  - *true* - slider and buttons (slider is not supported for a ARC sound output)
   - *false* - no volume control
-  - *"slider"* - just slider
+  - *"slider"* - just slider (not supported for a ARC sound output)
   - *"buttons"* - just buttons
 - `volumeLimit` [optional]
 The max allowed volume which can be set using the volume service. Range 1-100. **Default: 100**
