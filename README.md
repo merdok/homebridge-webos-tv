@@ -38,6 +38,7 @@ sudo npm install -g homebridge-webos-tv
 ## Configuration
 
 Add the `webostv` platform in `config.json` in your home directory inside `.homebridge`.
+
 Add your TV or multiply TVs in the `devices` or `tvs`  array.
 
 Example configuration:
@@ -127,7 +128,7 @@ This is located on your TV under `Settings > General > Mobile TV On`
 
 On newer TVs **LG Connect Apps** under the network settings needs to be enabled.
 
-### Adding the TV to Home app when using platform
+### Adding the TV to Home app
 Since HomeKit expects only one TV per bridge they will be declared as external accessories and acts as a bridge.  
 This means that a TV will not appear in your Home app until you add it!
 
@@ -148,7 +149,7 @@ Should always be "webostv".
 A list of your TVs.
 #### TV Configuration fields
 - `name` [required]
-Name of your tv.
+Name of your TV.
 - `ip` [required]
 ip address of your TV.
 - `mac` [required]
