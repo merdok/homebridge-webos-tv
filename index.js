@@ -25,7 +25,7 @@ module.exports = (homebridge) => {
 };
 
 
-class webosTvAccessory {
+class webosTvDevice {
     constructor(log, config, api) {
         this.log = log;
         this.api = api;
@@ -1637,6 +1637,15 @@ class webosTvAccessory {
 
 }
 
+// --== ACCESSORY STUFF  ==--
+
+class webosTvAccessory extends webosTvDevice {
+    constructor(log, config, api) {
+        super(log, config, api);
+        this.log.warn(`[${this.name}] WARNING - your tv is set up as an accessory, and this is not the preferred way anymore. Plase set up your tv in the config.json as a platform device. See the README on how to do that. Setting up the tv as an accessory will be removed in future release!`);
+    }
+}
+
 
 // --== PLATFORM STUFF  ==--
 class webosTvPlatform {
@@ -1662,7 +1671,7 @@ class webosTvPlatform {
         if (this.config.devices) {
             for (let device of this.config.devices) {
                 if (device) {
-                    new webosTvDevice(this.log, device, this.api);
+                    new webosTvPlatformDevice(this.log, device, this.api);
                 }
             }
         }
@@ -1671,7 +1680,7 @@ class webosTvPlatform {
         if (this.config.tvs) {
             for (let tv of this.config.tvs) {
                 if (tv) {
-                    new webosTvDevice(this.log, tv, this.api);
+                    new webosTvPlatformDevice(this.log, tv, this.api);
                 }
             }
         }
@@ -1694,7 +1703,7 @@ class webosTvPlatform {
 }
 
 
-class webosTvDevice extends webosTvAccessory {
+class webosTvPlatformDevice extends webosTvDevice {
     constructor(log, config, api) {
         super(log, config, api);
 

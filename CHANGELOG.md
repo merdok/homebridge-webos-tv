@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved logging
 - The channelButtonService now also accepts an array of objects as value
 - Wait till all tv information is retrieved
+- Platform is now the preferred way to use the plugin, when still using as an accessory a warning will be shown
 
 ### Removed
 - Input names are no longer beeing saved in a file, renaming should be done in the config.json
