@@ -6,8 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+## [1.8.0] - 2020-05-24
+
 ### Added
 - Extended the channelButtonService with an optional name
+- Extended the notificationButtonService with an optional name
 - Store launch points (apps, inputs)
 - Store channel list
 
@@ -16,9 +20,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed missing AccessoryInformation.Name warning
 - Improved logging
 - The channelButtonService now also accepts an array of objects as value
+- The notificationButtonService now also accepts an array of objects as value
 - Wait till all tv information is retrieved
 - Platform is now the preferred way to use the plugin, when still using as an accessory a warning will be shown
-- The notificationButtonService now also accepts an array of objects as value
 
 ### Removed
 - Input names are no longer beeing saved in a file, renaming should be done in the config.json
