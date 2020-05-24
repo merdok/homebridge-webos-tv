@@ -37,77 +37,10 @@ sudo npm install -g homebridge-webos-tv
 
 ## Configuration
 
-Add the accessory in `config.json` in your home directory inside `.homebridge`.
+Add the `webostv` platform in `config.json` in your home directory inside `.homebridge`.
+Add your TV or multiply TVs in the `devices` or `tvs`  array.
 
-Example configuration accessory:
-
-```js
-{
-  "accessories": [
-    {
-      "accessory": "webostv",
-      "name": "My webOS tv",
-      "ip": "192.168.0.40",
-      "mac": "ab:cd:ef:fe:dc:ba",
-      "keyFile": "/home/pi/.homebridge/lgtvKeyFile",
-      "pollingInterval": 10,
-      "inputs": [
-          {
-            "appId": "com.webos.app.livetv",
-            "name": "Live TV"
-          },
-          {
-            "appId": "com.webos.app.hdmi1",
-            "name": "PS4"
-          },
-          {
-            "appId": "youtube.leanback.v4",
-            "name": "YouTube",
-            "params":{
-		"contentTarget": "https://www.youtube.com/tv?v=Bey4XXJAqS8"
-            }
-          },
-          {
-            "appId": "com.webos.app.photovideo",
-            "name": "Photo Video"
-          }
-      ],
-      "showInputButtons": true,
-      "volumeControl": "buttons",
-      "channelControl": false,
-      "mediaControl": false,
-      "channelButtons": [3,5,7,8],
-      "notificationButtons": [
-         "Motion detected - living room",
-         "Motion detected - kitchen"
-      ],
-      "remoteControlButtons": [
-         "HOME",
-         "LIST",
-         "EXIT"
-      ],
-      "soundOutputButtons": [
-         "tv_speaker",
-         "external_optical",
-         "headphone"
-      ],
-       "remoteSequenceButtons": [
-          {
-              "sequence": ["HOME","RIGHT","RIGHT","RIGHT","ENTER"],
-              "name": "screen_share_seq"
-          },
-          {
-              "sequence": ["VOLUMEUP","VOLUMEDOWN","MUTE","MUTE"],
-              "name": "volume_seq",
-              "interval": 1000
-          }
-      ]
-    }
-  ]  
-}
-```
-
-Example configuration platform:
+Example configuration:
 
 ```js
 {
@@ -207,11 +140,15 @@ To add TV to HomeKit this follow this steps:
 - Tap on it and follow the steps
 - When you are asked for a **pin** then just use the **pin from the bridge section** in your **config.json**
 
-### Configuration fields
-- `accessory` [required]
+### Configuration
+#### Platform Configuration fields
+- `platform` [required]
 Should always be "webostv".
+- `devices` or `tvs`  [required]
+A list of your TVs.
+#### TV Configuration fields
 - `name` [required]
-Name of your accessory.
+Name of your tv.
 - `ip` [required]
 ip address of your TV.
 - `mac` [required]
