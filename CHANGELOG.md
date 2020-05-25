@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [1.8.2] - 2020-05-26
+
+### Added
+- An optional channelId can now be specified for the channelButtonService
+
+### Changed
+- Updated README
+- TV information request errors log silently now
+- Renamed name to channelName in the channelButtonService
+
+### Removed
+
+
 ## [1.8.1] - 2020-05-25
 
 ### Added

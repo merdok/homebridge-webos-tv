@@ -684,7 +684,7 @@ class webosTvDevice {
             }
 
             // get name
-            let inputName = this.name + ' App: ' + appId;
+            let inputName = this.name + ' App - ' + appId;
 
             if (value.name) {
                 inputName = value.name;
@@ -806,6 +806,7 @@ class webosTvDevice {
 
         this.channelButtonService = new Array();
         this.channelNumbers = new Array();
+        this.channelIds = new Array();
         this.channelButtons.forEach((value, i) => {
 
             // get channelNumber
@@ -820,15 +821,25 @@ class webosTvDevice {
             // convert to string if the channel number was not a string
             channelNumber = channelNumber.toString();
 
-            // get name		
-            let channelName = this.name + ' Channel: ' + channelNumber;
+            // get channelId
+            let channelId = null;
 
-            if (value.name) {
-                channelName = value.name;
+            if (value.channelId !== undefined) {
+                channelId = value.channelId;
+            }
+
+            // get name		
+            let channelName = this.name + ' Channel - ' + channelNumber;
+
+            if (value.channelName) {
+                channelName = value.channelName;
             }
 
             // store all channel numbers
             this.channelNumbers.push(channelNumber);
+
+            // store all channel ids
+            this.channelIds[parseInt(channelNumber)] = channelId;
 
             let tmpChannel = new Service.Switch(channelName, 'channelButtonService' + i);
             tmpChannel
@@ -867,7 +878,7 @@ class webosTvDevice {
             }
 
             // get name		
-            let norificationName = this.name + ' Notification: ' + notificationMsg;
+            let norificationName = this.name + ' Notification - ' + notificationMsg;
 
             if (value.name) {
                 norificationName = value.name;
@@ -901,7 +912,7 @@ class webosTvDevice {
         this.remoteControlButtonService = new Array();
         this.remoteControlButtons.forEach((value, i) => {
             this.remoteControlButtons[i] = this.remoteControlButtons[i].toString().toUpperCase();
-            let tmpRemoteControl = new Service.Switch(this.name + ' RC: ' + value, 'remoteControlButtonService' + i);
+            let tmpRemoteControl = new Service.Switch(this.name + ' RC - ' + value, 'remoteControlButtonService' + i);
             tmpRemoteControl
                 .getCharacteristic(Characteristic.On)
                 .on('get', (callback) => {
@@ -928,7 +939,7 @@ class webosTvDevice {
         this.soundOutputButtonService = new Array();
         this.soundOutputButtons.forEach((value, i) => {
             this.soundOutputButtons[i] = this.soundOutputButtons[i].toString();
-            let tmpSoundOutput = new Service.Switch(this.name + ' SO: ' + value, 'soundOutputButtonService' + i);
+            let tmpSoundOutput = new Service.Switch(this.name + ' SO - ' + value, 'soundOutputButtonService' + i);
             tmpSoundOutput
                 .getCharacteristic(Characteristic.On)
                 .on('get', (callback) => {
@@ -1219,7 +1230,8 @@ class webosTvDevice {
     openChannel(channelNum) {
         if (this.connected && this.lgtv) {
             this.lgtv.request('ssap://tv/openChannel', {
-                channelNumber: channelNum
+                channelNumber: channelNum,
+                channelId: this.channelIds[parseInt(channelNum)]
             }, (err, res) => {
                 if (!res || err || res.errorCode || !res.returnValue) {
                     this.logRequestError('Open channel - error while switching channel', err, res);
@@ -1444,10 +1456,10 @@ class webosTvDevice {
         if (this.connected) {
             if (state) {
                 if (this.tvCurrentAppId === WEBOS_LIVE_TV_APP_ID) { // it is only possible to switch channels when we are in the livetv app
-                    this.logDebug('Channel button service - switching to channel number %s', channelNum);
+                    this.logDebug('Channel button service - switching to channel number: %s, id: %s', channelNum, this.channelIds[parseInt(channelNum)]);
                     this.openChannel(channelNum);
                 } else { // if we are not in the livetv app, then switch to the livetv app and set launchLiveTvChannel, after the app is switched the channel will be switched to the selected
-                    this.logDebug('Channel button service - trying to switch to channel %s but the livetv app is not running, switching to livetv app', channelNum);
+                    this.logDebug('Channel button service - trying to switch to channel number: %s, id: %s, but the livetv app is not running, switching to livetv app', channelNum, this.channelIds[parseInt(channelNum)]);
                     this.launchLiveTvChannel = channelNum;
                     this.lgtv.request('ssap://system.launcher/launch', {
                         id: WEBOS_LIVE_TV_APP_ID
@@ -1463,9 +1475,9 @@ class webosTvDevice {
             callback();
         } else {
             if (state) {
-                this.logInfo('Channel button service - Trying to open channel number %s but TV is off, attempting to power on the TV', channelNum);
+                this.logInfo('Channel button service - Trying to open channel number: %s, id: %s, but TV is off, attempting to power on the TV', channelNum, this.channelIds[parseInt(channelNum)]);
                 this.powerOnTvWithCallback(() => {
-                    this.logDebug('Channel button service - tv powered on, switching to channel: %s', channelNum);
+                    this.logDebug('Channel button service - tv powered on, switching to channel number: %s, id: %s', channelNum, this.channelIds[parseInt(channelNum)]);
                     this.openChannel(channelNum);
                     callback();
                 });
