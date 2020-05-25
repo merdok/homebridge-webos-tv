@@ -10,7 +10,7 @@ let lgtv, pointerInputSocket;
 
 const PLUGIN_NAME = 'homebridge-webos-tv';
 const PLATFORM_NAME = 'webostv';
-const PLUGIN_VERSION = '1.8.1';
+const PLUGIN_VERSION = '1.8.0';
 const TV_WEBSOCKET_PORT = 3000;
 
 const WEBOS_LIVE_TV_APP_ID = 'com.webos.app.livetv';
@@ -175,16 +175,13 @@ class webosTvDevice {
     connect() {
         this.logInfo('Connected to TV');
         this.connected = true;
-        let tmpInfoPromises = this.getTvInformation();
-
-        Promise.all(tmpInfoPromises).then(values => {
+        this.getTvInformation().then(() => {
             this.logDebug('Got TV information proceeding with launch');
             this.updateTvStatus(null, true);
             this.subscribeToServices();
             this.connectToPointerInputSocket();
             this.updateAccessoryStatus();
         });
-
     }
 
     disconnect() {
@@ -207,17 +204,14 @@ class webosTvDevice {
 
 
     // --== INIT HELPER METHODS ==--
-    getTvInformation() {
-
+    async getTvInformation() {
         this.logDebug('Requesting TV information');
-
         let tvInfoPromises = [];
 
         tvInfoPromises.push(new Promise((resolve, reject) => {
             this.lgtv.request('ssap://system/getSystemInfo', (err, res) => {
                 if (!res || err || res.errorCode) {
-                    this.logRequestError('System info - error while getting system info', err, res);
-                    reject(new Error(`[${this.name}] Failed to get system info`));
+                    this.logRequestDebug('System info - error while getting system info', err, res);
                 } else {
                     delete res['returnValue'];
                     this.logDebug('System info: \n' + JSON.stringify(res, null, 2));
@@ -233,42 +227,39 @@ class webosTvDevice {
                     } else {
                         this.logDebug('TV info file already exists, not saving!');
                     }
-                    resolve();
                 }
+                resolve();
             });
         }));
 
         tvInfoPromises.push(new Promise((resolve, reject) => {
             this.lgtv.request('ssap://com.webos.service.update/getCurrentSWInformation', (err, res) => {
                 if (!res || err || res.errorCode) {
-                    this.logRequestError('Sw information - error while getting sw information', err, res);
-                    reject(new Error(`[${this.name}] Failed to get software information`));
+                    this.logRequestDebug('Sw information - error while getting sw information', err, res);
                 } else {
                     delete res['returnValue'];
                     this.logDebug('Sw information: \n' + JSON.stringify(res, null, 2));
-                    resolve();
                 }
+                resolve();
             });
         }));
 
         tvInfoPromises.push(new Promise((resolve, reject) => {
             this.lgtv.request('ssap://api/getServiceList', (err, res) => {
                 if (!res || err || res.errorCode) {
-                    this.logRequestError('Service list - error while getting service list', err, res);
-                    reject(new Error(`[${this.name}] Failed to get service list`));
+                    this.logRequestDebug('Service list - error while getting service list', err, res);
                 } else {
                     delete res['returnValue'];
                     this.logDebug('Service list: \n' + JSON.stringify(res, null, 2));
-                    resolve();
                 }
+                resolve();
             });
         }));
 
         tvInfoPromises.push(new Promise((resolve, reject) => {
             this.lgtv.request('ssap://com.webos.applicationManager/listLaunchPoints', (err, res) => {
                 if (!res || err || res.errorCode) {
-                    this.logRequestError('Launch points list - error while getting the launch points list', err, res);
-                    reject(new Error(`[${this.name}] Failed to get launch points`));
+                    this.logRequestDebug('Launch points list - error while getting the launch points list', err, res);
                 } else {
                     if (res && res.launchPoints && Array.isArray(res.launchPoints)) {
                         for (let launchPoint of res.launchPoints) {
@@ -281,16 +272,15 @@ class webosTvDevice {
                     } else {
                         this.logDebug('Launch points list - error while parsing the launch point list \n' + JSON.stringify(res, null, 2));
                     }
-                    resolve();
                 }
+                resolve();
             });
         }));
 
         tvInfoPromises.push(new Promise((resolve, reject) => {
             this.lgtv.request('ssap://tv/getChannelList', (err, res) => {
                 if (!res || err || res.errorCode) {
-                    this.logRequestError('Channel list - error while getting the channel list', err, res);
-                    reject(new Error(`[${this.name}] Failed to get channel list`));
+                    this.logRequestDebug('Channel list - error while getting the channel list', err, res);
                 } else {
                     if (res && res.channelList && Array.isArray(res.channelList)) {
                         for (let channelInfo of res.channelList) {
@@ -306,12 +296,12 @@ class webosTvDevice {
                     } else {
                         this.logDebug('Channel list - error while parsing channel list \n' + JSON.stringify(res, null, 2));
                     }
-                    resolve();
                 }
+                resolve();
             });
         }));
 
-        return tvInfoPromises;
+        await Promise.allSettled(tvInfoPromises);
     }
 
     subscribeToServices() {
@@ -594,6 +584,7 @@ class webosTvDevice {
                     .setCharacteristic(Characteristic.ConfiguredName, inputName)
                     .setCharacteristic(Characteristic.IsConfigured, Characteristic.IsConfigured.CONFIGURED)
                     .setCharacteristic(Characteristic.InputSourceType, Characteristic.InputSourceType.APPLICATION)
+                    .setCharacteristic(Characteristic.TargetVisibilityState, Characteristic.TargetVisibilityState.SHOWN)
                     .setCharacteristic(Characteristic.CurrentVisibilityState, Characteristic.CurrentVisibilityState.SHOWN);
 
                 this.tvService.addLinkedService(tmpInput);
@@ -1658,6 +1649,18 @@ class webosTvDevice {
         }
     }
 
+    logRequestDebug(message, err, res) {
+        this.logDebug(message);
+
+        if (err) {
+            this.logDebug('Error: %s', err);
+        }
+
+        if (res && res.errorText) {
+            this.logDebug('Error message: %s', res.errorText);
+        }
+    }
+
 }
 
 // --== ACCESSORY STUFF  ==--
@@ -1697,6 +1700,8 @@ class webosTvPlatform {
                     new webosTvPlatformDevice(this.log, device, this.api);
                 }
             }
+        } else if (this.config.devices) {
+            this.log.info('The devices property is not of type array. Cannot initialize. Type: %s', typeof this.config.devices);
         }
 
         // also read from config.tvs
@@ -1706,6 +1711,8 @@ class webosTvPlatform {
                     new webosTvPlatformDevice(this.log, tv, this.api);
                 }
             }
+        } else if (this.config.tvs) {
+            this.log.info('The tvs property is not of type array. Cannot initialize. Type: %s', typeof this.config.tvs);
         }
 
         if (!this.config.devices && !this.config.tvs) {
