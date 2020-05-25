@@ -198,8 +198,10 @@ Wheter the channel buttons service is enabled. This allows to create buttons for
   - Set an array of channel numbers as the value
   - You can also set an array of objects as the value. An object can have the following properties:
     - *channelNumber* - [required] the channel number,
-    - *name* - [optional] the channel name, 
+    - *channelId* - [optional] the channel id,
+    - *channelName* - [optional] the channel name, 
   - Channels can also be opened when the TV is off, in that case an attempt to power on the TV and afterwards open the chosen channel will be made.
+  - Some webos TVs require the *channelId* in order to be able to switch channels, in that case this property needs to be specified. To get the *channelId* simply change a channel on your TV and check the homebridge console. The *channelId* of the current channel will be printed. 
 - `notificationButtons` [optional] 
 Wheter the notification buttons service is enabled. This allows to create buttons which when pressed display the specified text on the TV screen. Useful for HomeKit automation or to display text on TV for viewers. **Default: "" (disabled)**
   - Set an array of notification texts as the value
