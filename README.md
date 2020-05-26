@@ -132,7 +132,7 @@ On newer TVs **LG Connect Apps** under the network settings needs to be enabled.
 Since HomeKit expects only one TV per bridge they will be declared as external accessories and acts as a bridge.  
 This means that a TV will not appear in your Home app until you add it!
 
-To add TV to HomeKit this follow this steps:
+To add a TV to HomeKit follow this steps:
 
 - Open the Home app
 - Select **Add Accessory**
