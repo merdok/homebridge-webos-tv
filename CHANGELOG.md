@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [1.8.3] - 2020-05-27
+
+### Added
+
+### Changed
+- Do not shutdown homebridge when mandatory information is missing, instead display an error
+- Changed default prefsDir path to "~/.homebridge/.webosTv"
+
+### Removed
+- Removed unused dependency
+
+
 ## [1.8.2] - 2020-05-26
 
 ### Added

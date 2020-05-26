@@ -2,7 +2,6 @@ const Lgtv2 = require('lgtv2');
 const wol = require('wake_on_lan');
 const tcpp = require('tcp-ping');
 const fs = require('fs');
-const ppath = require('persist-path');
 const mkdirp = require('mkdirp');
 
 let Service, Characteristic, Homebridge, Accessory;
@@ -29,10 +28,17 @@ class webosTvDevice {
     constructor(log, config, api) {
         this.log = log;
         this.api = api;
+        this.startupError = null;
 
         // check if we have mandatory device info
-        if (!config.ip) throw new Error(`TV ip address is required for ${config.name}`);
-        if (!config.mac) throw new Error(`TV mac address is required for ${config.name}`);
+        try {
+            if (!config.ip) throw new Error(`TV ip address is required for ${config.name}`);
+            if (!config.mac) throw new Error(`TV mac address is required for ${config.name}`);
+        } catch (error) {
+            this.logError(error);
+            this.startupError = error;
+            return;
+        }
 
         // configuration
         this.name = config.name || 'webOS TV';
@@ -40,7 +46,7 @@ class webosTvDevice {
         this.mac = config.mac;
         this.broadcastAdr = config.broadcastAdr || '255.255.255.255';
         this.keyFile = config.keyFile;
-        this.prefsDir = config.prefsDir || ppath('webosTv/');
+        this.prefsDir = config.prefsDir || api.user.storagePath() + '/.webosTv/';
         this.isLegacyTvService = config.legacyTvService;
         if (this.isLegacyTvService === undefined) {
             this.isLegacyTvService = false;
@@ -437,7 +443,7 @@ class webosTvDevice {
             let infoArr = JSON.parse(fs.readFileSync(this.tvInfoFile));
             modelName = infoArr.modelName;
         } catch (err) {
-            this.logDebug('Input names file does not exist');
+            this.logDebug('TV info file does not exist');
         }
 
         // there is currently no way to update the AccessoryInformation service after it was added to the service list
@@ -1633,20 +1639,16 @@ class webosTvDevice {
     }
 
 
-    getServices() {
-        return this.enabledServices;
-    }
-
     logInfo(message, ...args) {
-        this.log.info(`[${this.name}] ` + message, ...args);
+        this.log.info((this.name ? `[${this.name}] ` : "") + message, ...args);
     }
 
     logDebug(message, ...args) {
-        this.log.debug(`[${this.name}] ` + message, ...args);
+        this.log.debug((this.name ? `[${this.name}] ` : "") + message, ...args);
     }
 
     logError(message, ...args) {
-        this.log.error(`[${this.name}] ` + message, ...args);
+        this.log.error((this.name ? `[${this.name}] ` : "") + message, ...args);
     }
 
     logRequestError(message, err, res) {
@@ -1680,7 +1682,18 @@ class webosTvDevice {
 class webosTvAccessory extends webosTvDevice {
     constructor(log, config, api) {
         super(log, config, api);
+
+        if (this.startupError) {
+            this.log.error("Failed to create accessory device, missing mandatory information!");
+            this.log.error("Please check your device config!");
+            return;
+        }
+
         this.log.warn(`[${this.name}] WARNING - your tv is set up as an accessory, and this is not the preferred way anymore. Plase set up your tv in the config.json as a platform device. See the README on how to do that. Setting up the tv as an accessory will be removed in future release!`);
+    }
+
+    getServices() {
+        return this.enabledServices;
     }
 }
 
@@ -1748,6 +1761,12 @@ class webosTvPlatform {
 class webosTvPlatformDevice extends webosTvDevice {
     constructor(log, config, api) {
         super(log, config, api);
+
+        if (this.startupError) {
+            this.log.error("Failed to create platform device, missing mandatory information!");
+            this.log.error("Please check your device config!");
+            return;
+        }
 
         this.log.info(`Init - initializing device with name: ${this.name}`);
 

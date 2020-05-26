@@ -24,8 +24,7 @@
     "lgtv2": "^1.4.1",
     "wake_on_lan": "^0.0.4",
     "tcp-ping": "^0.1.1",
-    "mkdirp": "^0.5.1",
-    "persist-path": "^1.0.2"
+    "mkdirp": "^0.5.1"
   },
   "repository": {
     "type": "git",

@@ -159,7 +159,7 @@ If homebridge runs on a host with more than one network interface use this to sp
 - `keyFile` [optional]
 To prevent the TV from asking for permission when you reboot homebridge, specify a file path to store the permission token. If the file doesn't exist it'll be created. Don't specify a directory or you'll get an `EISDIR` error.
 - `prefsDir` [optional]
-The directory where TV model info should be saved. **Default: "~/.webosTv"**
+The directory where TV model info should be saved. **Default: "~/.homebridge/.webosTv"**
 - `pollingInterval` [optional]
 The TV state background polling interval in seconds. **Default: 5**
 - `legacyTvService` [optional]
