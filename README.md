@@ -23,7 +23,7 @@ The legacy TV service is only recommended if your iOS device is not running on i
 ## Installation
 
 If you are new to Homebridge, please first read the Homebridge [documentation](https://www.npmjs.com/package/homebridge).
-If you are running on a Raspberry, you will find a tutorial in the [homebridge-punt Wiki](https://github.com/cflurin/homebridge-punt/wiki/Running-Homebridge-on-a-Raspberry-Pi).
+If you are running on a Raspberry, you will find a tutorial in the [homebridge Wiki](https://github.com/homebridge/homebridge/wiki/Install-Homebridge-on-Raspbian).
 
 Install homebridge:
 ```sh
