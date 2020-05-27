@@ -152,7 +152,7 @@ class webosTvDevice {
         });
 
         this.lgtv.on('error', (error) => {
-            this.logError('Error - %s', error);
+            this.logDebug('Error - %s', error);
         });
 
         this.lgtv.on('prompt', () => {
@@ -406,7 +406,7 @@ class webosTvDevice {
         // current channel
         this.lgtv.subscribe('ssap://tv/getCurrentChannel', (err, res) => {
             if (!res || err || res.errorCode) {
-                this.logRequestError('TV channel status - error while getting current channel status', err, res);
+                this.logRequestDebug('TV channel status - error while getting current channel status', err, res); // not important, subscribe only works when live tv is the foreground app when connecting, logDebug
             } else {
                 if (this.tvCurrentChannel !== res.channelNumber) {
                     this.logInfo('Current channel status changed');
@@ -421,7 +421,7 @@ class webosTvDevice {
         // sound output
         this.lgtv.subscribe('ssap://com.webos.service.apiadapter/audio/getSoundOutput', (err, res) => {
             if (!res || err || res.errorCode) {
-                this.logRequestError('TV sound output - error while getting current sound output status', err, res);
+                this.logRequestDebug('TV sound output - error while getting current sound output status', err, res); // not important, logDebug
             } else {
                 if (this.tvCurrentSoundOutput !== res.soundOutput) {
                     this.logInfo('Sound output changed');
@@ -1787,4 +1787,3 @@ class webosTvPlatformDevice extends webosTvDevice {
         this.api.publishExternalAccessories(PLUGIN_NAME, [this.tvAccesory]);
     }
 }
-
