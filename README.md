@@ -9,8 +9,8 @@
 
 </span>
 
-`homebridge-webos-tv` is a plugin for Homebridge which allows you to control your LG webOS TV from your Home app! It should work with all TVs that support webOS2 and newer.  
-If you are already running a TV with native Homekit integration then you can still use this plugin to add even more features and functionality to your TV. 
+`homebridge-webos-tv` is a plugin for homebridge which allows you to control your LG webOS TV from your Home app! It should work with all TVs that support webOS2 and newer.  
+If you are already running a TV with native Homekit integration then you can still benefit from using this plugin with adding even more features and functionality to your TV. 
 
 ### Features
 * HomeKit TV integration
@@ -31,7 +31,7 @@ The legacy TV service is only recommended if your iOS device is not running on i
 
 ## Installation
 
-If you are new to Homebridge, please first read the Homebridge [documentation](https://www.npmjs.com/package/homebridge).
+If you are new to homebridge, please first read the homebridge [documentation](https://www.npmjs.com/package/homebridge).
 If you are running on a Raspberry, you will find a tutorial in the [homebridge wiki](https://github.com/homebridge/homebridge/wiki/Install-Homebridge-on-Raspbian).
 
 Install homebridge:
