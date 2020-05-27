@@ -2,6 +2,8 @@
   "pluginAlias": "webostv",
   "pluginType": "platform",
   "singular": true,
+  "headerDisplay": "Homebridge plugin for LG webOS TVs",
+  "footerDisplay": "For a detailed description, see the [README](https://github.com/merdok/homebridge-webos-tv#configuration-1)",
   "schema": {
     "devices": {
       "title": "Devices",
@@ -12,6 +14,7 @@
         "properties": {
           "name": {
             "title": "Name",
+            "description": "The name of your TV.",
             "type": "string",
             "default": "My LG TV",
             "minLength": 1,
@@ -19,50 +22,59 @@
           },
           "ip": {
             "title": "TV ip address",
+            "description": "The ip address of your TV.",
             "type": "string",
             "required": true
           },
           "mac": {
             "title": "TV mac address",
+            "description": "The mac address of your TV.",
             "type": "string",
             "required": true
           },
           "broadcastAdr": {
             "title": "Broadcast address",
+            "description": "If homebridge runs on a host with more than one network interface use this to specify the broadcast address.",
             "type": "string",
             "required": false
           },
           "keyFile": {
             "title": "Key file location",
+            "description": "The location where to store the tv key file.",
             "type": "string",
             "required": false
           },
           "prefsDir": {
             "title": "Prefs directory",
+            "description": "The location where to store tv information.",
             "type": "string",
-            "default": "~/.webosTv",
+            "default": "~/.homebridge/.webosTv",
             "required": false
           },
           "pollingInterval": {
-            "title": "Background polling interval in seconds",
+            "title": "Background polling interval",
+            "description": "How often to check the status f the tv in seconds.",
             "type": "number",
             "default": 5,
             "required": false
           },
           "legacyTvService": {
             "title": "Emulate the TV as a switch",
+            "description": "Show the TV as a simple on/off switch.",
             "type": "boolean",
             "default": false,
             "required": false
           },
           "showInputButtons": {
             "title": "Show input buttons",
+            "description": "Wether to show buttons for each input, useful for automation.",
             "type": "boolean",
             "default": false,
             "required": false
           },
           "volumeControl": {
             "title": "Volume control service",
+            "description": "Wether to enable additional volume control.",
             "type": [
               "boolean",
               "string"
@@ -78,6 +90,7 @@
           },
           "volumeLimit": {
             "title": "Volume limit for volume service",
+            "description": "Allows to limit the volume which can be set using the volume service.",
             "type": "number",
             "default": 100,
             "maximum": 100,
@@ -86,18 +99,21 @@
           },
           "channelControl": {
             "title": "Channel control service",
+            "description": "Wether to show channel up/down buttons.",
             "type": "boolean",
             "default": true,
             "required": false
           },
           "mediaControl": {
             "title": "Media control service",
+            "description": "Wether to show media control buttons.",
             "type": "boolean",
             "default": false,
             "required": false
           },
           "inputs": {
             "title": "Inputs",
+            "description": "Inputs which will appear for the TV.",
             "type": "array",
             "items": {
               "type": "object",
@@ -105,7 +121,7 @@
                 "appId": {
                   "title": "appId",
                   "type": "string",
-                  "required": false
+                  "required": true
                 },
                 "name": {
                   "title": "name",
@@ -124,22 +140,54 @@
           },
           "channelButtons": {
             "title": "Channel buttons",
+            "description": "Allows to create buttons for specific channel.",
             "type": "array",
             "items": {
-              "type": "string"
+              "type": "object",
+              "properties": {
+                "channelNumber": {
+                  "title": "Channel number",
+                  "type": "string",
+                  "required": true
+                },
+                "channelId": {
+                  "title": "Channel id",
+                  "type": "string",
+                  "required": false
+                },
+                "channelName": {
+                  "title": "Channel name",
+                  "type": "string",
+                  "required": false
+                }
+              }
             },
             "required": false
           },
           "notificationButtons": {
             "title": "Notification buttons",
+            "description": "Allows to create buttons that show notifications on your TV.",
             "type": "array",
             "items": {
-              "type": "string"
+              "type": "object",
+              "properties": {
+                "message": {
+                  "title": "message",
+                  "type": "string",
+                  "required": true
+                },
+                "name": {
+                  "title": "name",
+                  "type": "string",
+                  "required": false
+                }
+              }
             },
             "required": false
           },
           "remoteControlButtons": {
             "title": "Remote control buttons",
+            "description": "Allows to create buttons that emulate remote control presses.",
             "type": "array",
             "items": {
               "type": "string",
@@ -190,6 +238,7 @@
           },
           "soundOutputButtons": {
             "title": "Sound output buttons",
+            "description": "Allows to create buttons that can switch between sound outputs.",
             "type": "array",
             "items": {
               "type": "string",
@@ -208,6 +257,7 @@
           },
           "remoteSequenceButtons": {
             "title": "Remote sequence buttons",
+            "description": "Allows to create buttons that run a specified remote control sequence.",
             "type": "array",
             "items": {
               "type": "object",
@@ -241,9 +291,52 @@
             "required": false
           },
           "infoButtonAction": {
-            "title": "Action for the info button on the remote control in the iOS control center",
+            "title": "Info button action",
+            "description": "Action for the info button on the remote control in the iOS control center.",
             "type": "string",
             "default": "INFO",
+            "enum": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8",
+              "9",
+              "0",
+              "LIST",
+              "AD",
+              "DASH",
+              "MUTE",
+              "VOLUMEUP",
+              "VOLUMEDOWN",
+              "CHANNELUP",
+              "CHANNELDOWN",
+              "HOME",
+              "MENU",
+              "UP",
+              "DOWN",
+              "LEFT",
+              "RIGHT",
+              "CLICK",
+              "BACK",
+              "EXIT",
+              "PROGRAM",
+              "ENTER",
+              "INFO",
+              "RED",
+              "GREEN",
+              "YELLOW",
+              "BLUE",
+              "LIVE_ZOOM",
+              "CC",
+              "PLAY",
+              "PAUSE",
+              "REWIND",
+              "FASTFORWARD"
+            ],
             "required": false
           }
         }
@@ -251,4 +344,3 @@
     }
   }
 }
-
