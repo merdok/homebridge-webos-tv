@@ -57,7 +57,7 @@ class webosTvDevice {
         }
         this.volumeControl = config.volumeControl;
         if (this.volumeControl === undefined) {
-            this.volumeControl = true;
+            this.volumeControl = "both";
         }
         this.volumeLimit = config.volumeLimit;
         if (this.volumeLimit === undefined || isNaN(this.volumeLimit) || this.volumeLimit < 0) {
@@ -624,12 +624,12 @@ class webosTvDevice {
 
     // additional services ----------------------------------------------------------------
     prepareVolumeService() {
-        if (!this.volumeControl) {
+        if (!this.volumeControl || this.volumeControl === "none") {
             return;
         }
 
         // slider/lightbulb
-        if (this.volumeControl === true || this.volumeControl === 'slider') {
+        if (this.volumeControl === true || this.volumeControl === "both" || this.volumeControl === 'slider') {
             this.volumeService = new Service.Lightbulb(this.name + ' Volume', 'volumeService');
             this.volumeService
                 .getCharacteristic(Characteristic.On)
@@ -644,7 +644,7 @@ class webosTvDevice {
         }
 
         // volume up/down buttons
-        if (this.volumeControl === true || this.volumeControl === 'buttons') {
+        if (this.volumeControl === true || this.volumeControl === "both" || this.volumeControl === 'buttons') {
             this.volumeUpService = new Service.Switch(this.name + ' Volume Up', 'volumeUpService');
             this.volumeUpService
                 .getCharacteristic(Characteristic.On)
@@ -1787,3 +1787,4 @@ class webosTvPlatformDevice extends webosTvDevice {
         this.api.publishExternalAccessories(PLUGIN_NAME, [this.tvAccesory]);
     }
 }
+
