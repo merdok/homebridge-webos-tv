@@ -9,7 +9,7 @@ let lgtv, pointerInputSocket;
 
 const PLUGIN_NAME = 'homebridge-webos-tv';
 const PLATFORM_NAME = 'webostv';
-const PLUGIN_VERSION = '1.8.4';
+const PLUGIN_VERSION = '1.8.5';
 const TV_WEBSOCKET_PORT = 3000;
 
 const WEBOS_LIVE_TV_APP_ID = 'com.webos.app.livetv';

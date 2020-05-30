@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [1.8.5] - 2020-05-31
+
+### Added
+
+### Changed
+- Updated README
+- Small improvements to the volume control service
+- More improvements to config.schema.json
+
+### Removed
+
+
 ## [1.8.4] - 2020-05-28
 
 ### Added
