@@ -24,6 +24,7 @@
             "title": "TV ip address",
             "description": "The ip address of your TV.",
             "type": "string",
+            "format": "ipv4",
             "required": true
           },
           "mac": {
@@ -36,84 +37,133 @@
             "title": "Broadcast address",
             "description": "If homebridge runs on a host with more than one network interface use this to specify the broadcast address.",
             "type": "string",
-            "required": false
+            "format": "ipv4"
           },
           "keyFile": {
             "title": "Key file location",
-            "description": "The location where to store the tv key file.",
-            "type": "string",
-            "required": false
+            "description": "The location where to store the tv key file. Default is: ~/.lgtv2/keyfile",
+            "type": "string"
           },
           "prefsDir": {
             "title": "Prefs directory",
-            "description": "The location where to store tv information.",
-            "type": "string",
-            "default": "~/.homebridge/.webosTv",
-            "required": false
+            "description": "The location where to store tv information. Default is: ~/.homebridge/.webosTv",
+            "type": "string"
           },
           "pollingInterval": {
             "title": "Background polling interval",
-            "description": "How often to check the status f the tv in seconds.",
+            "description": "How often to check the status of the tv in seconds.",
             "type": "number",
-            "default": 5,
-            "required": false
+            "default": 5
           },
           "legacyTvService": {
             "title": "Emulate the TV as a switch",
             "description": "Show the TV as a simple on/off switch.",
-            "type": "boolean",
-            "default": false,
-            "required": false
+            "type": "boolean"
           },
           "showInputButtons": {
             "title": "Show input buttons",
-            "description": "Wether to show buttons for each input, useful for automation.",
-            "type": "boolean",
-            "default": false,
-            "required": false
+            "description": "Wether to show a on/off button for each input, useful for automations.",
+            "type": "boolean"
           },
           "volumeControl": {
             "title": "Volume control service",
-            "description": "Wether to enable additional volume control.",
+            "description": "Wether to enable additional volume control. Button - adds volume up/down buttons, Slider - adds a light bulb which acts as a volume controller.",
             "type": [
-              "boolean",
               "string"
             ],
-            "enum": [
-              true,
-              false,
-              "slider",
-              "switch"
+            "oneOf": [
+              {
+                "title": "None",
+                "const": "none"
+              },
+              {
+                "title": "Both - slider and switch",
+                "const": "both"
+              },
+              {
+                "title": "Slider",
+                "const": "slider"
+              },
+              {
+                "title": "Switch",
+                "const": "switch"
+              }
             ],
-            "default": true,
+            "default": "both",
             "required": true
           },
           "volumeLimit": {
-            "title": "Volume limit for volume service",
+            "title": "Volume limit for the volume service",
             "description": "Allows to limit the volume which can be set using the volume service.",
-            "type": "number",
+            "type": "integer",
             "default": 100,
             "maximum": 100,
-            "minimum": 1,
-            "required": false
+            "minimum": 1
           },
           "channelControl": {
             "title": "Channel control service",
             "description": "Wether to show channel up/down buttons.",
             "type": "boolean",
-            "default": true,
-            "required": false
+            "default": true
           },
           "mediaControl": {
             "title": "Media control service",
             "description": "Wether to show media control buttons.",
             "type": "boolean",
-            "default": false,
-            "required": false
+            "default": false
+          },
+          "infoButtonAction": {
+            "title": "Info button action",
+            "description": "Action for the info button on the remote control in the iOS control center.",
+            "type": "string",
+            "default": "INFO",
+            "enum": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8",
+              "9",
+              "0",
+              "LIST",
+              "AD",
+              "DASH",
+              "MUTE",
+              "VOLUMEUP",
+              "VOLUMEDOWN",
+              "CHANNELUP",
+              "CHANNELDOWN",
+              "HOME",
+              "MENU",
+              "UP",
+              "DOWN",
+              "LEFT",
+              "RIGHT",
+              "CLICK",
+              "BACK",
+              "EXIT",
+              "PROGRAM",
+              "ENTER",
+              "INFO",
+              "RED",
+              "GREEN",
+              "YELLOW",
+              "BLUE",
+              "LIVE_ZOOM",
+              "CC",
+              "PLAY",
+              "PAUSE",
+              "REWIND",
+              "FASTFORWARD"
+            ],
+            "required": true
           },
           "inputs": {
             "title": "Inputs",
-            "description": "Inputs which will appear for the TV.",
+            "description": "Inputs which will appear for the TV. Params needs to be added manually in the config.json",
             "type": "array",
             "items": {
               "type": "object",
@@ -125,44 +175,37 @@
                 },
                 "name": {
                   "title": "name",
-                  "type": "string",
-                  "required": false
+                  "type": "string"
                 },
                 "params": {
                   "title": "params",
-                  "type": "object",
-                  "required": false
+                  "type": "object"
                 }
               }
-            },
-            "default": false,
-            "required": false
+            }
           },
           "channelButtons": {
             "title": "Channel buttons",
-            "description": "Allows to create buttons for specific channel.",
+            "description": "Allows to create buttons for specific channels.",
             "type": "array",
             "items": {
               "type": "object",
               "properties": {
                 "channelNumber": {
                   "title": "Channel number",
-                  "type": "string",
+                  "type": "number",
                   "required": true
                 },
                 "channelId": {
                   "title": "Channel id",
-                  "type": "string",
-                  "required": false
+                  "type": "string"
                 },
                 "channelName": {
                   "title": "Channel name",
-                  "type": "string",
-                  "required": false
+                  "type": "string"
                 }
               }
-            },
-            "required": false
+            }
           },
           "notificationButtons": {
             "title": "Notification buttons",
@@ -178,12 +221,10 @@
                 },
                 "name": {
                   "title": "name",
-                  "type": "string",
-                  "required": false
+                  "type": "string"
                 }
               }
-            },
-            "required": false
+            }
           },
           "remoteControlButtons": {
             "title": "Remote control buttons",
@@ -233,8 +274,80 @@
                 "REWIND",
                 "FASTFORWARD"
               ]
-            },
-            "required": false
+            }
+          },
+          "remoteSequenceButtons": {
+            "title": "Remote sequence buttons",
+            "description": "Allows to create buttons that run a specified remote control sequence.",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "sequence": {
+                  "title": "sequence",
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                      "0",
+                      "LIST",
+                      "AD",
+                      "DASH",
+                      "MUTE",
+                      "VOLUMEUP",
+                      "VOLUMEDOWN",
+                      "CHANNELUP",
+                      "CHANNELDOWN",
+                      "HOME",
+                      "MENU",
+                      "UP",
+                      "DOWN",
+                      "LEFT",
+                      "RIGHT",
+                      "CLICK",
+                      "BACK",
+                      "EXIT",
+                      "PROGRAM",
+                      "ENTER",
+                      "INFO",
+                      "RED",
+                      "GREEN",
+                      "YELLOW",
+                      "BLUE",
+                      "LIVE_ZOOM",
+                      "CC",
+                      "PLAY",
+                      "PAUSE",
+                      "REWIND",
+                      "FASTFORWARD"
+                    ],
+                    "required": true
+                  },
+                  "required": true
+                },
+                "name": {
+                  "title": "name",
+                  "type": "string"
+                },
+                "interval": {
+                  "title": "interval",
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "default": 500
+                }
+              }
+            }
           },
           "soundOutputButtons": {
             "title": "Sound output buttons",
@@ -252,92 +365,7 @@
                 "tv_speaker_headphone",
                 "bt_soundbar"
               ]
-            },
-            "required": false
-          },
-          "remoteSequenceButtons": {
-            "title": "Remote sequence buttons",
-            "description": "Allows to create buttons that run a specified remote control sequence.",
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "sequence": {
-                  "title": "sequence",
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "required": true
-                  },
-                  "required": true
-                },
-                "name": {
-                  "title": "name",
-                  "type": "string",
-                  "required": false
-                },
-                "interval": {
-                  "title": "interval",
-                  "type": "array",
-                  "items": {
-                    "type": "number"
-                  },
-                  "default": 500,
-                  "required": false
-                }
-              }
-            },
-            "default": false,
-            "required": false
-          },
-          "infoButtonAction": {
-            "title": "Info button action",
-            "description": "Action for the info button on the remote control in the iOS control center.",
-            "type": "string",
-            "default": "INFO",
-            "enum": [
-              "1",
-              "2",
-              "3",
-              "4",
-              "5",
-              "6",
-              "7",
-              "8",
-              "9",
-              "0",
-              "LIST",
-              "AD",
-              "DASH",
-              "MUTE",
-              "VOLUMEUP",
-              "VOLUMEDOWN",
-              "CHANNELUP",
-              "CHANNELDOWN",
-              "HOME",
-              "MENU",
-              "UP",
-              "DOWN",
-              "LEFT",
-              "RIGHT",
-              "CLICK",
-              "BACK",
-              "EXIT",
-              "PROGRAM",
-              "ENTER",
-              "INFO",
-              "RED",
-              "GREEN",
-              "YELLOW",
-              "BLUE",
-              "LIVE_ZOOM",
-              "CC",
-              "PLAY",
-              "PAUSE",
-              "REWIND",
-              "FASTFORWARD"
-            ],
-            "required": false
+            }
           }
         }
       }
