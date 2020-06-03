@@ -22,7 +22,7 @@
           },
           "ip": {
             "title": "TV ip address",
-            "description": "The ip address of your TV.", 
+            "description": "The ip address of your TV.",
             "type": "string",
             "format": "ipv4",
             "required": true
@@ -176,10 +176,6 @@
                 "name": {
                   "title": "name",
                   "type": "string"
-                },
-                "params": {
-                  "title": "params",
-                  "type": "object"
                 }
               }
             }
