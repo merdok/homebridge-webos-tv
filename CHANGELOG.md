@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [1.8.8] - 2020-06-06
+
+### Added
+
+### Changed
+- Fixed an issue which might have caused disconnects on some TVs
+
+### Removed
+
+
 ## [1.8.7] - 2020-06-04
 
 ### Added
