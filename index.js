@@ -99,7 +99,6 @@ class webosTvDevice {
         this.tvCurrentSoundOutput = '';
 
         this.launchPointsList = [];
-        this.channelList = [];
 
 
         // check if prefs directory ends with a /, if not then add it
@@ -181,6 +180,7 @@ class webosTvDevice {
     connect() {
         this.logInfo('Connected to TV');
         this.connected = true;
+        this.launchPointsList = []; // reset launch points list on a new connection
         this.getTvInformation().then(() => {
             this.logDebug('Got TV information proceeding with launch');
             this.updateTvStatus(null, true);
@@ -277,30 +277,6 @@ class webosTvDevice {
                         this.logDebug('Launch points (inputs, apps): \n' + JSON.stringify(this.launchPointsList, null, 2));
                     } else {
                         this.logDebug('Launch points list - error while parsing the launch point list \n' + JSON.stringify(res, null, 2));
-                    }
-                }
-                resolve();
-            });
-        }));
-
-        tvInfoPromises.push(new Promise((resolve, reject) => {
-            this.lgtv.request('ssap://tv/getChannelList', (err, res) => {
-                if (!res || err || res.errorCode) {
-                    this.logRequestDebug('Channel list - error while getting the channel list', err, res);
-                } else {
-                    if (res && res.channelList && Array.isArray(res.channelList)) {
-                        for (let channelInfo of res.channelList) {
-                            let newObj = {};
-                            if (channelInfo.Radio == false) { // skip radio stations
-                                newObj.channelId = channelInfo.channelId;
-                                newObj.channelNumber = channelInfo.channelNumber;
-                                newObj.channelName = channelInfo.channelName;
-                                this.channelList.push(newObj);
-                            }
-                        }
-                        //	this.logDebug('Channel list: \n' + JSON.stringify(this.channelList, null, 2));
-                    } else {
-                        this.logDebug('Channel list - error while parsing channel list \n' + JSON.stringify(res, null, 2));
                     }
                 }
                 resolve();
