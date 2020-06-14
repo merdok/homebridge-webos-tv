@@ -1360,7 +1360,7 @@ class webosTvDevice {
         if (this.connected) {
             if (state) {
                 this.logDebug('App switch service - launching app with id %s', appId);
-                if (this.inputParams[appId]) {
+                if (this.inputParams && this.inputParams[appId]) {
                     // launch with input params
                     this.logDebug('App switch service - params specified, adding params: %s', JSON.stringify(this.inputParams[appId]));
                     this.lgtv.request('ssap://com.webos.applicationManager/launch', {
