@@ -6,6 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Added new hideTvService configuration property
+
+### Changed
+- Fixed some typos
+
+### Removed
+- Removed the legacyTvService
+
 
 ## [1.8.9] - 2020-06-14
 

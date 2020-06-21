@@ -55,8 +55,8 @@
             "type": "number",
             "default": 5
           },
-          "legacyTvService": {
-            "title": "Emulate the TV as a switch",
+          "hideTvService": {
+            "title": "Hide the TV service. Recommended when the TV already supports native HomeKit integration to prevent double TV accessories.",
             "description": "Show the TV as a simple on/off switch.",
             "type": "boolean"
           },

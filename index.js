@@ -47,9 +47,9 @@ class webosTvDevice {
         this.broadcastAdr = config.broadcastAdr || '255.255.255.255';
         this.keyFile = config.keyFile;
         this.prefsDir = config.prefsDir || api.user.storagePath() + '/.webosTv/';
-        this.isLegacyTvService = config.legacyTvService;
-        if (this.isLegacyTvService === undefined) {
-            this.isLegacyTvService = false;
+        this.isHideTvService = config.hideTvService;
+        if (this.isHideTvService === undefined) {
+            this.isHideTvService = false;
         }
         this.showInputButtons = config.showInputButtons;
         if (this.showInputButtons === undefined) {
@@ -164,15 +164,10 @@ class webosTvDevice {
             this.connected = false;
         });
 
-        // preapre the services
-        this.prepareInformationService();
 
-        // choose between new (tv integration) or old (legacy) services, in legacy mode the TV will appear as a Switch
-        if (this.isLegacyTvService) {
-            this.prepareLegacyService();
-        } else {
-            this.prepareTvService();
-        }
+        // prepare accessory services
+        this.setupAccessoryServices();
+
     }
 
 
@@ -412,6 +407,35 @@ class webosTvDevice {
 
 
     // --== SETUP SERVICES  ==--
+    setupAccessoryServices() {
+
+        // prepare the services
+        this.prepareInformationService();
+
+        // prepare the tv service
+        if (this.isHideTvService === false) {
+            this.prepareTvService();
+        }
+
+        // additional services
+        this.prepareVolumeService();
+        this.prepareChannelService();
+        this.prepareMediaControlService();
+        this.prepareChannelButtonService();
+        this.prepareNotificationButtonService();
+        this.prepareRemoteControlButtonService();
+        this.prepareSoundOutputButtonService();
+        this.prepareRemoteSequenceButtonsService();
+
+        // add additional input buttons  if desired
+        if (this.showInputButtons === true) {
+            this.prepareInputButtonService();
+        }
+
+    }
+
+    // 
+    // tv information service ----------------------------------------------------------------
     prepareInformationService() {
         // currently i save the tv info in a file and load if it exists
         let modelName = "Unknown model";
@@ -435,8 +459,11 @@ class webosTvDevice {
         this.enabledServices.push(informationService);
     }
 
-    // tv integration services ----------------------------------------------------------------
+
+
+    // native tv services ----------------------------------------------------------------
     prepareTvService() {
+
         this.tvService = new Service.Television(this.name, 'tvService');
         this.tvService
             .setCharacteristic(Characteristic.ConfiguredName, this.name);
@@ -478,24 +505,10 @@ class webosTvDevice {
 
         this.enabledServices.push(this.tvService);
 
-
+        // prepare the additional native services control center tv speaker and inputs
         this.prepareTvSpeakerService();
         this.prepareInputSourcesService();
 
-        // additional services
-        this.prepareVolumeService();
-        this.prepareChannelService();
-        this.prepareMediaControlService();
-        this.prepareChannelButtonService();
-        this.prepareNotificationButtonService();
-        this.prepareRemoteControlButtonService();
-        this.prepareSoundOutputButtonService();
-        this.prepareRemoteSequenceButtonsService();
-
-        // add additional input buttons 
-        if (this.showInputButtons === true) {
-            this.prepareInputButtonService();
-        }
     }
 
     prepareTvSpeakerService() {
@@ -575,27 +588,6 @@ class webosTvDevice {
             }
 
         });
-    }
-
-    // legacy service ----------------------------------------------------------------
-    prepareLegacyService() {
-        this.powerService = new Service.Switch(this.name + ' Power', 'powerService');
-        this.powerService
-            .getCharacteristic(Characteristic.On)
-            .on('get', this.getPowerState.bind(this))
-            .on('set', this.setPowerState.bind(this));
-
-        this.enabledServices.push(this.powerService);
-
-        this.prepareVolumeService();
-        this.prepareInputButtonService();
-        this.prepareChannelService();
-        this.prepareMediaControlService();
-        this.prepareChannelButtonService();
-        this.prepareNotificationButtonService();
-        this.prepareRemoteControlButtonService();
-        this.prepareSoundOutputButtonService();
-        this.prepareRemoteSequenceButtonsService();
     }
 
     // additional services ----------------------------------------------------------------
@@ -1090,7 +1082,6 @@ class webosTvDevice {
 
     updateTvStatus(error, tvStatus) {
         if (!tvStatus) {
-            if (this.powerService) this.powerService.getCharacteristic(Characteristic.On).updateValue(false);
             if (this.tvService) this.tvService.getCharacteristic(Characteristic.Active).updateValue(false); //tv service
             if (this.volumeService) this.volumeService.getCharacteristic(Characteristic.On).updateValue(false);
             this.setAppSwitchManually(null, false, null);
@@ -1098,7 +1089,6 @@ class webosTvDevice {
             this.setMuteStateManually(false);
             this.setSoundOutputManually(null, false, null);
         } else {
-            if (this.powerService) this.powerService.getCharacteristic(Characteristic.On).updateValue(true);
             if (this.tvService) this.tvService.getCharacteristic(Characteristic.Active).updateValue(true); //tv service
         }
     }

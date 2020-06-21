@@ -14,9 +14,9 @@ If you are already running a TV with native Homekit integration then you can sti
 
 ### Features
 * HomeKit TV integration
-* HomeKit automation
-* Turn TV on / off
-* Mute / Unmute
+* HomeKit automations
+* Turn TV on/off
+* Mute/Unmute
 * Volume control (as light bulb, buttons or through iOS remote app)
 * Change sound output
 * Switch inputs
@@ -26,8 +26,6 @@ If you are already running a TV with native Homekit integration then you can sti
 * Show notifications
 * Emulate remote control
 * Run sequences of remote control button presses
-
-The legacy TV service is only recommended if your iOS device is not running on iOS12.2 or newer. It emulates the TV as a simple on/off switch.
 
 ## Installation
 
@@ -171,10 +169,10 @@ To prevent the TV from asking for permission when you reboot homebridge, specify
 The directory where TV model info should be saved. **Default: "~/.homebridge/.webosTv"**
 - `pollingInterval` [optional]
 The TV state background polling interval in seconds. **Default: 5**
-- `legacyTvService` [optional]
-Wheter to use the legacy TV service. Should be used if your iOS device is not running on iOS12.2 or newer. TV will be emulated as a switch.  **Default: false**  
+- `hideTvService` [optional]
+Wheter to hide the TV service. This is recommended if your TV supports native HomeKit integration since the TV accessory already exists.  **Default: false**  
 - `inputs` [optional] 
-Inputs which should appear under the *Inputs* list on yor TV accessory. When you use the legacy tv service, buttons for the inputs will be created. **Default: "" (disabled)**
+Inputs which should appear under the *Inputs* list on yor TV accessory. **Default: "" (disabled)**
   - Set an array of app IDs or objects as the value. An object needs to have the *appId* and *name* property
   - You can optionally specifiy the *params* property as key/value object to launch the applciation with the specified parameters
   - To get the app ID simply open an app on your TV and check the homebridge console. The app ID of the opened app will be printed.
@@ -187,7 +185,7 @@ Inputs which should appear under the *Inputs* list on yor TV accessory. When you
     - *com.webos.app.externalinput.av1*
   - Inputs and apps can also be switched when the TV is off, in that case an attempt to power on the TV and switch to the chosen input will be made
 - `showInputButtons` [optional]
-Wheter to additionally show inputs as buttons. Useful for automation. **Default: false**
+Wheter to additionally show inputs as buttons. Useful for automations. **Default: false**
 - `volumeControl` [optional]
 Wheter the volume control service is enabled. **Default: "both"**  
   - Available values:
@@ -212,7 +210,7 @@ Wheter the channel buttons service is enabled. This allows to create buttons for
   - Channels can also be opened when the TV is off, in that case an attempt to power on the TV and afterwards open the chosen channel will be made.
   - Some webos TVs require the *channelId* in order to be able to switch channels, in that case this property needs to be specified. To get the *channelId* simply change a channel on your TV and check the homebridge console. The *channelId* of the current channel will be printed. 
 - `notificationButtons` [optional] 
-Wheter the notification buttons service is enabled. This allows to create buttons which when pressed display the specified text on the TV screen. Useful for HomeKit automation or to display text on TV for viewers. **Default: "" (disabled)**
+Wheter the notification buttons service is enabled. This allows to create buttons which when pressed display the specified text on the TV screen. Useful for HomeKit automations or to display text on TV for viewers. **Default: "" (disabled)**
   - Set an array of notification texts as the value
   - You can also set an array of objects as the value. An object can have the following properties:
     - *message* - [required] the message to display in the notification,
