@@ -505,7 +505,7 @@ class webosTvDevice {
 
         this.enabledServices.push(this.tvService);
 
-        // prepare the additional native services control center tv speaker and inputs
+        // prepare the additional native services - control center tv speaker and inputs
         this.prepareTvSpeakerService();
         this.prepareInputSourcesService();
 
