@@ -170,7 +170,7 @@ The directory where TV model info should be saved. **Default: "~/.homebridge/.we
 - `pollingInterval` [optional]
 The TV state background polling interval in seconds. **Default: 5**
 - `hideTvService` [optional]
-Wheter to hide the TV service. This is recommended if your TV supports native HomeKit integration since the TV accessory already exists.  **Default: false**  
+Wheter to hide the TV service. This is recommended if your TV supports native HomeKit integration, since the TV accessory already exists.  **Default: false**  
 - `inputs` [optional] 
 Inputs which should appear under the *Inputs* list on yor TV accessory. **Default: "" (disabled)**
   - Set an array of app IDs or objects as the value. An object needs to have the *appId* and *name* property
