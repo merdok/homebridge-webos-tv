@@ -172,7 +172,7 @@ The directory where TV model info should be saved. **Default: "~/.homebridge/.we
 - `pollingInterval` [optional]
 The TV state background polling interval in seconds. **Default: 5**
 - `hideTvService` [optional]
-Wheter to hide the TV service. This is recommended if your TV supports native HomeKit integration, since the TV accessory already exists.  **Default: false**  
+Whether to hide the TV service. This is recommended if your TV supports native HomeKit integration, since the TV accessory already exists.  **Default: false**  
 - `inputs` [optional]
 Inputs which should appear under the *Inputs* list on yor TV accessory. **Default: "" (disabled)**
   - Set an array of app IDs or objects as the value. An object needs to have the *appId* and *name* property
@@ -187,9 +187,9 @@ Inputs which should appear under the *Inputs* list on yor TV accessory. **Defaul
     - *com.webos.app.externalinput.av1*
   - Inputs and apps can also be switched when the TV is off, in that case an attempt to power on the TV and switch to the chosen input will be made
 - `showInputButtons` [optional]
-Wheter to additionally show inputs as buttons. Useful for automations. **Default: false**
+Whether to additionally show inputs as buttons. Useful for automations. **Default: false**
 - `volumeControl` [optional]
-Wheter the volume control service is enabled. **Default: "both"**  
+Whether the volume control service is enabled. **Default: "both"**  
   - Available values:
     - *"both"* or *true* - slider and buttons
     - *"none"* or *false* - no volume control
@@ -199,11 +199,11 @@ Wheter the volume control service is enabled. **Default: "both"**
 - `volumeLimit` [optional]
 The max allowed volume which can be set using the volume service. Range 1-100. **Default: 100**
 - `channelControl` [optional]
-Wheter the channel control service is enabled. **Default: true**
+Whether the channel control service is enabled. **Default: true**
 - `mediaControl` [optional]
-Wheter the media control service is enabled. Buttons: play, pause, stop, rewind, fast forward. **Default: false**
+Whether the media control service is enabled. Buttons: play, pause, stop, rewind, fast forward. **Default: false**
 - `channelButtons` [optional]
-Wheter the channel buttons service is enabled. This allows to create buttons for the channels of your choice. This way you can quickly switch between favorite channels. **Default: "" (disabled)**
+Whether the channel buttons service is enabled. This allows to create buttons for the channels of your choice. This way you can quickly switch between favorite channels. **Default: "" (disabled)**
   - Set an array of channel numbers as the value
   - You can also set an array of objects as the value. An object can have the following properties:
     - *channelNumber* - [required] the channel number,
@@ -212,27 +212,27 @@ Wheter the channel buttons service is enabled. This allows to create buttons for
   - Channels can also be opened when the TV is off, in that case an attempt to power on the TV and afterwards open the chosen channel will be made.
   - Some webos TVs require the *channelId* in order to be able to switch channels, in that case this property needs to be specified. To get the *channelId* simply change a channel on your TV and check the homebridge console. The *channelId* of the current channel will be printed.
 - `notificationButtons` [optional]
-Wheter the notification buttons service is enabled. This allows to create buttons which when pressed display the specified text on the TV screen. Useful for HomeKit automations or to display text on TV for viewers. **Default: "" (disabled)**
+Whether the notification buttons service is enabled. This allows to create buttons which when pressed display the specified text on the TV screen. Useful for HomeKit automations or to display text on TV for viewers. **Default: "" (disabled)**
   - Set an array of notification texts as the value
   - You can also set an array of objects as the value. An object can have the following properties:
     - *message* - [required] the message to display in the notification,
     - *name* - [optional]  the notification name,
 - `remoteControlButtons` [optional]
-Wheter the remote control buttons service is enabled. This allows to emulate remote control buttons. **Default: "" (disabled)**
+Whether the remote control buttons service is enabled. This allows to emulate remote control buttons. **Default: "" (disabled)**
   - Set an array of commands as the value. Possible values are:
     - *1*, *2*, *3*, *4*, *5*, *6*, *7*, *8*, *9*, *0*, *LIST*, *AD*, *DASH*
     - *MUTE*, *VOLUMEUP*, *VOLUMEDOWN*, *CHANNELUP*, *CHANNELDOWN*, *HOME*, *MENU*
     - *UP*, *DOWN*, *LEFT*, *RIGHT*, *CLICK*, *BACK*, *EXIT*, *PROGRAM*, *ENTER*, *INFO*
     - *RED*, *GREEN*, *YELLOW*, *BLUE*, *LIVE_ZOOM*, *CC*, *PLAY*, *PAUSE*, *REWIND*, *FASTFORWARD*
-  - Most probably there are also other values possible which i didn't find yet (like settings or voice command), you can try typing some other values and if you find some that work then please let me know
+  - Most probably there are also other values possible which I didn't find yet (like settings or voice command), you can try typing some other values and if you find some that work then please let me know
 - `remoteSequenceButtons` [optional]
-Wheter the remote sequence buttons service is enabled. This allows to run a sequence of remote control button presses. **Default: "" (disabled)**
+Whether the remote sequence buttons service is enabled. This allows to run a sequence of remote control button presses. **Default: "" (disabled)**
   - Set an array of objects as the value. An object can have the following properties:
     - *sequence* - [required] an array of remote control keys. For possible values see `remoteControlButtons` above,
     - *name* - [optional] the sequence name,
-    - *interval* - [optional] the interval beetwen sequence actions. Can be a single value or an array of values. Default is 500ms
+    - *interval* - [optional] the interval between sequence actions. Can be a single value or an array of values. Default is 500ms
 - `soundOutputButtons` [optional]
-Wheter the sound output buttons service is enabled. This allows to switch between sound outputs on the TV. **Default: "" (disabled)**
+Whether the sound output buttons service is enabled. This allows to switch between sound outputs on the TV. **Default: "" (disabled)**
   - Set an array of sound outputs as the value. Example values are:
     - *tv_speaker* - internal tv speaker,
     - *external_optical* - optical audio,
