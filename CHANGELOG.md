@@ -5,10 +5,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Completing the transition to platform. From now one the plugin can only be setup as a platform
+- Optimize code
+
+### Removed
+- Removed the possibility to setup the plugin as an accessory (breaking change for some users)
 
 
 ## [1.9.0] - 2020-06-22
-
 ### Added
 - Added new hideTvService configuration property
 
@@ -20,7 +25,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [1.8.9] - 2020-06-14
-
 ### Added
 
 ### Changed
@@ -30,7 +34,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [1.8.8] - 2020-06-06
-
 ### Added
 
 ### Changed
@@ -40,7 +43,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [1.8.7] - 2020-06-04
-
 ### Added
 
 ### Changed
@@ -50,7 +52,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [1.8.6] - 2020-05-31
-
 ### Added
 
 ### Changed
@@ -62,7 +63,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [1.8.4] - 2020-05-28
-
 ### Added
 
 ### Changed
@@ -74,7 +74,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [1.8.3] - 2020-05-27
-
 ### Added
 
 ### Changed
@@ -86,7 +85,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [1.8.2] - 2020-05-26
-
 ### Added
 - An optional channelId can now be specified for the channelButtonService
 
@@ -99,7 +97,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [1.8.1] - 2020-05-25
-
 ### Added
 - Additional checks when requesting tv information and initializing devices
 
@@ -110,7 +107,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [1.8.0] - 2020-05-24
-
 ### Added
 - Extended the channelButtonService with an optional name
 - Extended the notificationButtonService with an optional name
@@ -131,7 +127,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [1.7.1] - 2020-04-23
-
 ### Added
 
 ### Changed
@@ -142,7 +137,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [1.7.0] - 2020-04-22
-
 ### Added
 - You can now configure this plugin to run as a platform with multiple TVs
 - Small code optimizations
@@ -175,7 +169,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - The plugin can now detect if the Pixel Refresher is running on OLED TVs and display the TV as off at that times
 - Power status of the TV can now be debuged
-- Fixed a bug with channelButtons 
+- Fixed a bug with channelButtons
 - Optimized code
 
 ### Changed
@@ -206,5 +200,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 - `tvService` property was removed
-
-
