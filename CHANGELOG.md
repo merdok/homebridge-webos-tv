@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [1.9.2] - 2020-07-23
+### Changed
+- Fixed config.schema.json volume control
+- Fixed some typos
+
+
 ## [1.9.1] - 2020-07-13
 ### Changed
 - Completing the transition to platform. From now one the plugin can only be setup as a platform
