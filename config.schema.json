@@ -62,12 +62,12 @@
           },
           "showInputButtons": {
             "title": "Show input buttons",
-            "description": "Wether to show a on/off button for each input, useful for automations.",
+            "description": "Whether to show a on/off button for each input, useful for automations.",
             "type": "boolean"
           },
           "volumeControl": {
             "title": "Volume control service",
-            "description": "Wether to enable additional volume control. Button - adds volume up/down buttons, Slider - adds a light bulb which acts as a volume controller.",
+            "description": "Whether to enable additional volume control. Button - adds volume up/down buttons, Slider - adds a light bulb which acts as a volume controller.",
             "type": [
               "string"
             ],
@@ -77,7 +77,7 @@
                 "const": "none"
               },
               {
-                "title": "Both - slider and switch",
+                "title": "Both - slider and buttons",
                 "const": "both"
               },
               {
@@ -85,8 +85,8 @@
                 "const": "slider"
               },
               {
-                "title": "Switch",
-                "const": "switch"
+                "title": "Buttons",
+                "const": "buttons"
               }
             ],
             "default": "both",
@@ -102,13 +102,13 @@
           },
           "channelControl": {
             "title": "Channel control service",
-            "description": "Wether to show channel up/down buttons.",
+            "description": "Whether to show channel up/down buttons.",
             "type": "boolean",
             "default": true
           },
           "mediaControl": {
             "title": "Media control service",
-            "description": "Wether to show media control buttons.",
+            "description": "Whether to show media control buttons.",
             "type": "boolean"
           },
           "infoButtonAction": {
