@@ -6,7 +6,7 @@
 [![homebridge-webos-tv](https://badgen.net/npm/v/homebridge-webos-tv?icon=npm)](https://www.npmjs.com/package/homebridge-webos-tv)
 [![mit-license](https://badgen.net/npm/license/lodash)](https://github.com/merdok/homebridge-webos-tv/blob/master/LICENSE)
 [![follow-me-on-twitter](https://badgen.net/twitter/follow/merdok_dev?icon=twitter)](https://twitter.com/merdok_dev)
-[![join-discord](https://badgen.net/badge/icon/discord?icon=discord&label=homebridge-webos-tv)](https://discord.gg/5c8njh)
+[![join-discord](https://badgen.net/badge/icon/discord?icon=discord&label=homebridge-webos-tv)](https://discord.gg/qMXdsH)
 <!---[![Discord](https://img.shields.io/discord/725015107985473598.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/5c8njh)--->
 
 </span>
@@ -137,24 +137,25 @@ This is located on your TV under `Settings > General > Mobile TV On`
 
 On newer TVs **LG Connect Apps** under the network settings needs to be enabled.
 
-### Adding the TV to Home app
+### Adding the TV to the Home app
 Since HomeKit expects only one TV per bridge they will be declared as external accessories and acts as a bridge.  
 This means that a TV will not appear in your Home app until you add it!
 
 To add a TV to HomeKit follow this steps:
 
-- Open the Home app
-- Select **Add Accessory**
-- Tap on **Don't Have a Code or Can't Scan?**
-- The TV should appear on the accessory list
-- Tap on it and follow the steps
-- When you are asked for a **pin** then just use the **pin from the bridge section** in your **config.json**
+1. Open the Home <img src="https://user-images.githubusercontent.com/3979615/78010622-4ea1d380-738e-11ea-8a17-e6a465eeec35.png" height="16.42px"> app on your device.
+2. Tap the Home tab, then tap <img src="https://user-images.githubusercontent.com/3979615/78010869-9aed1380-738e-11ea-9644-9f46b3633026.png" height="16.42px">.
+3. Tap *Add Accessory*, and select *I Don't Have a Code or Cannot Scan*.
+4. Select the tv accessory you want to pair.
+5. Enter the Homebridge PIN, this can be found under the QR code in Homebridge UI or your Homebridge logs, alternatively you can select *Use Camera* and scan the QR code again.
+
+For more info check the homebridge wiki [Connecting Homebridge To HomeKit](https://github.com/homebridge/homebridge/wiki/Connecting-Homebridge-To-HomeKit).
 
 ### Configuration
 #### Platform Configuration fields
 - `platform` [required]
-Should always be "webostv".
-- `devices` or `tvs`  [required]
+Should always be **"webostv"**.
+- `devices` or `tvs` [required]
 A list of your TVs.
 #### TV Configuration fields
 - `name` [required]
