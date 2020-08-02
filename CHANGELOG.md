@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [1.9.3] - 2020-08-02
+### Changed
+- Fixed a possible crash
+- Updated README
+
+
 ## [1.9.2] - 2020-07-23
 ### Changed
 - Fixed config.schema.json volume control
