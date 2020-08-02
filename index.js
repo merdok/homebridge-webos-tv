@@ -197,7 +197,7 @@ class webosTvDevice {
       if (!err) {
         this.pointerInputSocket = sock;
       } else {
-        this.logError('Remote control socket error - %s', error);
+        this.logError('Remote control socket error - %s', err);
       }
     });
   }
