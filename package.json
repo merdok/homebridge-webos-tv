@@ -1,6 +1,6 @@
 {
   "name": "homebridge-webos-tv",
-  "version": "1.9.3",
+  "version": "2.0.0",
   "description": "Homebridge plugin for LG webOS TVs",
   "main": "index.js",
   "engines": {
@@ -21,9 +21,8 @@
   "author": "merdok",
   "license": "MIT",
   "dependencies": {
-    "lgtv2": "^1.4.1",
+    "lgtv2": "^1.6.2",
     "wake_on_lan": "^0.0.4",
-    "tcp-ping": "^0.1.1",
     "mkdirp": "^0.5.1"
   },
   "repository": {

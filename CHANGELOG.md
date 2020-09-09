@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [2.0.0] - 2020-09-10
+### Added
+- Inputs will now automatically be retrieved from the TV. You now only need to enable or disable the desired inputs straight from the Home app
+- Notification button service has now an optional `appId` property. When this is set pressing on the notification will take you to the specified app
+- Remote control buttons now also accept as an array of objects with `action` and `name` properties as values. This allows you to name your buttons as you desire
+- sound output buttons now also accept as an array of objects with `soundOutput` and `name` properties as values. This allows you to name your buttons as you desire
+- new `appButtons` which allows to create dedicated input buttons which can be used for automations or controlled by Siri
+- new `screenControl` property which when enabled allows to turn on/off the TV screen
+- new `screenSaverControl` property which when enabled allows to instantly activate the screen saver on the tv
+- new `ccRemoteRemap` property which allows to completely remap the control center remote buttons
+- new `deepDebugLog` property which enabled more detailed debug log
+
+### Changed
+- Completely rewrote the plugin!
+- Much better status detection and accuracy (I would consider it like native HomeKit at this point)
+- Volume limit now also works for any source that changes the volume on the tv, that includes the remote control
+- Channel button service now works much more better and more reliable
+- Renamed `channelName` property to `name` to be consistent with other properties
+- Fixed some typos in the README
+
+### Removed
+- Removed `showInputButtons` property as it is no longer needed
+- Removed `inputs` property as it is no longer needed and has been replaced by `appButtons` property
+- Removed `infoButtonAction` property as it is no longer needed and has been replaced by `ccRemoteRemap` property
+
+
 ## [1.9.3] - 2020-08-02
 ### Changed
 - Fixed a possible crash

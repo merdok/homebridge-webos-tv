@@ -55,15 +55,23 @@
             "type": "number",
             "default": 5
           },
+          "deepDebugLog": {
+            "title": "Enable deep debug log.",
+            "description": "Enables additional more detailed debug log. Useful when trying to figure out issues with the plugin.",
+            "type": "boolean"
+          },
           "hideTvService": {
             "title": "Hide the TV service",
             "description": "Recommended when the TV already supports native HomeKit integration to prevent double TV accessories.",
             "type": "boolean"
           },
-          "showInputButtons": {
-            "title": "Show input buttons",
-            "description": "Whether to show a on/off button for each input, useful for automations.",
-            "type": "boolean"
+          "volumeLimit": {
+            "title": "Volume limit for the volume service",
+            "description": "Allows to limit the volume which can be set using the volume service.",
+            "type": "integer",
+            "default": 100,
+            "maximum": 100,
+            "minimum": 1
           },
           "volumeControl": {
             "title": "Volume control service",
@@ -92,14 +100,6 @@
             "default": "both",
             "required": true
           },
-          "volumeLimit": {
-            "title": "Volume limit for the volume service",
-            "description": "Allows to limit the volume which can be set using the volume service.",
-            "type": "integer",
-            "default": 100,
-            "maximum": 100,
-            "minimum": 1
-          },
           "channelControl": {
             "title": "Channel control service",
             "description": "Whether to show channel up/down buttons.",
@@ -111,58 +111,58 @@
             "description": "Whether to show media control buttons.",
             "type": "boolean"
           },
-          "infoButtonAction": {
-            "title": "Info button action",
-            "description": "Action for the info button on the remote control in the iOS control center.",
-            "type": "string",
-            "default": "INFO",
-            "enum": [
-              "1",
-              "2",
-              "3",
-              "4",
-              "5",
-              "6",
-              "7",
-              "8",
-              "9",
-              "0",
-              "LIST",
-              "AD",
-              "DASH",
-              "MUTE",
-              "VOLUMEUP",
-              "VOLUMEDOWN",
-              "CHANNELUP",
-              "CHANNELDOWN",
-              "HOME",
-              "MENU",
-              "UP",
-              "DOWN",
-              "LEFT",
-              "RIGHT",
-              "CLICK",
-              "BACK",
-              "EXIT",
-              "PROGRAM",
-              "ENTER",
-              "INFO",
-              "RED",
-              "GREEN",
-              "YELLOW",
-              "BLUE",
-              "LIVE_ZOOM",
-              "CC",
-              "PLAY",
-              "PAUSE",
-              "REWIND",
-              "FASTFORWARD"
-            ],
-            "required": true
+          "screenControl": {
+            "title": "Screen control service",
+            "description": "Whether to show the screen control button. Allows to turn on/off the tv screen.",
+            "type": "boolean"
           },
-          "inputs": {
-            "title": "Inputs",
-            "description": "Inputs which will appear for the TV. Params needs to be added manually in the config.json",
+          "screenSaverControl": {
+            "title": "Screen saver control service",
+            "description": "Whether to show the screen saver control button. Allows to instantly activate the screen saver on the TV. Can be used only when no content is playing on the tv.",
+            "type": "boolean"
+          },
+          "ccRemoteRemap": {
+            "title": "Remap control center remote buttons",
+            "description": "Allows to remap the control center remote buttons. For possible values check the README.",
+            "type": "object",
+            "properties": {
+              "arrowup": {
+                "title": "Arrow up button",
+                "type": "string"
+              },
+              "arrowdown": {
+                "title": "Arrow down button",
+                "type": "string"
+              },
+              "arrowleft": {
+                "title": "Arrow left button",
+                "type": "string"
+              },
+              "arrowright": {
+                "title": "Arrow right button",
+                "type": "string"
+              },
+              "select": {
+                "title": "Select button",
+                "type": "string"
+              },
+              "back": {
+                "title": "Back button",
+                "type": "string"
+              },
+              "playpause": {
+                "title": "PlayPause button",
+                "type": "string"
+              },
+              "information": {
+                "title": "Information button",
+                "type": "string"
+              }
+            }
+          },
+          "appButtons": {
+            "title": "App buttons",
+            "description": "Dedicated app buttons which will appear for the TV. Params needs to be added manually in the config.json",
             "type": "array",
             "items": {
               "type": "object",
@@ -195,7 +195,7 @@
                   "title": "Channel id",
                   "type": "string"
                 },
-                "channelName": {
+                "name": {
                   "title": "Channel name",
                   "type": "string"
                 }
@@ -217,6 +217,10 @@
                 "name": {
                   "title": "name",
                   "type": "string"
+                },
+                "appId": {
+                  "title": "appId",
+                  "type": "string"
                 }
               }
             }
@@ -226,49 +230,17 @@
             "description": "Allows to create buttons that emulate remote control presses.",
             "type": "array",
             "items": {
-              "type": "string",
-              "enum": [
-                "1",
-                "2",
-                "3",
-                "4",
-                "5",
-                "6",
-                "7",
-                "8",
-                "9",
-                "0",
-                "LIST",
-                "AD",
-                "DASH",
-                "MUTE",
-                "VOLUMEUP",
-                "VOLUMEDOWN",
-                "CHANNELUP",
-                "CHANNELDOWN",
-                "HOME",
-                "MENU",
-                "UP",
-                "DOWN",
-                "LEFT",
-                "RIGHT",
-                "CLICK",
-                "BACK",
-                "EXIT",
-                "PROGRAM",
-                "ENTER",
-                "INFO",
-                "RED",
-                "GREEN",
-                "YELLOW",
-                "BLUE",
-                "LIVE_ZOOM",
-                "CC",
-                "PLAY",
-                "PAUSE",
-                "REWIND",
-                "FASTFORWARD"
-              ]
+              "type": "object",
+              "properties": {
+                "action": {
+                  "title": "Action",
+                  "type": "string"
+                },
+                "name": {
+                  "title": "Name",
+                  "type": "string"
+                }
+              }
             }
           },
           "remoteSequenceButtons": {
@@ -306,17 +278,27 @@
             "description": "Allows to create buttons that can switch between sound outputs.",
             "type": "array",
             "items": {
-              "type": "string",
-              "enum": [
-                "tv_speaker",
-                "external_optical",
-                "external_arc",
-                "lineout",
-                "headphone",
-                "tv_external_speaker",
-                "tv_speaker_headphone",
-                "bt_soundbar"
-              ]
+              "type": "object",
+              "properties": {
+                "soundOutput": {
+                  "title": "Sound output",
+                  "type": "string",
+                  "enum": [
+                    "tv_speaker",
+                    "external_optical",
+                    "external_arc",
+                    "lineout",
+                    "headphone",
+                    "tv_external_speaker",
+                    "tv_speaker_headphone",
+                    "bt_soundbar"
+                  ]
+                },
+                "name": {
+                  "title": "name",
+                  "type": "string"
+                }
+              }
             }
           }
         }

@@ -1,6 +1,7 @@
 <span align="center">
 
 # homebridge-webos-tv
+## HomeKit integration for LG webOS TVs how it's supposed to be
 
 [![verified-by-homebridge](https://badgen.net/badge/homebridge/verified/purple)](https://github.com/homebridge/homebridge/wiki/Verified-Plugins#verified-plugins)
 [![homebridge-webos-tv](https://badgen.net/npm/v/homebridge-webos-tv?icon=npm)](https://www.npmjs.com/package/homebridge-webos-tv)
@@ -28,6 +29,8 @@ If you are already running a TV with native Homekit integration then you can sti
 * Show notifications
 * Emulate remote control
 * Run sequences of remote control button presses
+* Turn on/off the tv screen
+* Reconfigure control center remote
 
 ## Installation
 
@@ -63,7 +66,10 @@ Example configuration:
           "ip": "192.168.0.40",
           "mac": "ab:cd:ef:fe:dc:ba",
           "pollingInterval": 10,
-          "inputs": [
+          "volumeControl": "buttons",
+          "channelControl": false,
+          "mediaControl": false,
+          "appButtons": [
             {
               "appId": "com.webos.app.livetv",
               "name": "Live TV"
@@ -80,10 +86,6 @@ Example configuration:
               }
             }
           ],
-          "showInputButtons": true,
-          "volumeControl": "buttons",
-          "channelControl": false,
-          "mediaControl": false,
           "channelButtons": [
             3,
             5,
@@ -123,7 +125,17 @@ Example configuration:
               "name": "volume_seq",
               "interval": 1000
             }
-          ]
+          ],
+          "ccRemoteRemap": {
+            "arrowup": "VOLUMEUP",
+            "arrowdown": "VOLUMEDOWN",
+            "arrowleft": "CHANNELDOWN",
+            "arrowright": "CHANNELUP",
+            "select": "PROGRAM",
+            "back": "BACK",
+            "playpause": "YELLOW",
+            "information": "TELETEXT"
+           }
         }
       ]
     }
@@ -172,23 +184,12 @@ To prevent the TV from asking for permission when you reboot homebridge, specify
 The directory where TV model info should be saved. **Default: "~/.homebridge/.webosTv"**
 - `pollingInterval` [optional]
 The TV state background polling interval in seconds. **Default: 5**
+- `deepDebugLog` [optional]
+Enables additional more detailed debug log. Useful when trying to figure out issues with the plugin. **Default: false**
 - `hideTvService` [optional]
 Whether to hide the TV service. This is recommended if your TV supports native HomeKit integration, since the TV accessory already exists.  **Default: false**  
-- `inputs` [optional]
-Inputs which should appear under the *Inputs* list on yor TV accessory. **Default: "" (disabled)**
-  - Set an array of app IDs or objects as the value. An object needs to have the *appId* and *name* property
-  - You can optionally specifiy the *params* property as key/value object to launch the applciation with the specified parameters
-  - To get the app ID simply open an app on your TV and check the homebridge console. The app ID of the opened app will be printed.
-  - Some of the default TV inputs which can be used:
-    - *com.webos.app.livetv*
-    - *com.webos.app.hdmi1*
-    - *com.webos.app.hdmi2*
-    - *com.webos.app.hdmi3*
-    - *com.webos.app.externalinput.component*
-    - *com.webos.app.externalinput.av1*
-  - Inputs and apps can also be switched when the TV is off, in that case an attempt to power on the TV and switch to the chosen input will be made
-- `showInputButtons` [optional]
-Whether to additionally show inputs as buttons. Useful for automations. **Default: false**
+- `volumeLimit` [optional]
+The max allowed volume which can be set using the TV. Range 1-100. **Default: 100**
 - `volumeControl` [optional]
 Whether the volume control service is enabled. **Default: "both"**  
   - Available values:
@@ -197,35 +198,46 @@ Whether the volume control service is enabled. **Default: "both"**
     - *"slider"* - just slider
     - *"buttons"* - just buttons
   - The slider volume control is not supported for ARC sound outputs
-- `volumeLimit` [optional]
-The max allowed volume which can be set using the volume service. Range 1-100. **Default: 100**
 - `channelControl` [optional]
 Whether the channel control service is enabled. **Default: true**
 - `mediaControl` [optional]
 Whether the media control service is enabled. Buttons: play, pause, stop, rewind, fast forward. **Default: false**
+- `screenControl` [optional]
+Whether the screen control service is enabled. Shows a button which allows to turn on/off the tv screen, while the content is still playing. **Default: false**
+- `screenSaverControl` [optional]
+Whether the screen saver control service is enabled. Shows a button which allows to instantly activate the screen saver on the TV. Can be used only when no content is playing on the tv. **Default: false**
+- `ccRemoteRemap` [optional]
+Allows to remap the control center remote buttons. For possible values, see section below. **Default: no remap**
+  - Set an object with the following properties: *arrowup*, *arrowdown*, *arrowleft*, *arrowright*, *select*, *back*, *playpause*, *information*
+  - See example above on how the property should look like
+- `appButtons` [optional]
+Dedicated app buttons which will appear for the TV. Can be used to trigger automations and can be controlled by Siri. **Default: "" (disabled)**
+  - Set an array of app IDs or objects as the value. An object needs to have the *appId* and *name* property
+  - You can optionally specifiy the *params* property as key/value object to launch the application with the specified parameters
+  - To get the app ID simply open an app on your TV and check the homebridge console. The app ID of the opened app will be printed
+  - App buttons can also be used when the TV is off, in that case an attempt to power on the TV and open the chosen app will be made
 - `channelButtons` [optional]
 Whether the channel buttons service is enabled. This allows to create buttons for the channels of your choice. This way you can quickly switch between favorite channels. **Default: "" (disabled)**
   - Set an array of channel numbers as the value
   - You can also set an array of objects as the value. An object can have the following properties:
     - *channelNumber* - [required] the channel number,
     - *channelId* - [optional] the channel id,
-    - *channelName* - [optional] the channel name,
-  - Channels can also be opened when the TV is off, in that case an attempt to power on the TV and afterwards open the chosen channel will be made.
+    - *name* - [optional] the channel name,
+  - Channel buttons can also be used when the TV is off, in that case an attempt to power on the TV and afterwards open the chosen channel will be made.
   - Some webos TVs require the *channelId* in order to be able to switch channels, in that case this property needs to be specified. To get the *channelId* simply change a channel on your TV and check the homebridge console. The *channelId* of the current channel will be printed.
 - `notificationButtons` [optional]
 Whether the notification buttons service is enabled. This allows to create buttons which when pressed display the specified text on the TV screen. Useful for HomeKit automations or to display text on TV for viewers. **Default: "" (disabled)**
   - Set an array of notification texts as the value
   - You can also set an array of objects as the value. An object can have the following properties:
     - *message* - [required] the message to display in the notification,
-    - *name* - [optional]  the notification name,
+    - *name* - [optional]  the notification name
 - `remoteControlButtons` [optional]
 Whether the remote control buttons service is enabled. This allows to emulate remote control buttons. **Default: "" (disabled)**
-  - Set an array of commands as the value. Possible values are:
-    - *1*, *2*, *3*, *4*, *5*, *6*, *7*, *8*, *9*, *0*, *LIST*, *AD*, *DASH*
-    - *MUTE*, *VOLUMEUP*, *VOLUMEDOWN*, *CHANNELUP*, *CHANNELDOWN*, *HOME*, *MENU*
-    - *UP*, *DOWN*, *LEFT*, *RIGHT*, *CLICK*, *BACK*, *EXIT*, *PROGRAM*, *ENTER*, *INFO*
-    - *RED*, *GREEN*, *YELLOW*, *BLUE*, *LIVE_ZOOM*, *CC*, *PLAY*, *PAUSE*, *REWIND*, *FASTFORWARD*
-  - Most probably there are also other values possible which I didn't find yet (like settings or voice command), you can try typing some other values and if you find some that work then please let me know
+  - For possible values, see section below.  
+  - Set an array of commands as the value.
+  - You can also set an array of objects as the value. An object can have the following properties:
+    - *action* - [required] one of the action specified above,
+    - *name* - [optional]  the remote control button name
 - `remoteSequenceButtons` [optional]
 Whether the remote sequence buttons service is enabled. This allows to run a sequence of remote control button presses. **Default: "" (disabled)**
   - Set an array of objects as the value. An object can have the following properties:
@@ -243,9 +255,25 @@ Whether the sound output buttons service is enabled. This allows to switch betwe
     - *tv_external_speaker* - tv speaker and optical,
     - *tv_speaker_headphone* - tv speaker and headphones
     - *bt_soundbar* - bluetooth soundbar and bluetooth devices
+  - You can also set an array of objects as the value. An object can have the following properties:
+    - *soundOutput* - [required] one of the sound outputs specified above,
+    - *name* - [optional]  the sound output button name
    - Depending on the TV and connected devices to the TV there might also be other values. In that case just switch sound outputs on the TV and check the homebridge log.
-- `infoButtonAction` [optional]
-The action (button press emulation) for the info button press on the remote control in iOS control center. For possible values see the `remoteControlButtons` property above. **Default: "INFO"**
+
+#### Remote control values
+- *1*, *2*, *3*, *4*, *5*, *6*, *7*, *8*, *9*, *0*, *LIST*, *AD*, *DASH*,
+- *MUTE*, *VOLUMEUP*, *VOLUMEDOWN*, *CHANNELUP*, *CHANNELDOWN*, *HOME*, *MENU*,
+- *UP*, *DOWN*, *LEFT*, *RIGHT*, *CLICK*, *BACK*, *EXIT*, *PROGRAM*, *ENTER*, *INFO*,
+- *RED*, *GREEN*, *YELLOW*, *BLUE*, *LIVE_ZOOM*, *CC*, *PLAY*, *PAUSE*, *REWIND*, *FASTFORWARD*,
+- *POWER*, *FAVORITES*, *RECORD*, *FLASHBACK*, *QMENU*, *GOTOPREV*,
+- *GOTONEXT*, *3D_MODE*, *SAP*, *ASPECT_RATIO*, *EJECT*, *MYAPPS*, *RECENT*,
+- *BS*, *BS_NUM_1*, *BS_NUM_2*, *BS_NUM_3*, *BS_NUM_4*, *BS_NUM_5*, *BS_NUM_6*, *BS_NUM_7*, *BS_NUM_8*,
+- *BS_NUM_9*, *BS_NUM_10*, *BS_NUM_11*, *BS_NUM_12*, *CS1*, *CS1_NUM_1*, *CS1_NUM_2*, *CS1_NUM_3*, *CS1_NUM_4*,
+- *CS1_NUM_5*, *CS1_NUM_6*, *CS1_NUM_7*, *CS1_NUM_8*, *CS1_NUM_9*, *CS1_NUM_10*, *CS1_NUM_11*, *CS1_NUM_12*,
+- *CS2*, *CS2_NUM_1*, *CS2_NUM_2*, *CS2_NUM_3*, *CS2_NUM_4*, *CS2_NUM_5*, *CS2_NUM_6*, *CS2_NUM_7*, *CS2_NUM_8*,
+- *CS2_NUM_9*, *CS2_NUM_10*, *CS2_NUM_11*, *CS2_NUM_12*, *TER*, *TER_NUM_1*, *TER_NUM_2*, *TER_NUM_3*, *TER_NUM_4*,
+- *TER_NUM_5*, *TER_NUM_6*, *TER_NUM_7*, *TER_NUM_8*, *TER_NUM_9*, *TER_NUM_10*, *TER_NUM_11*, *TER_NUM_12*,
+- *3DIGIT_INPUT*, *BML_DATA*, *JAPAN_DISPLAY*, *TELETEXT*, *TEXTOPTION*, *MAGNIFIER_ZOOM*, *SCREEN_REMOT*
 
 ## Troubleshooting
 If you have any issues with the plugin or TV services then you can run homebridge in debug mode, which will provide some additional information. This might be useful for debugging issues.
