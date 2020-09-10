@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [2.0.1] - 2020-10-10
+### Added
+- notification buttons can now have a `params` property
+
+### Fixed
+- Fixed basic inputs missing on TVs with webOS 4.5 and higher
+- Fixed a possible crash with the control center remote
+
+### Changed
+- Updated README
+
+
 ## [2.0.0] - 2020-09-10
 ### Added
 - Inputs will now automatically be retrieved from the TV. You now only need to enable or disable the desired inputs straight from the Home app
