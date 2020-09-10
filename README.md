@@ -236,13 +236,13 @@ Whether the channel buttons service is enabled. This allows to create buttons fo
   - Channel buttons can also be used when the TV is off, in that case an attempt to power on the TV and afterwards open the chosen channel will be made.
   - Some webos TVs require the *channelId* in order to be able to switch channels, in that case this property needs to be specified. To get the *channelId* simply change a channel on your TV and check the homebridge console. The *channelId* of the current channel will be printed.
 - `notificationButtons` [optional]
-Whether the notification buttons service is enabled. This allows to create buttons which when pressed display the specified text on the TV screen. Useful for HomeKit automations or to display text on TV for viewers. **Default: "" (disabled)**
+Whether the notification buttons service is enabled. This allows to create buttons which when pressed display the specified text on the TV screen in a toast. Useful for HomeKit automations or to display text on TV for viewers. **Default: "" (disabled)**
   - Set an array of notification texts as the value
   - You can also set an array of objects as the value. An object can have the following properties:
     - *message* - [required] the message to display in the notification,
     - *name* - [optional] the notification name
     - *appId* - [optional] when specified, clicking on the toast will open the app
-    - *params* - [optional] parameters for the launched application
+    - *params* - [optional] parameters to be used for the app when clicking on the toast
 - `remoteControlButtons` [optional]
 Whether the remote control buttons service is enabled. This allows to emulate remote control buttons. **Default: "" (disabled)**
   - For possible values, see section below.  
