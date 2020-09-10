@@ -80,6 +80,7 @@ class webosTvDevice {
     if (this.screenSaverControl === undefined) {
       this.screenSaverControl = false;
     }
+    this.ccRemoteRemap = config.ccRemoteRemap;
     if (this.ccRemoteRemap === undefined) {
       this.ccRemoteRemap = {};
     }
@@ -89,7 +90,6 @@ class webosTvDevice {
     this.remoteControlButtons = config.remoteControlButtons;
     this.soundOutputButtons = config.soundOutputButtons;
     this.remoteSequenceButtons = config.remoteSequenceButtons;
-    this.ccRemoteRemap = config.ccRemoteRemap;
 
 
     this.logInfo(`Init - got TV configuration, initializing device with name: ${this.name}`);
@@ -716,6 +716,9 @@ class webosTvDevice {
       // get the appId if specified
       newNotificationButtonDef.appId = value.appId;
 
+      // params
+      newNotificationButtonDef.params = value.params || {};
+
       // create the stateless button service
       let newNotificationButtonService = this.createStatlessSwitchService(newNotificationButtonDef.name, 'notificationButtonService' + i, (state, callback) => {
         this.setNotificationButtonState(state, callback, newNotificationButtonDef);
@@ -1102,6 +1105,7 @@ class webosTvDevice {
       if (notificationButtonDef.appId) {
         onClick = {};
         onClick.appId = notificationButtonDef.appId;
+        onClick.params = notificationButtonDef.params;
       }
       this.lgTvCtrl.openToast(notificationButtonDef.message, null, null, onClick);
     }

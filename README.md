@@ -92,8 +92,18 @@ Example configuration:
             7
           ],
           "notificationButtons": [
-            "Motion detected - living room",
-            "Motion detected - kitchen"
+            {
+              "message": "Motion detected - living room",
+              "name": "Living room motion",
+              "appId": "com.webos.app.browser",
+              "params": {
+                "target": "https://www.google.com/"
+              }
+            },
+            {
+              "message": "Motion detected - kitchen",
+              "name": "Kitchen motion"
+            }
           ],
           "remoteControlButtons": [
             "HOME",
@@ -230,7 +240,9 @@ Whether the notification buttons service is enabled. This allows to create butto
   - Set an array of notification texts as the value
   - You can also set an array of objects as the value. An object can have the following properties:
     - *message* - [required] the message to display in the notification,
-    - *name* - [optional]  the notification name
+    - *name* - [optional] the notification name
+    - *appId* - [optional] when specified, clicking on the toast will open the app
+    - *params* - [optional] parameters for the launched application
 - `remoteControlButtons` [optional]
 Whether the remote control buttons service is enabled. This allows to emulate remote control buttons. **Default: "" (disabled)**
   - For possible values, see section below.  
@@ -282,6 +294,12 @@ Homebridge debug mode:
 ```sh
 homebridge -D
 ```
+
+Deep debug log, add the following to your config.json:
+```json
+"deepDebugLog": true
+```
+This will enable additional extra log which might be helpful to debug all kind of issues. Just be aware that this will produce a lot of log information so it is recommended to use a service like https://pastebin.com/ when providing the log for inspection.
 
 ## Special thanks
 [lgtv2](https://github.com/hobbyquaker/lgtv2) - the Node.js remote control module for LG WebOS smart TVs.
