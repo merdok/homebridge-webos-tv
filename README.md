@@ -264,7 +264,7 @@ Whether the sound output buttons service is enabled. This allows to switch betwe
     - *external_arc* - hdmi arc,
     - *lineout* - line out,
     - *headphone* - headphones,
-    - *external_speaker* - Audio out (Optical/HDMI ARC),
+    - *external_speaker* - audio out (optical/hdmi arc),
     - *tv_external_speaker* - tv speaker and optical,
     - *tv_speaker_headphone* - tv speaker and headphones
     - *bt_soundbar* - bluetooth soundbar and bluetooth devices
