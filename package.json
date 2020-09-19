@@ -23,7 +23,8 @@
   "dependencies": {
     "lgtv2": "^1.6.2",
     "wake_on_lan": "^0.0.4",
-    "mkdirp": "^0.5.1"
+    "mkdirp": "^0.5.1",
+    "tcp-ping": "^0.1.1"
   },
   "repository": {
     "type": "git",
