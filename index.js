@@ -276,7 +276,7 @@ class webosTvDevice {
       .on('set', (inputIdentifier, callback) => {
         this.logDebug('Input source changed, new input source identifier: %d, source appId: %s', inputIdentifier, this.configuredInputs[inputIdentifier].appId);
         if (this.configuredInputs[inputIdentifier]) {
-          this.lgTvCtrl.launchApp(this.configuredInputs[inputIdentifier].appId, this.configuredInputs[inputIdentifier].params);
+          this.lgTvCtrl.turnOnTvAndLaunchApp(this.configuredInputs[inputIdentifier].appId, this.configuredInputs[inputIdentifier].params);
         }
         callback();
       })
@@ -1211,7 +1211,7 @@ class webosTvDevice {
       } else {
         // allow to relaunch an appbutton if it has params, in that case the user wants to open a specific content in the appid and not just the appid
         // this means tapping an active appbutton will realunch the app
-        if(appButtonDef.params != null){
+        if (appButtonDef.params != null) {
           //open the selected app
           this.lgTvCtrl.launchApp(appButtonDef.appId, appButtonDef.params);
         }
@@ -1223,9 +1223,7 @@ class webosTvDevice {
       }
     } else {
       // if TV is off, then try to turn on tv and open the app
-      this.lgTvCtrl.turnOn().then(() => {
-        this.lgTvCtrl.launchApp(appButtonDef.appId, appButtonDef.params);
-      })
+      this.lgTvCtrl.turnOnTvAndLaunchApp(appButtonDef.appId, appButtonDef.params);
     }
     callback();
   }
