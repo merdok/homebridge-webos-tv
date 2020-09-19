@@ -173,6 +173,9 @@ To add a TV to HomeKit follow this steps:
 
 For more info check the homebridge wiki [Connecting Homebridge To HomeKit](https://github.com/homebridge/homebridge/wiki/Connecting-Homebridge-To-HomeKit).
 
+### Inputs
+Inputs and apps are automatically fetched from your TV. As default only Live TV and basic external inputs (HDMI1, HDMI2, etc) are enabled in the "inputs spinner". To add more apps to the spinner simply go on the accessory configuration in the Home app and check all the inputs which you would like to have in the spinner.
+
 ### Configuration
 #### Platform Configuration fields
 - `platform` [required]
