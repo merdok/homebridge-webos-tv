@@ -6,6 +6,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.3] - 2020-09-20
+### Added
+- The TV webOS version is now displayed on connection in the console
+
+### Fixed
+- TV status should now again work correctly on webOS 2.x TVs
+- Home automations with inputs from the "input spinner" should now work properly
+
+### Changed
+- Updated README
+
+
 ## [2.0.2] - 2020-09-19
 ### Added
 - new `external_speaker` sound output. Thanks @perana
@@ -16,7 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.0.1] - 2020-09-11
 ### Added
-- notification buttons can now have a `params` property
+- Notification buttons can now have a `params` property
 
 ### Fixed
 - Fixed basic inputs missing on TVs with webOS 4.5 and higher
