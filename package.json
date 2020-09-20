@@ -19,6 +19,10 @@
     "homekit"
   ],
   "author": "merdok",
+  "funding": {
+    "type" : "paypal",
+    "url" : "https://paypal.me/merdokdev"
+  },
   "license": "MIT",
   "dependencies": {
     "lgtv2": "^1.6.2",
