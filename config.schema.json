@@ -24,14 +24,12 @@
                         "title": "TV ip address",
                         "description": "The ip address of your TV.",
                         "type": "string",
-                        "default": "192.168.1.5",
                         "format": "ipv4",
                         "required": true
                     },
                     "mac": {
                         "title": "TV mac address",
                         "description": "The mac address of your TV.",
-                        "default": "ab:cd:ef:fe:dc:ba",
                         "type": "string",
                         "required": true
                     },
@@ -385,7 +383,6 @@
                                         {
                                             "key": "devices[].appButtons[]",
                                             "type": "array",
-                                            "title": "App buttons",
                                             "orderable": false,
                                             "buttonText": "Add app button",
                                             "items": [
@@ -494,7 +491,13 @@
                                                         "devices[].remoteSequenceButtons[].sequence[]"
                                                     ]
                                                 },
-                                                "devices[].remoteSequenceButtons[].name",
+                                                {
+                                                    "key": "devices[].remoteSequenceButtons[].name",
+                                                    "title": "Name",
+                                                    "items": [
+                                                        "devices[].remoteSequenceButtons[].name"
+                                                    ]
+                                                },
                                                 {
                                                     "key": "devices[].remoteSequenceButtons[].interval",
                                                     "title": "Interval",
