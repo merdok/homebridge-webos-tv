@@ -1,309 +1,558 @@
 {
-  "pluginAlias": "webostv",
-  "pluginType": "platform",
-  "singular": true,
-  "headerDisplay": "Homebridge plugin for LG webOS TVs",
-  "footerDisplay": "For a detailed description, see the [README](https://github.com/merdok/homebridge-webos-tv#configuration-1)",
-  "schema": {
-    "devices": {
-      "title": "Devices",
-      "type": "array",
-      "required": true,
-      "items": {
+    "pluginAlias": "webostv",
+    "pluginType": "platform",
+    "singular": true,
+    "headerDisplay": "Homebridge plugin for LG webOS TVs",
+    "footerDisplay": "For a detailed description, see the [README](https://github.com/merdok/homebridge-webos-tv#configuration-1)",
+    "schema": {
         "type": "object",
         "properties": {
-          "name": {
-            "title": "Name",
-            "description": "The name of your TV.",
-            "type": "string",
-            "default": "My LG TV",
-            "minLength": 1,
-            "required": true
-          },
-          "ip": {
-            "title": "TV ip address",
-            "description": "The ip address of your TV.",
-            "type": "string",
-            "format": "ipv4",
-            "required": true
-          },
-          "mac": {
-            "title": "TV mac address",
-            "description": "The mac address of your TV.",
-            "type": "string",
-            "required": true
-          },
-          "broadcastAdr": {
-            "title": "Broadcast address",
-            "description": "If homebridge runs on a host with more than one network interface use this to specify the broadcast address.",
-            "type": "string",
-            "format": "ipv4"
-          },
-          "keyFile": {
-            "title": "Key file location",
-            "description": "The location where to store the tv key file. Default is: ~/.lgtv2/keyfile",
-            "type": "string"
-          },
-          "prefsDir": {
-            "title": "Prefs directory",
-            "description": "The location where to store tv information. Default is: ~/.homebridge/.webosTv",
-            "type": "string"
-          },
-          "pollingInterval": {
-            "title": "Background polling interval",
-            "description": "How often to check the status of the tv in seconds.",
-            "type": "number",
-            "default": 5
-          },
-          "deepDebugLog": {
-            "title": "Enable deep debug log.",
-            "description": "Enables additional more detailed debug log. Useful when trying to figure out issues with the plugin.",
-            "type": "boolean"
-          },
-          "hideTvService": {
-            "title": "Hide the TV service",
-            "description": "Recommended when the TV already supports native HomeKit integration to prevent double TV accessories.",
-            "type": "boolean"
-          },
-          "volumeLimit": {
-            "title": "Volume limit for the volume service",
-            "description": "Allows to limit the volume which can be set using the volume service.",
-            "type": "integer",
-            "default": 100,
-            "maximum": 100,
-            "minimum": 1
-          },
-          "volumeControl": {
-            "title": "Volume control service",
-            "description": "Whether to enable additional volume control. Button - adds volume up/down buttons, Slider - adds a light bulb which acts as a volume controller.",
-            "type": [
-              "string"
-            ],
-            "oneOf": [
-              {
-                "title": "None",
-                "const": "none"
-              },
-              {
-                "title": "Both - slider and buttons",
-                "const": "both"
-              },
-              {
-                "title": "Slider",
-                "const": "slider"
-              },
-              {
-                "title": "Buttons",
-                "const": "buttons"
-              }
-            ],
-            "default": "both",
-            "required": true
-          },
-          "channelControl": {
-            "title": "Channel control service",
-            "description": "Whether to show channel up/down buttons.",
-            "type": "boolean",
-            "default": true
-          },
-          "mediaControl": {
-            "title": "Media control service",
-            "description": "Whether to show media control buttons.",
-            "type": "boolean"
-          },
-          "screenControl": {
-            "title": "Screen control service",
-            "description": "Whether to show the screen control button. Allows to turn on/off the tv screen.",
-            "type": "boolean"
-          },
-          "screenSaverControl": {
-            "title": "Screen saver control service",
-            "description": "Whether to show the screen saver control button. Allows to instantly activate the screen saver on the TV. Can be used only when no content is playing on the tv.",
-            "type": "boolean"
-          },
-          "ccRemoteRemap": {
-            "title": "Remap control center remote buttons",
-            "description": "Allows to remap the control center remote buttons. For possible values check the README.",
-            "type": "object",
-            "properties": {
-              "arrowup": {
-                "title": "Arrow up button",
-                "type": "string"
-              },
-              "arrowdown": {
-                "title": "Arrow down button",
-                "type": "string"
-              },
-              "arrowleft": {
-                "title": "Arrow left button",
-                "type": "string"
-              },
-              "arrowright": {
-                "title": "Arrow right button",
-                "type": "string"
-              },
-              "select": {
-                "title": "Select button",
-                "type": "string"
-              },
-              "back": {
-                "title": "Back button",
-                "type": "string"
-              },
-              "playpause": {
-                "title": "PlayPause button",
-                "type": "string"
-              },
-              "information": {
-                "title": "Information button",
-                "type": "string"
-              }
-            }
-          },
-          "appButtons": {
-            "title": "App buttons",
-            "description": "Dedicated app buttons which will appear for the TV. Params needs to be added manually in the config.json",
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "appId": {
-                  "title": "appId",
-                  "type": "string",
-                  "required": true
-                },
-                "name": {
-                  "title": "name",
-                  "type": "string"
+            "devices": {
+                "title": "Devices",
+                "type": "array",
+                "required": true,
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "title": "Name",
+                            "description": "The name of your TV.",
+                            "type": "string",
+                            "default": "My LG TV",
+                            "minLength": 1,
+                            "required": true
+                        },
+                        "ip": {
+                            "title": "TV ip address",
+                            "description": "The ip address of your TV.",
+                            "type": "string",
+                            "format": "ipv4",
+                            "required": true
+                        },
+                        "mac": {
+                            "title": "TV mac address",
+                            "description": "The mac address of your TV.",
+                            "type": "string",
+                            "required": true
+                        },
+                        "broadcastAdr": {
+                            "title": "Broadcast address",
+                            "description": "If homebridge runs on a host with more than one network interface use this to specify the broadcast address.",
+                            "type": "string",
+                            "format": "ipv4"
+                        },
+                        "keyFile": {
+                            "title": "Key file location",
+                            "description": "The location where to store the tv key file. Default is: ~/.lgtv2/keyfile",
+                            "type": "string"
+                        },
+                        "prefsDir": {
+                            "title": "Prefs directory",
+                            "description": "The location where to store tv information. Default is: ~/.homebridge/.webosTv",
+                            "type": "string"
+                        },
+                        "pollingInterval": {
+                            "title": "Background polling interval",
+                            "description": "How often to check the status of the tv in seconds.",
+                            "type": "number",
+                            "default": 5
+                        },
+                        "deepDebugLog": {
+                            "title": "Enable deep debug log.",
+                            "description": "Enables additional more detailed debug log. Useful when trying to figure out issues with the plugin.",
+                            "type": "boolean"
+                        },
+                        "hideTvService": {
+                            "title": "Hide the TV service",
+                            "description": "Recommended when the TV already supports native HomeKit integration to prevent double TV accessories.",
+                            "type": "boolean"
+                        },
+                        "volumeLimit": {
+                            "title": "Volume limit for the volume service",
+                            "description": "Allows to limit the volume which can be set using the volume service.",
+                            "type": "integer",
+                            "default": 100,
+                            "maximum": 100,
+                            "minimum": 1
+                        },
+                        "volumeControl": {
+                            "title": "Volume control service",
+                            "description": "Whether to enable additional volume control. Button - adds volume up/down buttons, Slider - adds a light bulb which acts as a volume controller.",
+                            "type": [
+                                "string"
+                            ],
+                            "oneOf": [
+                                {
+                                    "title": "None",
+                                    "const": "none"
+                                },
+                                {
+                                    "title": "Both - slider and buttons",
+                                    "const": "both"
+                                },
+                                {
+                                    "title": "Slider",
+                                    "const": "slider"
+                                },
+                                {
+                                    "title": "Buttons",
+                                    "const": "buttons"
+                                }
+                            ],
+                            "default": "both",
+                            "required": true
+                        },
+                        "channelControl": {
+                            "title": "Channel control service",
+                            "description": "Whether to show channel up/down buttons.",
+                            "type": "boolean",
+                            "default": true
+                        },
+                        "mediaControl": {
+                            "title": "Media control service",
+                            "description": "Whether to show media control buttons.",
+                            "type": "boolean"
+                        },
+                        "screenControl": {
+                            "title": "Screen control service",
+                            "description": "Whether to show the screen control button. Allows to turn on/off the tv screen.",
+                            "type": "boolean"
+                        },
+                        "screenSaverControl": {
+                            "title": "Screen saver control service",
+                            "description": "Whether to show the screen saver control button. Allows to instantly activate the screen saver on the TV. Can be used only when no content is playing on the tv.",
+                            "type": "boolean"
+                        },
+                        "ccRemoteRemap": {
+                            "title": "Remap control center remote buttons",
+                            "description": "Allows to remap the control center remote buttons. For possible values check the README.",
+                            "type": "object",
+                            "properties": {
+                                "arrowup": {
+                                    "title": "Arrow up button",
+                                    "type": "string"
+                                },
+                                "arrowdown": {
+                                    "title": "Arrow down button",
+                                    "type": "string"
+                                },
+                                "arrowleft": {
+                                    "title": "Arrow left button",
+                                    "type": "string"
+                                },
+                                "arrowright": {
+                                    "title": "Arrow right button",
+                                    "type": "string"
+                                },
+                                "select": {
+                                    "title": "Select button",
+                                    "type": "string"
+                                },
+                                "back": {
+                                    "title": "Back button",
+                                    "type": "string"
+                                },
+                                "playpause": {
+                                    "title": "PlayPause button",
+                                    "type": "string"
+                                },
+                                "information": {
+                                    "title": "Information button",
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "appButtons": {
+                            "title": "App buttons",
+                            "description": "Dedicated app buttons which will appear for the TV. Params needs to be added manually in the config.json",
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "appId": {
+                                        "title": "appId",
+                                        "type": "string",
+                                        "required": true
+                                    },
+                                    "name": {
+                                        "title": "name",
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        },
+                        "channelButtons": {
+                            "title": "Channel buttons",
+                            "description": "Allows to create buttons for specific channels.",
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "channelNumber": {
+                                        "title": "Channel number",
+                                        "type": "number",
+                                        "required": true
+                                    },
+                                    "channelId": {
+                                        "title": "Channel id",
+                                        "type": "string"
+                                    },
+                                    "name": {
+                                        "title": "Channel name",
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        },
+                        "notificationButtons": {
+                            "title": "Notification buttons",
+                            "description": "Allows to create buttons that show notifications on your TV.",
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "message": {
+                                        "title": "message",
+                                        "type": "string",
+                                        "required": true
+                                    },
+                                    "name": {
+                                        "title": "name",
+                                        "type": "string"
+                                    },
+                                    "appId": {
+                                        "title": "appId",
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        },
+                        "remoteControlButtons": {
+                            "title": "Remote control buttons",
+                            "description": "Allows to create buttons that emulate remote control presses.",
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "action": {
+                                        "title": "Action",
+                                        "type": "string"
+                                    },
+                                    "name": {
+                                        "title": "Name",
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        },
+                        "remoteSequenceButtons": {
+                            "title": "Remote sequence buttons",
+                            "description": "Allows to create buttons that run a specified remote control sequence.",
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "sequence": {
+                                        "title": "sequence",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "required": true
+                                        }
+                                    },
+                                    "name": {
+                                        "title": "name",
+                                        "type": "string"
+                                    },
+                                    "interval": {
+                                        "title": "interval",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "number"
+                                        },
+                                        "default": 500
+                                    }
+                                }
+                            }
+                        },
+                        "soundOutputButtons": {
+                            "title": "Sound output buttons",
+                            "description": "Allows to create buttons that can switch between sound outputs.",
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "soundOutput": {
+                                        "title": "Sound output",
+                                        "type": "string",
+                                        "enum": [
+                                            "tv_speaker",
+                                            "external_optical",
+                                            "external_arc",
+                                            "external_speaker",
+                                            "lineout",
+                                            "headphone",
+                                            "tv_external_speaker",
+                                            "tv_speaker_headphone",
+                                            "bt_soundbar"
+                                        ]
+                                    },
+                                    "name": {
+                                        "title": "name",
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
-              }
             }
-          },
-          "channelButtons": {
-            "title": "Channel buttons",
-            "description": "Allows to create buttons for specific channels.",
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "channelNumber": {
-                  "title": "Channel number",
-                  "type": "number",
-                  "required": true
-                },
-                "channelId": {
-                  "title": "Channel id",
-                  "type": "string"
-                },
-                "name": {
-                  "title": "Channel name",
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "notificationButtons": {
-            "title": "Notification buttons",
-            "description": "Allows to create buttons that show notifications on your TV.",
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "message": {
-                  "title": "message",
-                  "type": "string",
-                  "required": true
-                },
-                "name": {
-                  "title": "name",
-                  "type": "string"
-                },
-                "appId": {
-                  "title": "appId",
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "remoteControlButtons": {
-            "title": "Remote control buttons",
-            "description": "Allows to create buttons that emulate remote control presses.",
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "action": {
-                  "title": "Action",
-                  "type": "string"
-                },
-                "name": {
-                  "title": "Name",
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "remoteSequenceButtons": {
-            "title": "Remote sequence buttons",
-            "description": "Allows to create buttons that run a specified remote control sequence.",
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "sequence": {
-                  "title": "sequence",
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "required": true
-                  }
-                },
-                "name": {
-                  "title": "name",
-                  "type": "string"
-                },
-                "interval": {
-                  "title": "interval",
-                  "type": "array",
-                  "items": {
-                    "type": "number"
-                  },
-                  "default": 500
-                }
-              }
-            }
-          },
-          "soundOutputButtons": {
-            "title": "Sound output buttons",
-            "description": "Allows to create buttons that can switch between sound outputs.",
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "soundOutput": {
-                  "title": "Sound output",
-                  "type": "string",
-                  "enum": [
-                    "tv_speaker",
-                    "external_optical",
-                    "external_arc",
-                    "external_speaker",
-                    "lineout",
-                    "headphone",
-                    "tv_external_speaker",
-                    "tv_speaker_headphone",
-                    "bt_soundbar"
-                  ]
-                },
-                "name": {
-                  "title": "name",
-                  "type": "string"
-                }
-              }
-            }
-          }
         }
-      }
-    }
-  }
+    },
+    "layout": [
+        {
+            "type": "section",
+            "title": "Devices",
+            "expandable": true,
+            "expanded": true,
+            "items": [
+                {
+                    "key": "devices",
+                    "type": "array",
+                    "orderable": false,
+                    "buttonText": "Add device",
+                    "items": [
+                        "devices[].name",
+                        "devices[].ip",
+                        "devices[].mac",
+                        "devices[].pollingInterval",
+                        {
+                            "key": "devices[]",
+                            "type": "section",
+                            "title": "Advanced Settings",
+                            "expandable": true,
+                            "expanded": false,
+                            "items": [
+                                "devices[].broadcastAdr",
+                                "devices[].prefsDir",
+                                "devices[].keyFile",
+                                "devices[].volumeLimit",
+                                "devices[].volumeControl",
+                                "devices[].mediaControl",
+                                "devices[].channelControl",
+                                "devices[].screenControl",
+                                "devices[].screenSaverControl",
+                                "devices[].hideTvService",
+                                "devices[].deepDebugLog"
+                            ]
+                        },
+                        {
+                            "key": "devices[]",
+                            "type": "section",
+                            "title": "Remote control",
+                            "expandable": true,
+                            "expanded": false,
+                            "items": [
+                                {
+                                    "key": "devices[].ccRemoteRemap",
+                                    "type": "section",
+                                    "items": [
+                                        {
+                                            "key": "devices[].ccRemoteRemap.arrowleft",
+                                            "type": "section",
+                                            "items": [
+                                                "devices[].title",
+                                                "devices[].type"
+                                            ]
+                                        },
+                                        {
+                                            "key": "devices[].ccRemoteRemap.arrowup",
+                                            "type": "section",
+                                            "items": [
+                                                "devices[].title",
+                                                "devices[].type"
+                                            ]
+                                        },
+                                        {
+                                            "key": "devices[].ccRemoteRemap.arrowright",
+                                            "type": "section",
+                                            "items": [
+                                                "devices[].title",
+                                                "devices[].type"
+                                            ]
+                                        },
+                                        {
+                                            "key": "devices[].ccRemoteRemap.arrowdown",
+                                            "type": "section",
+                                            "items": [
+                                                "devices[].title",
+                                                "devices[].type"
+                                            ]
+                                        },
+                                        {
+                                            "key": "devices[].ccRemoteRemap.select",
+                                            "type": "section",
+                                            "items": [
+                                                "devices[].title",
+                                                "devices[].type"
+                                            ]
+                                        },
+                                        {
+                                            "key": "devices[].ccRemoteRemap.back",
+                                            "type": "section",
+                                            "items": [
+                                                "devices[].title",
+                                                "devices[].type"
+                                            ]
+                                        },
+                                        {
+                                            "key": "devices[].ccRemoteRemap.playpause",
+                                            "type": "section",
+                                            "items": [
+                                                "devices[].title",
+                                                "devices[].type"
+                                            ]
+                                        },
+                                        {
+                                            "key": "devices[].ccRemoteRemap.information",
+                                            "type": "section",
+                                            "items": [
+                                                "devices[].title",
+                                                "devices[].type"
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "key": "devices[]",
+                            "type": "section",
+                            "title": "Buttons",
+                            "expandable": true,
+                            "expanded": false,
+                            "items": [
+                                {
+                                    "key": "devices[]",
+                                    "type": "section",
+                                    "title": "App buttons",
+                                    "expandable": true,
+                                    "expanded": false,
+                                    "items": [
+                                        {
+                                            "key": "devices[].appButtons",
+                                            "type": "array",
+                                            "orderable": false,
+                                            "buttonText": "Add app button",
+                                            "items": [
+                                                "devices[].inputs[].appId",
+                                                "devices[].inputs[].name"
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "key": "devices[]",
+                                    "type": "section",
+                                    "title": "Channel buttons",
+                                    "expandable": true,
+                                    "expanded": false,
+                                    "items": [
+                                        {
+                                            "key": "devices[].channelButtons",
+                                            "type": "array",
+                                            "orderable": false,
+                                            "buttonText": "Add channel button",
+                                            "items": [
+                                                "devices[].inputs[].channelNumber",
+                                                "devices[].inputs[].channelId",
+                                                "devices[].inputs[].name"
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "key": "devices[]",
+                                    "type": "section",
+                                    "title": "Notification buttons",
+                                    "expandable": true,
+                                    "expanded": false,
+                                    "items": [
+                                        {
+                                            "key": "devices[].notificationButtons",
+                                            "type": "array",
+                                            "orderable": false,
+                                            "buttonText": "Add notification button",
+                                            "items": [
+                                                "devices[].inputs[].message",
+                                                "devices[].inputs[].name",
+                                                "devices[].inputs[].appId"
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "key": "devices[]",
+                                    "type": "section",
+                                    "title": "Remote control buttons",
+                                    "expandable": true,
+                                    "expanded": false,
+                                    "items": [
+                                        {
+                                            "key": "devices[].remoteControlButtons",
+                                            "type": "array",
+                                            "orderable": false,
+                                            "buttonText": "Add remote control button",
+                                            "items": [
+                                                "devices[].inputs[].action",
+                                                "devices[].inputs[].name"
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "key": "devices[]",
+                                    "type": "section",
+                                    "title": "Remote sequence buttons",
+                                    "expandable": true,
+                                    "expanded": false,
+                                    "items": [
+                                        {
+                                            "key": "devices[].remoteSequenceButtons",
+                                            "type": "array",
+                                            "orderable": false,
+                                            "buttonText": "Add remote sequence button",
+                                            "items": [
+                                                "devices[].inputs[].name",
+                                                "devices[].inputs[].interval"
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "key": "devices[]",
+                                    "type": "section",
+                                    "title": "Sound output buttons",
+                                    "expandable": true,
+                                    "expanded": false,
+                                    "items": [
+                                        {
+                                            "key": "devices[].soundOutputButtons",
+                                            "type": "array",
+                                            "orderable": false,
+                                            "buttonText": "Add sound output button",
+                                            "items": [
+                                                "devices[].inputs[].soundOutput",
+                                                "devices[].inputs[].name"
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
 }
