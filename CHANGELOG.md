@@ -6,6 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.4] - 2020-09-23
+
+### Fixed
+- The tv speaker service is now working properly
+
+### Changed
+- Under the hood changes for better readability
+
+
 ## [2.0.3] - 2020-09-20
 ### Added
 - The TV webOS version is now displayed on connection in the console
