@@ -53,7 +53,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Notification button service has now an optional `appId` property. When this is set pressing on the notification will take you to the specified app
 - Remote control buttons now also accept as an array of objects with `action` and `name` properties as values. This allows you to name your buttons as you desire
 - sound output buttons now also accept as an array of objects with `soundOutput` and `name` properties as values. This allows you to name your buttons as you desire
-- new `appButtons` which allows to create dedicated input buttons which can be used for automations or controlled by Siri
+- new `appButtons` property which allows to create dedicated input buttons which can be used for automations or controlled by Siri
 - new `screenControl` property which when enabled allows to turn on/off the TV screen
 - new `screenSaverControl` property which when enabled allows to instantly activate the screen saver on the tv
 - new `ccRemoteRemap` property which allows to completely remap the control center remote buttons
