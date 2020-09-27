@@ -105,6 +105,11 @@ class webosTvDevice {
       mkdirp(this.prefsDir);
     }
 
+    // generate the key file name for the TV if not specified
+    if (this.keyFile === undefined) {
+      this.keyFile = this.prefsDir + 'keyFile_' + this.ip.split('.').join('') + '_' + this.mac.split(':').join('');
+    }
+
     // prepare file paths
     this.tvInfoFile = this.prefsDir + 'info_' + this.mac.split(':').join('');
     this.tvAvailableInputsFile = this.prefsDir + 'inputsAvailable_' + this.mac.split(':').join('');
