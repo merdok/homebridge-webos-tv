@@ -6,8 +6,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [2.0.4] - 2020-09-23
 
+## [2.0.5] - 2020-09-28
+### Added
+- Automatically generate keyFile name for the TV if not specified by the user. Due to this there is no need anymore to specify custom keyFile names when using multiply TVs
+- Default keyFile location, if not specified by the user, is now inside the prefsDir
+
+### Changed
+- Due to the change in the keyFile location you might be asked by the TV to allow connection to the plugin again
+- Bumped dependencies
+
+
+## [2.0.4] - 2020-09-23
 ### Fixed
 - The tv speaker service is now working properly
 

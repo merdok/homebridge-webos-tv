@@ -41,7 +41,7 @@
           },
           "keyFile": {
             "title": "Key file location",
-            "description": "The location where to store the tv key file. Default is: ~/.lgtv2/keyfile",
+            "description": "The location where to store the tv key file. Default is: ~/.homebridge/.webosTv/keyFile_xxx",
             "type": "string"
           },
           "prefsDir": {

@@ -192,7 +192,7 @@ Mac address of your TV.
 - `broadcastAdr` [optional]
 If homebridge runs on a host with more than one network interface use this to specify the broadcast address.
 - `keyFile` [optional]
-To prevent the TV from asking for permission when you reboot homebridge, specify a file path to store the permission token. If the file doesn't exist it'll be created. Don't specify a directory or you'll get an `EISDIR` error.
+Specify a custom file path to store the permission token for the TV. If the file doesn't exist it'll be created. Don't specify a directory or you'll get an `EISDIR` error. **Default: "~/.homebridge/.webosTv/keyFile_xxx"**
 - `prefsDir` [optional]
 The directory where TV model info should be saved. **Default: "~/.homebridge/.webosTv"**
 - `pollingInterval` [optional]
