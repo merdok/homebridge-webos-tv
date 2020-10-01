@@ -1,6 +1,7 @@
 const fs = require('fs');
 const mkdirp = require('mkdirp');
 const LgTvController = require('./lib/LgTvController.js');
+const Events = require('./lib/Events.js');
 
 let Service, Characteristic, Homebridge, Accessory;
 
@@ -139,7 +140,7 @@ class webosTvDevice {
 
 
     //register to listeners
-    this.lgTvCtrl.on('tvSetupFinished', () => {
+    this.lgTvCtrl.on(Events.SETUP_FINISHED, () => {
       this.logInfo('TV setup finished, ready to control tv');
 
       // add external inputs
@@ -149,47 +150,47 @@ class webosTvDevice {
       this.updateInformationService();
     });
 
-    this.lgTvCtrl.on('tvTurnedOn', () => {
+    this.lgTvCtrl.on(Events.TV_TURNED_ON, () => {
       this.updateTvStatusFull();
     });
 
-    this.lgTvCtrl.on('tvTurnedOff', () => {
+    this.lgTvCtrl.on(Events.TV_TURNED_OFF, () => {
       this.updateTvStatusFull();
     });
 
-    this.lgTvCtrl.on('tvPixelRefresherStarted', () => {
+    this.lgTvCtrl.on(Events.PIXEL_REFRESHER_STARTED, () => {
       this.updateTvStatusFull();
     });
 
-    this.lgTvCtrl.on('screenSaverTurnedOn', () => {
+    this.lgTvCtrl.on(Events.SCREEN_SAVER_TURNED_ON, () => {
       this.updateScreenSaverStatus();
     });
 
-    this.lgTvCtrl.on('foregroundAppChanged', (res) => {
+    this.lgTvCtrl.on(Events.FOREGROUND_APP_CHANGED, (res) => {
       this.updateActiveInputSource();
       this.updateAppButtons();
       this.updateChannelButtons();
     });
 
-    this.lgTvCtrl.on('audioStatusChanged', () => {
+    this.lgTvCtrl.on(Events.AUDIO_STATUS_CHANGED, () => {
       this.updateTvAudioStatus();
     });
 
-    this.lgTvCtrl.on('liveTvChannelChanged', () => {
+    this.lgTvCtrl.on(Events.LIVE_TV_CHANNEL_CHANGED, () => {
       this.updateChannelButtons();
     });
 
-    this.lgTvCtrl.on('soundOutputChanged', () => {
+    this.lgTvCtrl.on(Events.SOUND_OUTPUT_CHANGED, () => {
       this.updateSoundOutputButtons();
     });
 
-    this.lgTvCtrl.on('appAdded', (res) => {
+    this.lgTvCtrl.on(Events.NEW_APP_ADDED, (res) => {
       if (res) {
         this.newAppInstalledOnTv(res);
       }
     });
 
-    this.lgTvCtrl.on('appRemoved', (res) => {
+    this.lgTvCtrl.on(Events.APP_REMOVED, (res) => {
       if (res) {
         this.appRemovedFromTv(res.appId);
       }
