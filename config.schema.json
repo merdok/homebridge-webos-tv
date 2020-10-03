@@ -56,7 +56,7 @@
             "default": 5
           },
           "deepDebugLog": {
-            "title": "Enable deep debug log.",
+            "title": "Enable deep debug log",
             "description": "Enables additional more detailed debug log. Useful when trying to figure out issues with the plugin.",
             "type": "boolean"
           },
