@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [2.0.6] - 2020-10-13
+### Fixed
+- Fixed an issue where the channel buttons service would not update the status in some cases
+- Setup on tv connection should not get stuck now in cases where no response comes back from the tv
+
+### Changed
+- Some under the hood improvements
+- Updated README
+
+
 ## [2.0.5] - 2020-09-28
 ### Added
 - Automatically generate keyFile name for the TV if not specified by the user. Due to this there is no need anymore to specify custom keyFile names when using multiply TVs
