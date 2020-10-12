@@ -242,7 +242,7 @@ Whether the channel buttons service is enabled. This allows to create buttons fo
 Whether the notification buttons service is enabled. This allows to create buttons which when pressed display the specified text on the TV screen in a toast. Useful for HomeKit automations or to display text on TV for viewers. **Default: "" (disabled)**
   - Set an array of notification texts as the value
   - You can also set an array of objects as the value. An object can have the following properties:
-    - *message* - [required] the message to display in the notification,
+    - *message* - [required] the message to display in the notification
     - *name* - [optional] the notification name
     - *appId* - [optional] when specified, clicking on the toast will open the app
     - *params* - [optional] parameters to be used for the app when clicking on the toast
