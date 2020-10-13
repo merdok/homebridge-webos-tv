@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [2.0.7] - 2020-10-14
+### Fixed
+- Fixed an which might have cause to crash the plugin
+- Correctly show the error message when a subscription fails
+- Fixed illegal value warning
+
+
 ## [2.0.6] - 2020-10-13
 ### Fixed
 - Fixed an issue where the channel buttons service would not update the status in some cases
