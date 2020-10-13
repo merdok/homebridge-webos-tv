@@ -1524,7 +1524,7 @@ class webosTvDevice {
       let activeInputId = Object.keys(this.configuredInputs).find(key => {
         return this.configuredInputs[key].appId === this.lgTvCtrl.getForegroundAppAppId();
       });
-      return activeInputId || NOT_EXISTING_INPUT;
+      return parseInt(activeInputId) || NOT_EXISTING_INPUT;
     }
     return NOT_EXISTING_INPUT;
   }
