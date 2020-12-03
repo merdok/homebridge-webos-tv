@@ -166,6 +166,12 @@ class webosTvDevice {
       this.updateScreenSaverStatus();
     });
 
+    this.lgTvCtrl.on(Events.POWER_STATE_CHANGED, () => {
+      this.updatePowerStatus();
+      this.updateScreenStatus();
+      this.updateScreenSaverStatus();
+    });
+
     this.lgTvCtrl.on(Events.FOREGROUND_APP_CHANGED, (res) => {
       this.updateActiveInputSource();
       this.updateAppButtons();
