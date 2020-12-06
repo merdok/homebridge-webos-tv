@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Improved tv status reporting
 - Improved error logging
+- Clarify in config UI that TV must be added explicitly. Thanks @henrik
 
 ### Fixed
 - Fixed "TV turned on!" appearing in log messages to many times
