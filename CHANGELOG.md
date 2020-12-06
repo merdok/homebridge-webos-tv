@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [2.0.8] - 2020-12-07
+### Changed
+- Improved tv status reporting
+- Improved error logging
+
+### Fixed
+- Fixed "TV turned on!" appearing in log messages to many times
+
+
 ## [2.0.7] - 2020-10-14
 ### Fixed
 - Fixed an which might have cause to crash the plugin
