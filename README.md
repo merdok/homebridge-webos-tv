@@ -246,6 +246,7 @@ Whether the notification buttons service is enabled. This allows to create butto
     - *name* - [optional] the notification name
     - *appId* - [optional] when specified, clicking on the toast will open the app
     - *params* - [optional] parameters to be used for the app when clicking on the toast
+    - *file* - [optional] when specified, the content of the file will be used for the notification message. Specify a file name (will be read from the prefs dir) or full file path
 - `remoteControlButtons` [optional]
 Whether the remote control buttons service is enabled. This allows to emulate remote control buttons. **Default: "" (disabled)**
   - For possible values, see section below.  

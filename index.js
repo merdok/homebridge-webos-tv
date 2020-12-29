@@ -717,7 +717,7 @@ class webosTvDevice {
       newNotificationButtonDef.message = value.message || value;
 
       // if message null or empty then skip this notification button, message is required to display a notification
-      if (!newNotificationButtonDef.message || newNotificationButtonDef.message === '' || typeof newNotificationButtonDef.message !== 'string') {
+      if (!newNotificationButtonDef.message || typeof newNotificationButtonDef.message !== 'string' || newNotificationButtonDef.message === '') {
         this.logWarn(`Missing message or message is not of type string. Cannot add notification button!`);
         return;
       }
@@ -730,6 +730,15 @@ class webosTvDevice {
 
       // params
       newNotificationButtonDef.params = value.params || {};
+
+      // get the optional notification content file, if that is specified then the content of this file is read and displayed in the notification
+      if (value.file && typeof value.file === 'string' && value.file.length > 0) {
+        newNotificationButtonDef.file = value.file;
+        // if only file name specified then look for the file in the prefsdir
+        if (newNotificationButtonDef.file.includes('/') === false) {
+          newNotificationButtonDef.file = this.prefsDir + newNotificationButtonDef.file;
+        }
+      }
 
       // create the stateless button service
       let newNotificationButtonService = this.createStatlessSwitchService(newNotificationButtonDef.name, 'notificationButtonService' + i, (state, callback) => {
@@ -1106,12 +1115,20 @@ class webosTvDevice {
   setNotificationButtonState(state, callback, notificationButtonDef) {
     if (this.lgTvCtrl.isTvOn()) {
       let onClick = null;
+      let notifyMsg = notificationButtonDef.message;
       if (notificationButtonDef.appId) {
         onClick = {};
         onClick.appId = notificationButtonDef.appId;
         onClick.params = notificationButtonDef.params;
       }
-      this.lgTvCtrl.openToast(notificationButtonDef.message, null, null, onClick);
+      if (notificationButtonDef.file) {
+        try {
+          notifyMsg = fs.readFileSync(notificationButtonDef.file, 'utf8');
+        } catch (err) {
+          this.logDebug(`Failed to load notification button message from the specified file: ${notificationButtonDef.file}. Does the file exist?`);
+        }
+      }
+      this.lgTvCtrl.openToast(notifyMsg, null, null, onClick);
     }
     this.resetNotificationButtons();
     callback();
