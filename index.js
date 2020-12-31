@@ -11,7 +11,7 @@ const PLUGIN_VERSION = '2.0.8';
 
 // General constants
 const NOT_EXISTING_INPUT = 999999;
-const INPUT_SOURCES_LIMIT = 45;
+const DEFAULT_INPUT_SOURCES_LIMIT = 45;
 const BUTTON_RESET_TIMEOUT = 20; // in milliseconds
 
 module.exports = (homebridge) => {
@@ -50,6 +50,7 @@ class webosTvDevice {
     this.alivePollingInterval = config.pollingInterval || 5;
     this.alivePollingInterval = this.alivePollingInterval * 1000;
     this.deepDebugLog = config.deepDebugLog;
+    this.inputSourcesLimit = config.inputSourcesLimit || DEFAULT_INPUT_SOURCES_LIMIT;
     if (this.deepDebugLog === undefined) {
       this.deepDebugLog = false;
     }
@@ -95,6 +96,14 @@ class webosTvDevice {
 
     this.logInfo(`Init - got TV configuration, initializing device with name: ${this.name}`);
 
+
+    // check if input sources limit is within a reasonable range
+    if (this.inputSourcesLimit < 10) {
+      this.inputSourcesLimit = 10;
+    }
+    if (this.inputSourcesLimit > 65) {
+      this.inputSourcesLimit = 65;
+    }
 
     // check if prefs directory ends with a /, if not then add it
     if (this.prefsDir.endsWith('/') === false) {
@@ -357,7 +366,7 @@ class webosTvDevice {
 
   prepareInputSourcesService() {
     // create dummy inputs
-    for (var i = 0; i < INPUT_SOURCES_LIMIT; i++) {
+    for (var i = 0; i < this.inputSourcesLimit; i++) {
 
       let inputId = i;
 
@@ -404,11 +413,13 @@ class webosTvDevice {
       inputSourcesList = [];
     }
 
-    inputSourcesList.forEach((value, i) => {
+    this.logDebug(`Adding ${inputSourcesList.length} new input sources!`);
+
+    for (let value of inputSourcesList) {
 
       if (this.dummyInputSourceServices.length === 0) {
-        this.logWarn(`Inputs limit reached! Cannot add any more new inputs`);
-        return;
+        this.logWarn(`Inputs limit (${this.inputSourcesLimit}) reached. Cannot add any more new inputs!`);
+        break;
       }
 
       var inputSourceService = this.dummyInputSourceServices.shift(); // get the first free input source service
@@ -476,7 +487,9 @@ class webosTvDevice {
       newInputDef.inputService = inputSourceService;
       this.configuredInputs[newInputDef.id] = newInputDef;
 
-    });
+      this.logDebug(`Created new input source: appId: ${newInputDef.appId}, name: ${newInputDef.name}`);
+
+    }
 
   }
 
