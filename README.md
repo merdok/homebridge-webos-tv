@@ -306,6 +306,29 @@ Deep debug log, add the following to your config.json:
 ```
 This will enable additional extra log which might be helpful to debug all kind of issues. Just be aware that this will produce a lot of log information so it is recommended to use a service like https://pastebin.com/ when providing the log for inspection.
 
+## Fixes to known issues
+
+### ‘Connecting to TV’ when adding the TV to HomeKit
+Most probably the ports assigned to your tv accessory are not open in your firewall.
+
+To fix that you need to first update the config.json with a fixed range of ports like this:
+
+```
+...
+  "bridge": {
+      "name": "Homebridge",
+      "username": "**:**:**:**:**:**",
+      "pin": "***-**-***",
+      "port": 51283
+  },
+  "ports": {
+      "start": 52100,
+      "end": 52150
+  },
+...
+```
+After that make sure that the specified range of ports is open in your firewall to allow connections. 
+
 ## Special thanks
 [lgtv2](https://github.com/hobbyquaker/lgtv2) - the Node.js remote control module for LG WebOS smart TVs.
 
