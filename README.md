@@ -329,6 +329,15 @@ To fix that you need to first update the config.json with a fixed range of ports
 ```
 After that make sure that the specified range of ports is open in your firewall to allow connections. 
 
+### TV not visible when trying to add to HomeKit
+When you try to add your TV to the HomeKit app but it is not visbile even when in the homebridge UI it appears, then it most probably is a homebridge cache issue.
+
+###### Homebridge Config UI X
+Go to *Homebridge Settings* and click on `Unpair Bridges / Cameras / TVs / External Accessories` and remove the TV from the list. After that try to add your TV to the HomeKit app.
+
+###### HOOBS
+Use the `Reset Connection` button and after that try to add your TV to the HomeKit app.
+
 ## Special thanks
 [lgtv2](https://github.com/hobbyquaker/lgtv2) - the Node.js remote control module for LG WebOS smart TVs.
 
