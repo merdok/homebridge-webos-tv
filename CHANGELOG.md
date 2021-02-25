@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [2.1.0] - 2021-02-26
+### Added
+- A file can now be used for notification buttons message. This way dynamic text can be displayed in the notification.  
+- New `inputSourcesLimit` property which allows to specify a limit for input sources which will be fetched from the TV. It is not documented in the README as it should only be used in edge cases.
+
+### Changed
+- Improved logging
+- Updated README
+
+### Fixed
+- Fixed a homebridge warning when using external sound devices.
+
+
 ## [2.0.8] - 2020-12-07
 ### Changed
 - Improved tv status reporting
