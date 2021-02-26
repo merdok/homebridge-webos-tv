@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [2.1.1] - 2021-02-27
+### Fixed
+- Fix screen on/off feature on newer LG TVs.
+
+
 ## [2.1.0] - 2021-02-26
 ### Added
 - A file can now be used for notification buttons message. This way dynamic text can be displayed in the notification.  
