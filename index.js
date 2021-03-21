@@ -13,6 +13,7 @@ const PLUGIN_VERSION = '2.1.1';
 const NOT_EXISTING_INPUT = 999999;
 const DEFAULT_INPUT_SOURCES_LIMIT = 45;
 const BUTTON_RESET_TIMEOUT = 20; // in milliseconds
+const AUTOMATIONS_TRIGGER_TIMEOUT = 400; // in milliseconds
 
 module.exports = (homebridge) => {
   Service = homebridge.hap.Service;
@@ -209,6 +210,14 @@ class webosTvDevice {
       if (res) {
         this.appRemovedFromTv(res.appId);
       }
+    });
+
+    this.lgTvCtrl.on(Events.VOLUME_UP, () => {
+      this.triggerVolumeUpAutomations();
+    });
+
+    this.lgTvCtrl.on(Events.VOLUME_DOWN, (res) => {
+      this.triggerVolumeDownAutomations();
     });
 
   }
@@ -1549,6 +1558,26 @@ class webosTvDevice {
           item.buttonService.getCharacteristic(Characteristic.On).updateValue(false);
         });
       }, BUTTON_RESET_TIMEOUT);
+    }
+  }
+
+  triggerVolumeUpAutomations() {
+    if (this.volumeUpService) {
+      // turn the button on and off after a delay to trigger homekit automations
+      this.volumeUpService.getCharacteristic(Characteristic.On).updateValue(true);
+      setTimeout(() => {
+        this.volumeUpService.getCharacteristic(Characteristic.On).updateValue(false);
+      }, AUTOMATIONS_TRIGGER_TIMEOUT);
+    }
+  }
+
+  triggerVolumeDownAutomations() {
+    if (this.volumeDownService) {
+      // turn the button on and off after a delay to trigger homekit automations
+      this.volumeDownService.getCharacteristic(Characteristic.On).updateValue(true);
+      setTimeout(() => {
+        this.volumeDownService.getCharacteristic(Characteristic.On).updateValue(false);
+      }, AUTOMATIONS_TRIGGER_TIMEOUT);
     }
   }
 
