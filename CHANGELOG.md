@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [2.1.2] - 2021-03-22
+### Fixed
+- Trigger HomeKit automations when pressing Volume Up/Down on the remote control
+
+
 ## [2.1.1] - 2021-02-27
 ### Fixed
 - Fix screen on/off feature on newer LG TVs.
