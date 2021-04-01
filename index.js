@@ -417,6 +417,11 @@ class webosTvDevice {
   }
 
   addInputSources(inputSourcesList) {
+    // if the tv service is hidden then we cannot add any input sources so just skip
+    if (this.isHideTvService) {
+      return;
+    }
+
     // make sure we always have an array here
     if (!inputSourcesList || Array.isArray(inputSourcesList) === false) {
       inputSourcesList = [];
