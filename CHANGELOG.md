@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [2.1.3] - 2021-04-02
+### Fixed
+- Fixed "input limit reached" warning showing up when hide TV service was enabled
+
+
 ## [2.1.2] - 2021-03-22
 ### Fixed
 - Trigger HomeKit automations when pressing Volume Up/Down on the remote control
