@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [2.1.4] - 2021-04-13
+### Changed
+- Optimize config.schema.json, organize services in sections
+- Updated README
+
+
 ## [2.1.3] - 2021-04-02
 ### Fixed
 - Fixed "input limit reached" warning showing up when hide TV service was enabled
