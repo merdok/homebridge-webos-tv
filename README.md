@@ -176,7 +176,7 @@ For more info check the homebridge wiki [Connecting Homebridge To HomeKit](https
 ### Inputs
 Inputs and apps are automatically fetched from your TV. As default only Live TV and basic external inputs (HDMI1, HDMI2, etc) are enabled in the "inputs spinner". To add more apps to the spinner simply go on the accessory configuration in the Home app and check all the inputs which you would like to have in the spinner.
 
-### Configuration
+### Parameters
 #### Platform Configuration fields
 - `platform` [required]
 Should always be **"webostv"**.
@@ -327,7 +327,7 @@ To fix that you need to first update the config.json with a fixed range of ports
   },
 ...
 ```
-After that make sure that the specified range of ports is open in your firewall to allow connections. 
+After that make sure that the specified range of ports is open in your firewall to allow connections.
 
 ### TV not visible when trying to add to HomeKit
 When you try to add your TV to the HomeKit app but it is not visbile even when in the homebridge UI it appears, then it most probably is a homebridge cache issue.
