@@ -539,7 +539,7 @@ class webosTvDevice {
 
     // slider/lightbulb
     if (this.volumeControl === true || this.volumeControl === "both" || this.volumeControl === 'slider') {
-      this.volumeAsLightbulbService = new Service.Lightbulb(this.name + ' Volume', 'volumeService');
+      this.volumeAsLightbulbService = new Service.Lightbulb('Volume', 'volumeService');
       this.volumeAsLightbulbService
         .getCharacteristic(Characteristic.On)
         .on('get', this.getLightbulbMuteState.bind(this))
@@ -555,10 +555,10 @@ class webosTvDevice {
     // volume up/down buttons
     if (this.volumeControl === true || this.volumeControl === "both" || this.volumeControl === 'buttons') {
 
-      this.volumeUpService = this.createStatlessSwitchService(this.name + ' Volume Up', 'volumeUpService', this.setVolumeUp.bind(this));
+      this.volumeUpService = this.createStatlessSwitchService('Volume Up', 'volumeUpService', this.setVolumeUp.bind(this));
       this.tvAccesory.addService(this.volumeUpService);
 
-      this.volumeDownService = this.createStatlessSwitchService(this.name + ' Volume Down', 'volumeDownService', this.setVolumeDown.bind(this));
+      this.volumeDownService = this.createStatlessSwitchService('Volume Down', 'volumeDownService', this.setVolumeDown.bind(this));
       this.tvAccesory.addService(this.volumeDownService);
     }
   }
@@ -569,10 +569,10 @@ class webosTvDevice {
       return;
     }
 
-    this.channelUpService = this.createStatlessSwitchService(this.name + ' Channel Up', 'channelUpService', this.setChannelUp.bind(this));
+    this.channelUpService = this.createStatlessSwitchService('Channel Up', 'channelUpService', this.setChannelUp.bind(this));
     this.tvAccesory.addService(this.channelUpService);
 
-    this.channelDownService = this.createStatlessSwitchService(this.name + ' Channel Down', 'channelDownService', this.setChannelDown.bind(this));
+    this.channelDownService = this.createStatlessSwitchService('Channel Down', 'channelDownService', this.setChannelDown.bind(this));
     this.tvAccesory.addService(this.channelDownService);
   }
 
@@ -582,19 +582,19 @@ class webosTvDevice {
       return;
     }
 
-    this.mediaPlayService = this.createStatlessSwitchService(this.name + ' Play', 'mediaPlayService', this.setPlay.bind(this));
+    this.mediaPlayService = this.createStatlessSwitchService('Play', 'mediaPlayService', this.setPlay.bind(this));
     this.tvAccesory.addService(this.mediaPlayService);
 
-    this.mediaPauseService = this.createStatlessSwitchService(this.name + ' Pause', 'mediaPauseService', this.setPause.bind(this));
+    this.mediaPauseService = this.createStatlessSwitchService('Pause', 'mediaPauseService', this.setPause.bind(this));
     this.tvAccesory.addService(this.mediaPauseService);
 
-    this.mediaStopService = this.createStatlessSwitchService(this.name + ' Stop', 'mediaStopService', this.setStop.bind(this));
+    this.mediaStopService = this.createStatlessSwitchService('Stop', 'mediaStopService', this.setStop.bind(this));
     this.tvAccesory.addService(this.mediaStopService);
 
-    this.mediaRewindService = this.createStatlessSwitchService(this.name + ' Rewind', 'mediaRewindService', this.setRewind.bind(this));
+    this.mediaRewindService = this.createStatlessSwitchService('Rewind', 'mediaRewindService', this.setRewind.bind(this));
     this.tvAccesory.addService(this.mediaRewindService);
 
-    this.mediaFastForwardService = this.createStatlessSwitchService(this.name + ' Fast Forward', 'mediaFastForwardService', this.setFastForward.bind(this));
+    this.mediaFastForwardService = this.createStatlessSwitchService('Fast Forward', 'mediaFastForwardService', this.setFastForward.bind(this));
     this.tvAccesory.addService(this.mediaFastForwardService);
   }
 
@@ -604,7 +604,7 @@ class webosTvDevice {
     }
 
     // create the service
-    this.screenControlService = new Service.Switch(this.name + ' Screen', 'screenControlService');
+    this.screenControlService = new Service.Switch('Screen', 'screenControlService');
     this.screenControlService
       .getCharacteristic(Characteristic.On)
       .on('get', this.getTvScreenState.bind(this))
@@ -619,7 +619,7 @@ class webosTvDevice {
     }
 
     // create the service
-    this.screenSaverControlService = new Service.Switch(this.name + ' Screen Saver', 'screenSaverControlService');
+    this.screenSaverControlService = new Service.Switch('Screen Saver', 'screenSaverControlService');
     this.screenSaverControlService
       .getCharacteristic(Characteristic.On)
       .on('get', this.getScreenSaverState.bind(this))
@@ -653,7 +653,7 @@ class webosTvDevice {
       newAppButtonDef.appId = newAppButtonDef.appId.replace(/\s/g, '');
 
       // get name
-      newAppButtonDef.name = value.name || this.name + ' App - ' + newAppButtonDef.appId;
+      newAppButtonDef.name = value.name || 'App - ' + newAppButtonDef.appId;
 
       // params
       newAppButtonDef.params = value.params || {};
@@ -707,7 +707,7 @@ class webosTvDevice {
       newChannelButtonDef.channelId = value.channelId;
 
       // get name
-      newChannelButtonDef.name = value.name || this.name + ' Channel - ' + newChannelButtonDef.channelNumber;
+      newChannelButtonDef.name = value.name || 'Channel - ' + newChannelButtonDef.channelNumber;
 
       // create the service
       let newChannelButtonService = new Service.Switch(newChannelButtonDef.name, 'channelButtonService' + i);
@@ -754,7 +754,7 @@ class webosTvDevice {
       }
 
       // get name
-      newNotificationButtonDef.name = value.name || this.name + ' Notification - ' + newNotificationButtonDef.message;
+      newNotificationButtonDef.name = value.name || 'Notification - ' + newNotificationButtonDef.message;
 
       // get the appId if specified
       newNotificationButtonDef.appId = value.appId;
@@ -811,7 +811,7 @@ class webosTvDevice {
       newRemoteControlButtonDef.action = newRemoteControlButtonDef.action.toString().toUpperCase();
 
       // get name
-      newRemoteControlButtonDef.name = value.name || this.name + ' RC - ' + newRemoteControlButtonDef.action;
+      newRemoteControlButtonDef.name = value.name || 'Remote - ' + newRemoteControlButtonDef.action;
 
       // create the stateless button service
       let newRemoteControlButtonService = this.createStatlessSwitchService(newRemoteControlButtonDef.name, 'remoteControlButtonService' + i, (state, callback) => {
@@ -853,7 +853,7 @@ class webosTvDevice {
       newSoundOutputButtonDef.soundOutput = newSoundOutputButtonDef.soundOutput.toString();
 
       // get name
-      newSoundOutputButtonDef.name = value.name || this.name + ' SO - ' + newSoundOutputButtonDef.soundOutput;
+      newSoundOutputButtonDef.name = value.name || 'Sound Output - ' + newSoundOutputButtonDef.soundOutput;
 
       // create the service
       let newSoundOutputButtonService = new Service.Switch(newSoundOutputButtonDef.name, 'soundOutputButtonService' + i);
@@ -991,7 +991,7 @@ class webosTvDevice {
       }
 
       // get sequence name
-      newRemoteSequenceButtonDef.name = value.name || this.name + ' Sequence ' + i;
+      newRemoteSequenceButtonDef.name = value.name || 'Sequence ' + i;
 
       // get/adjust sequence interval
       newRemoteSequenceButtonDef.interval = [500]; // default value
