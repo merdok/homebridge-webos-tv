@@ -93,6 +93,7 @@ class webosTvDevice {
     this.remoteControlButtons = config.remoteControlButtons;
     this.soundOutputButtons = config.soundOutputButtons;
     this.remoteSequenceButtons = config.remoteSequenceButtons;
+    this.pictureModeButtons = config.pictureModeButtons;
 
 
     this.logInfo(`Init - got TV configuration, initializing device with name: ${this.name}`);
@@ -259,6 +260,7 @@ class webosTvDevice {
     this.prepareRemoteControlButtonService();
     this.prepareSoundOutputButtonService();
     this.prepareRemoteSequenceButtonsService();
+    this.preparePictureModeButtonService();
   }
 
   //
@@ -873,6 +875,49 @@ class webosTvDevice {
   }
 
 
+  preparePictureModeButtonService() {
+    if (this.checkArrayConfigProperty(this.pictureModeButtons, "pictureModeButtons") === false) {
+      return;
+    }
+
+    this.configuredPictureModeButtons = [];
+
+    this.pictureModeButtons.forEach((value, i) => {
+
+      // create a new picture mode button definition
+      let newPictureModeButtonDef = {};
+
+      // get the picture mode name
+      newPictureModeButtonDef.pictureMode = value.pictureMode || value;
+
+      // if pictureMode null or empty then skip this picture mode button, pictureMode is required for a picture mode button
+      if (!newPictureModeButtonDef.pictureMode || newPictureModeButtonDef.pictureMode === '' || typeof newPictureModeButtonDef.pictureMode !== 'string') {
+        this.logWarn(`Missing pictureMode or pictureMode is not of type string. Cannot add picture mode button!`);
+        return;
+      }
+
+      // make sure the pictureMode is string
+      newPictureModeButtonDef.pictureMode = newSoundOutputButtonDef.pictureMode.toString();
+
+      // get name
+      newPictureModeButtonDef.name = value.name || 'Picture Mode - ' + newPictureModeButtonDef.pictureMode;
+
+      // create the stateless button service
+      let newPictureModeButtonService = this.createStatlessSwitchService(newPictureModeButtonDef.name, 'pictureModeButtonsService' + i, (state, callback) => {
+        this.setPictureModeButtonState(state, callback, newPictureModeButtonDef.pictureMode);
+      });
+
+      this.tvAccesory.addService(newPictureModeButtonService);
+
+      // save the configured sound output button service
+      newPictureModeButtonDef.buttonService = newPictureModeButtonService;
+
+      this.configuredRemoteSequenceButtons.push(newPictureModeButtonDef);
+
+    });
+  }
+
+
   prepareRemoteSequenceButtonsService() {
     if (this.checkArrayConfigProperty(this.remoteSequenceButtons, "remoteSequenceButtons") === false) {
       return;
@@ -1189,6 +1234,16 @@ class webosTvDevice {
     this.resetRemoteSequenceButtons();
     callback();
   }
+
+  // pictureMode buttons
+  setPictureModeButtonState(state, callback, pictureModeStr) {
+    if (this.lgTvCtrl.isTvOn()) {
+      this.lgTvCtrl.setPictureMode(pictureModeStr);
+    }
+    this.resetPictureModeButtons();
+    callback();
+  }
+
 
   /*--== Stateful ==--*/
 
@@ -1560,6 +1615,16 @@ class webosTvDevice {
     if (this.configuredRemoteSequenceButtons) {
       setTimeout(() => {
         this.configuredRemoteSequenceButtons.forEach((item, i) => {
+          item.buttonService.getCharacteristic(Characteristic.On).updateValue(false);
+        });
+      }, BUTTON_RESET_TIMEOUT);
+    }
+  }
+
+  resetPictureModeButtons() {
+    if (this.configuredPictureModeButtons) {
+      setTimeout(() => {
+        this.configuredPictureModeButtons.forEach((item, i) => {
           item.buttonService.getCharacteristic(Characteristic.On).updateValue(false);
         });
       }, BUTTON_RESET_TIMEOUT);

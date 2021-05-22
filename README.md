@@ -31,6 +31,7 @@ If you are already running a TV with native Homekit integration then you can sti
 * Run sequences of remote control button presses
 * Turn on/off the tv screen
 * Reconfigure control center remote
+* Switch picture mode
 
 ## Installation
 
@@ -145,7 +146,12 @@ Example configuration:
             "back": "BACK",
             "playpause": "YELLOW",
             "information": "TELETEXT"
-           }
+          },
+          "pictureModeButtons": [
+            "eco",
+            "game",
+            "cinema"
+          ]
         }
       ]
     }
@@ -276,6 +282,13 @@ Whether the sound output buttons service is enabled. This allows to switch betwe
     - *soundOutput* - [required] one of the sound outputs specified above,
     - *name* - [optional]  the sound output button name
    - Depending on the TV and connected devices to the TV there might also be other values. In that case just switch sound outputs on the TV and check the homebridge log.
+ - `pictureModeButtons` [optional]
+ Whether the picture mode buttons service is enabled. This allows to switch between picture modes on the TV. **Default: "" (disabled)**
+   - Set an array of picture modes as the value. Available values are below.
+   - You can also set an array of objects as the value. An object can have the following properties:
+     - *pictureMode* - [required] one of the picture modes specified below,
+     - *name* - [optional]  the picture mode button name
+   - Not all picture modes might be available for all TVs.
 
 #### Remote control values
 - *1*, *2*, *3*, *4*, *5*, *6*, *7*, *8*, *9*, *0*, *LIST*, *AD*, *DASH*,
@@ -291,6 +304,12 @@ Whether the sound output buttons service is enabled. This allows to switch betwe
 - *CS2_NUM_9*, *CS2_NUM_10*, *CS2_NUM_11*, *CS2_NUM_12*, *TER*, *TER_NUM_1*, *TER_NUM_2*, *TER_NUM_3*, *TER_NUM_4*,
 - *TER_NUM_5*, *TER_NUM_6*, *TER_NUM_7*, *TER_NUM_8*, *TER_NUM_9*, *TER_NUM_10*, *TER_NUM_11*, *TER_NUM_12*,
 - *3DIGIT_INPUT*, *BML_DATA*, *JAPAN_DISPLAY*, *TELETEXT*, *TEXTOPTION*, *MAGNIFIER_ZOOM*, *SCREEN_REMOT*
+
+#### Picture modes
+- *cinema*, *eco*, *expert1*, *expert2*, *game*, *normal*, *photo*, *sports*, *technicolor*,
+- *vivid*, *hdrEffect*,  *hdrCinema*, *hdrCinemaBright*, *hdrExternal*, *hdrGame*,
+- *hdrStandard*, *hdrTechnicolor*, *hdrVivid*, *dolbyHdrCinema*,*dolbyHdrCinemaBright*,
+- *dolbyHdrDarkAmazon*, *dolbyHdrGame*, *dolbyHdrStandard*, *dolbyHdrVivid*, *dolbyStandard*
 
 ## Troubleshooting
 If you have any issues with the plugin or TV services then you can run homebridge in debug mode, which will provide some additional information. This might be useful for debugging issues.

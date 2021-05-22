@@ -300,6 +300,50 @@
                   }
                 }
               }
+            },
+            "pictureModeButtons": {
+              "title": "Picture mode buttons",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "pictureMode": {
+                    "title": "Picture mode",
+                    "type": "string",
+                    "enum": [
+                      "cinema",
+                      "eco",
+                      "expert1",
+                      "expert2",
+                      "game",
+                      "normal",
+                      "photo",
+                      "sports",
+                      "technicolor",
+                      "vivid",
+                      "hdrEffect",
+                      "hdrCinema",
+                      "hdrCinemaBright",
+                      "hdrExternal",
+                      "hdrGame",
+                      "hdrStandard",
+                      "hdrTechnicolor",
+                      "hdrVivid",
+                      "dolbyHdrCinema",
+                      "dolbyHdrCinemaBright",
+                      "dolbyHdrDarkAmazon",
+                      "dolbyHdrGame",
+                      "dolbyHdrStandard",
+                      "dolbyHdrVivid",
+                      "dolbyStandard"
+                    ]
+                  },
+                  "name": {
+                    "title": "name",
+                    "type": "string"
+                  }
+                }
+              }
             }
           }
         }
@@ -455,6 +499,17 @@
             "items": [
               "devices[].soundOutputButtons[].soundOutput",
               "devices[].soundOutputButtons[].name"
+            ]
+          },
+          {
+            "key": "devices[].pictureModeButtons",
+            "buttonText": "Add picture mode button",
+            "type": "fieldset",
+            "expandable": true,
+            "expanded": false,
+            "items": [
+              "devices[].pictureModeButtons[].pictureMode",
+              "devices[].pictureModeButtons[].name"
             ]
           }
         ]
