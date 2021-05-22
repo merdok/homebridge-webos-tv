@@ -32,6 +32,7 @@ If you are already running a TV with native Homekit integration then you can sti
 * Turn on/off the tv screen
 * Reconfigure control center remote
 * Switch picture mode
+* Adjust any system settings
 
 ## Installation
 
@@ -289,6 +290,14 @@ Whether the sound output buttons service is enabled. This allows to switch betwe
      - *pictureMode* - [required] one of the picture modes specified below,
      - *name* - [optional]  the picture mode button name
    - Not all picture modes might be available for all TVs.
+ - `systemSettingsButtons` [optional] [advanced]
+ Whether the system settings buttons service is enabled. This allows to change any system settings on the TV. **Default: "" (disabled)**
+   - Due to the complexity, not available in the homebridge ui configuration. For possible configuration values see below.
+   - Set an array of objects as the value. An object can have the following properties:
+     - *category* - [required] category e.g *picture*,
+     - *settings* - [required] settings which should be applied,
+     - *name* - [optional]  the system settings button name
+   - Not all picture modes might be available for all TVs.
 
 #### Remote control values
 - *1*, *2*, *3*, *4*, *5*, *6*, *7*, *8*, *9*, *0*, *LIST*, *AD*, *DASH*,
@@ -310,6 +319,104 @@ Whether the sound output buttons service is enabled. This allows to switch betwe
 - *vivid*, *hdrEffect*,  *hdrCinema*, *hdrCinemaBright*, *hdrExternal*, *hdrGame*,
 - *hdrStandard*, *hdrTechnicolor*, *hdrVivid*, *dolbyHdrCinema*,*dolbyHdrCinemaBright*,
 - *dolbyHdrDarkAmazon*, *dolbyHdrGame*, *dolbyHdrStandard*, *dolbyHdrVivid*, *dolbyStandard*
+
+#### System settings
+To set system settings you need to specify a category and an object of settings which you would like to set. Known categories with settings:
+
+`picture`
+
+```js
+{
+  "category": "picture",
+  "name": "Set picture settings",
+  "settings": {
+    "adjustingLuminance": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+     "backlight": "80",
+     "blackLevel": {
+         "ntsc": "auto",
+         "ntsc443": "auto",
+         "pal": "auto",
+         "pal60": "auto",
+         "palm": "auto",
+         "paln": "auto",
+         "secam": "auto",
+         "unknown": "auto"
+     },
+     "brightness": "50",
+     "color": "50",
+     "colorFilter": "off",
+     "colorGamut": "auto",
+     "colorManagementColorSystem": "red",
+     "colorManagementHueBlue": "0",
+     "colorManagementHueCyan": "0",
+     "colorManagementHueGreen": "0",
+     "colorManagementHueMagenta": "0",
+     "colorManagementHueRed": "0",
+     "colorManagementHueYellow": "0",
+     "colorManagementLuminanceBlue": "0",
+     "colorManagementLuminanceCyan": "0",
+     "colorManagementLuminanceGreen": "0",
+     "colorManagementLuminanceMagenta": "0",
+     "colorManagementLuminanceRed": "0",
+     "colorManagementLuminanceYellow": "0",
+     "colorManagementSaturationBlue": "0",
+     "colorManagementSaturationCyan": "0",
+     "colorManagementSaturationGreen": "0",
+     "colorManagementSaturationMagenta": "0",
+     "colorManagementSaturationRed": "0",
+     "colorManagementSaturationYellow": "0",
+     "colorTemperature": "0",
+     "contrast": "80",
+     "dynamicColor": "off",
+     "dynamicContrast": "off",
+     "edgeEnhancer": "on",
+     "expertPattern": "off",
+     "externalPqlDbType": "none",
+     "gamma": "high2",
+     "grassColor": "0",
+     "hPosition": "0",
+     "hSharpness": "10",
+     "hSize": "0",
+     "hdrDynamicToneMapping": "on",
+     "hdrLevel": "medium",
+     "localDimming": "medium",
+     "motionEyeCare": "off",
+     "motionPro": "off",
+     "mpegNoiseReduction": "off",
+     "noiseReduction": "off",
+     "realCinema": "on",
+     "sharpness": "10",
+     "skinColor": "0",
+     "skyColor": "0",
+     "superResolution": "off",
+     "tint": "0",
+     "truMotionBlur": "10",
+     "truMotionJudder": "0",
+     "truMotionMode": "user",
+     "vPosition": "0",
+     "vSharpness": "10",
+     "vSize": "0",
+     "whiteBalanceApplyAllInputs": "off",
+     "whiteBalanceBlue": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+     "whiteBalanceBlueGain": "0",
+     "whiteBalanceBlueOffset": "0",
+     "whiteBalanceCodeValue": "19",
+     "whiteBalanceColorTemperature": "warm2",
+     "whiteBalanceGreen": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+     "whiteBalanceGreenGain": "0",
+     "whiteBalanceGreenOffset": "0",
+     "whiteBalanceIre": "100",
+     "whiteBalanceLuminance": "130",
+     "whiteBalanceMethod": "2",
+     "whiteBalancePattern": "outer",
+     "whiteBalancePoint": "high",
+     "whiteBalanceRed": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+     "whiteBalanceRedGain": "0",
+     "whiteBalanceRedOffset": "0",
+     "xvycc": "auto"
+  }
+}
+```
 
 ## Troubleshooting
 If you have any issues with the plugin or TV services then you can run homebridge in debug mode, which will provide some additional information. This might be useful for debugging issues.

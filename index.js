@@ -94,6 +94,7 @@ class webosTvDevice {
     this.soundOutputButtons = config.soundOutputButtons;
     this.remoteSequenceButtons = config.remoteSequenceButtons;
     this.pictureModeButtons = config.pictureModeButtons;
+    this.systemSettingsButtons = config.systemSettingsButtons;
 
 
     this.logInfo(`Init - got TV configuration, initializing device with name: ${this.name}`);
@@ -261,6 +262,7 @@ class webosTvDevice {
     this.prepareSoundOutputButtonService();
     this.prepareRemoteSequenceButtonsService();
     this.preparePictureModeButtonService();
+    this.prepareSystemSettingsButtonService();
   }
 
   //
@@ -897,7 +899,7 @@ class webosTvDevice {
       }
 
       // make sure the pictureMode is string
-      newPictureModeButtonDef.pictureMode = newSoundOutputButtonDef.pictureMode.toString();
+      newPictureModeButtonDef.pictureMode = newPictureModeButtonDef.pictureMode.toString();
 
       // get name
       newPictureModeButtonDef.name = value.name || 'Picture Mode - ' + newPictureModeButtonDef.pictureMode;
@@ -909,10 +911,59 @@ class webosTvDevice {
 
       this.tvAccesory.addService(newPictureModeButtonService);
 
-      // save the configured sound output button service
+      // save the configured picture mode button service
       newPictureModeButtonDef.switchService = newPictureModeButtonService;
 
       this.configuredRemoteSequenceButtons.push(newPictureModeButtonDef);
+
+    });
+  }
+
+
+  prepareSystemSettingsButtonService() {
+    if (this.checkArrayConfigProperty(this.systemSettingsButtons, "systemSettingsButtons") === false) {
+      return;
+    }
+
+    this.configuredSystemSettingsButtons = [];
+
+    this.systemSettingsButtons.forEach((value, i) => {
+
+      // create a new system setting button definition
+      let newSystemSettingsButtonDef = {};
+
+      // get the category object
+      newSystemSettingsButtonDef.category = value.category;
+
+      // if category null or empty then skip this system settings button, category is required for a system settings button
+      if (!newSystemSettingsButtonDef.category || newSystemSettingsButtonDef.category === '' || typeof newSystemSettingsButtonDef.category !== 'string') {
+        this.logWarn(`Missing category or category is not of type string. Cannot add system settings button!`);
+        return;
+      }
+
+      // get the settings object
+      newSystemSettingsButtonDef.settings = value.settings;
+
+      // if settings null or empty then skip this system settings button, settings is required for a system settings button
+      if (newSystemSettingsButtonDef.settings === null || newSystemSettingsButtonDef.settings === undefined) {
+        this.logWarn(`Missing settings defintion. Cannot add system settings button!`);
+        return;
+      }
+
+      // get name
+      newSystemSettingsButtonDef.name = value.name || 'System Settings - ' + i;
+
+      // create the stateless button service
+      let newSystemModeSettingsService = this.createStatlessSwitchService(newSystemSettingsButtonDef.name, 'systemSettingsService' + i, (state, callback) => {
+        this.setSystemSettingsButtonState(state, callback, newSystemSettingsButtonDef);
+      });
+
+      this.tvAccesory.addService(newSystemModeSettingsService);
+
+      // save the configured system settings button service
+      newSystemSettingsButtonDef.switchService = newSystemModeSettingsService;
+
+      this.configuredSystemSettingsButtons.push(newSystemSettingsButtonDef);
 
     });
   }
@@ -1235,12 +1286,21 @@ class webosTvDevice {
     callback();
   }
 
-  // pictureMode buttons
+  // picture mode buttons
   setPictureModeButtonState(state, callback, pictureModeStr) {
     if (this.lgTvCtrl.isTvOn()) {
       this.lgTvCtrl.setPictureMode(pictureModeStr);
     }
     this.resetPictureModeButtons();
+    callback();
+  }
+
+  // picture settings buttons
+  setSystemSettingsButtonState(state, callback, systemSettingsDef) {
+    if (this.lgTvCtrl.isTvOn()) {
+      this.lgTvCtrl.setSystemSettings(systemSettingsDef.category, systemSettingsDef.settings);
+    }
+    this.resetSystemSettingsButtons();
     callback();
   }
 
@@ -1625,6 +1685,16 @@ class webosTvDevice {
     if (this.configuredPictureModeButtons) {
       setTimeout(() => {
         this.configuredPictureModeButtons.forEach((item, i) => {
+          item.switchService.getCharacteristic(Characteristic.On).updateValue(false);
+        });
+      }, BUTTON_RESET_TIMEOUT);
+    }
+  }
+
+  resetSystemSettingsButtons() {
+    if (this.configuredSystemSettingsButtons) {
+      setTimeout(() => {
+        this.configuredSystemSettingsButtons.forEach((item, i) => {
           item.switchService.getCharacteristic(Characteristic.On).updateValue(false);
         });
       }, BUTTON_RESET_TIMEOUT);
