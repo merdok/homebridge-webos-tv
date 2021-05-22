@@ -32,7 +32,8 @@ If you are already running a TV with native Homekit integration then you can sti
 * Turn on/off the tv screen
 * Reconfigure control center remote
 * Switch picture mode
-* Adjust any system settings
+* Adjust picture settings
+<!---* Adjust any system settings--->
 
 ## Installation
 
@@ -226,6 +227,14 @@ Whether the media control service is enabled. Buttons: play, pause, stop, rewind
 Whether the screen control service is enabled. Shows a button which allows to turn on/off the tv screen, while the content is still playing. **Default: false**
 - `screenSaverControl` [optional]
 Whether the screen saver control service is enabled. Shows a button which allows to instantly activate the screen saver on the TV. Can be used only when no content is playing on the tv. **Default: false**
+- `backlightControl` [optional]
+Whether the backlight control service is enabled. Allows to control the backlight picture setting of the TV. **Default: false**
+- `brightnessControl` [optional]
+Whether the brightness control service is enabled. Allows to control the brightness picture setting of the TV. **Default: false**
+- `colorControl` [optional]
+Whether the color control service is enabled. Allows to control the color picture setting of the TV. **Default: false**
+- `contrastControl` [optional]
+Whether the contrast control service is enabled. Allows to control the contrast picture setting of the TV. **Default: false**
 - `ccRemoteRemap` [optional]
 Allows to remap the control center remote buttons. For possible values, see section below. **Default: no remap**
   - Set an object with the following properties: *arrowup*, *arrowdown*, *arrowleft*, *arrowright*, *select*, *back*, *playpause*, *information*

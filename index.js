@@ -83,6 +83,22 @@ class webosTvDevice {
     if (this.screenSaverControl === undefined) {
       this.screenSaverControl = false;
     }
+    this.backlightControl = config.backlightControl;
+    if (this.backlightControl === undefined) {
+      this.backlightControl = false;
+    }
+    this.brightnessControl = config.brightnessControl;
+    if (this.brightnessControl === undefined) {
+      this.brightnessControl = false;
+    }
+    this.colorControl = config.colorControl;
+    if (this.colorControl === undefined) {
+      this.colorControl = false;
+    }
+    this.contrastControl = config.contrastControl;
+    if (this.contrastControl === undefined) {
+      this.contrastControl = false;
+    }
     this.ccRemoteRemap = config.ccRemoteRemap;
     if (this.ccRemoteRemap === undefined) {
       this.ccRemoteRemap = {};
@@ -222,6 +238,10 @@ class webosTvDevice {
       this.triggerVolumeDownAutomations();
     });
 
+    this.lgTvCtrl.on(Events.PICTURE_SETTINGS_CHANGED, (res) => {
+      this.updatePictureSettingsServices();
+    });
+
   }
 
   /*----------========== SETUP SERVICES ==========----------*/
@@ -255,6 +275,7 @@ class webosTvDevice {
     this.prepareMediaControlService();
     this.prepareScreenControlService();
     this.prepareScreenSaverControlService();
+    this.preparePictureSettingsControlServices();
     this.prepareAppButtonService();
     this.prepareChannelButtonService();
     this.prepareNotificationButtonService();
@@ -626,6 +647,28 @@ class webosTvDevice {
       .on('set', this.setScreenSaverState.bind(this));
 
     this.tvAccesory.addService(this.screenSaverControlService);
+  }
+
+  preparePictureSettingsControlServices() {
+    if (this.backlightControl) {
+      this.backlightControlService = this.createPictureSettingsLightbulbService('Backlight', 'backlightControlService', this.setLightbulbBacklightOnState, this.setLightbulbBacklight, this.getLightbulbBacklight, );
+      this.tvAccesory.addService(this.backlightControlService);
+    }
+
+    if (this.brightnessControl) {
+      this.brightnessControlService = this.createPictureSettingsLightbulbService('Brightness', 'brightnessControlService', this.setLightbulbBrightnessOnState, this.setLightbulbBrightness, this.getLightbulbBrightness, );
+      this.tvAccesory.addService(this.brightnessControlService);
+    }
+
+    if (this.colorControl) {
+      this.colorControlService = this.createPictureSettingsLightbulbService('Color', 'colorControlService', this.setLightbulbColorOnState, this.setLightbulbColor, this.getLightbulbColor, );
+      this.tvAccesory.addService(this.colorControlService);
+    }
+
+    if (this.contrastControl) {
+      this.contrastControlService = this.createPictureSettingsLightbulbService('Contrast', 'contrastControlService', this.setLightbulbContrastOnState, this.setLightbulbContrast, this.getLightbulbContrast, );
+      this.tvAccesory.addService(this.contrastControlService);
+    }
   }
 
   prepareAppButtonService() {
@@ -1488,6 +1531,118 @@ class webosTvDevice {
     callback();
   }
 
+  // backlight
+  setLightbulbBacklightOnState(state, callback) {
+    // reset only when trying to turn off the switch
+    // do nothing when trying to turn on since sliding causes this to be called with state = true
+    if (!state) {
+      this.lgTvCtrl.setBacklight(0);
+      setTimeout(() => {
+        this.updatePictureSettingsServices();
+      }, BUTTON_RESET_TIMEOUT);
+    }
+    callback();
+  }
+
+  getLightbulbBacklight(callback) {
+    let contrast = 0;
+    if (this.lgTvCtrl.isTvOn()) {
+      contrast = this.lgTvCtrl.getBacklight();
+    }
+    callback(null, contrast);
+  }
+
+  setLightbulbBacklight(backlight, callback) {
+    if (this.lgTvCtrl.isTvOn()) {
+      this.lgTvCtrl.setBacklight(backlight)
+    }
+    callback();
+  }
+
+  // brightness
+  setLightbulbBrightnessOnState(state, callback) {
+    // reset only when trying to turn off the switch
+    // do nothing when trying to turn on since sliding causes this to be called with state = true
+    if (!state) {
+      this.lgTvCtrl.setBrightness(0);
+      setTimeout(() => {
+        this.updatePictureSettingsServices();
+      }, BUTTON_RESET_TIMEOUT);
+    }
+    callback();
+  }
+
+  getLightbulbBrightness(callback) {
+    let contrast = 0;
+    if (this.lgTvCtrl.isTvOn()) {
+      contrast = this.lgTvCtrl.getBrightness();
+    }
+    callback(null, contrast);
+  }
+
+  setLightbulbBrightness(brightness, callback) {
+    if (this.lgTvCtrl.isTvOn()) {
+      this.lgTvCtrl.setBrightness(brightness)
+    }
+    callback();
+  }
+
+  // color
+  setLightbulbColorOnState(state, callback) {
+    // reset only when trying to turn off the switch
+    // do nothing when trying to turn on since sliding causes this to be called with state = true
+    if (!state) {
+      this.lgTvCtrl.setColor(0);
+      setTimeout(() => {
+        this.updatePictureSettingsServices();
+      }, BUTTON_RESET_TIMEOUT);
+    }
+    callback();
+  }
+
+  getLightbulbColor(callback) {
+    let contrast = 0;
+    if (this.lgTvCtrl.isTvOn()) {
+      contrast = this.lgTvCtrl.getColor();
+    }
+    callback(null, contrast);
+  }
+
+  setLightbulbColor(color, callback) {
+    if (this.lgTvCtrl.isTvOn()) {
+      this.lgTvCtrl.setColor(color)
+    }
+    callback();
+  }
+
+  // contrast
+  setLightbulbContrastOnState(state, callback) {
+    // reset only when trying to turn off the switch
+    // do nothing when trying to turn on since sliding causes this to be called with state = true
+    if (!state) {
+      this.lgTvCtrl.setContrast(0);
+      setTimeout(() => {
+        this.updatePictureSettingsServices();
+      }, BUTTON_RESET_TIMEOUT);
+    }
+    callback();
+  }
+
+  getLightbulbContrast(callback) {
+    let contrast = 0;
+    if (this.lgTvCtrl.isTvOn()) {
+      contrast = this.lgTvCtrl.getContrast();
+    }
+    callback(null, contrast);
+  }
+
+  setLightbulbContrast(contrast, callback) {
+    if (this.lgTvCtrl.isTvOn()) {
+      this.lgTvCtrl.setContrast(contrast)
+    }
+    callback();
+  }
+
 
   /*----------========== STATUS HELPERS ==========----------*/
 
@@ -1573,6 +1728,28 @@ class webosTvDevice {
     }
   }
 
+  updatePictureSettingsServices() {
+    if (this.lgTvCtrl && this.lgTvCtrl.isTvOn()) {
+      if (this.backlightControlService) this.backlightControlService.getCharacteristic(Characteristic.On).updateValue(true);
+      if (this.backlightControlService) this.backlightControlService.getCharacteristic(Characteristic.Brightness).updateValue(this.lgTvCtrl.getBacklight());
+      if (this.brightnessControlService) this.brightnessControlService.getCharacteristic(Characteristic.On).updateValue(true);
+      if (this.brightnessControlService) this.brightnessControlService.getCharacteristic(Characteristic.Brightness).updateValue(this.lgTvCtrl.getBrightness());
+      if (this.colorControlService) this.colorControlService.getCharacteristic(Characteristic.On).updateValue(true);
+      if (this.colorControlService) this.colorControlService.getCharacteristic(Characteristic.Brightness).updateValue(this.lgTvCtrl.getColor());
+      if (this.contrastControlService) this.contrastControlService.getCharacteristic(Characteristic.On).updateValue(true);
+      if (this.contrastControlService) this.contrastControlService.getCharacteristic(Characteristic.Brightness).updateValue(this.lgTvCtrl.getContrast());
+    } else {
+      if (this.backlightControlService) this.backlightControlService.getCharacteristic(Characteristic.Brightness).updateValue(0);
+      if (this.backlightControlService) this.backlightControlService.getCharacteristic(Characteristic.On).updateValue(false);
+      if (this.brightnessControlService) this.brightnessControlService.getCharacteristic(Characteristic.Brightness).updateValue(0);
+      if (this.brightnessControlService) this.brightnessControlService.getCharacteristic(Characteristic.On).updateValue(false);
+      if (this.colorControlService) this.colorControlService.getCharacteristic(Characteristic.Brightness).updateValue(0);
+      if (this.colorControlService) this.colorControlService.getCharacteristic(Characteristic.On).updateValue(false);
+      if (this.contrastControlService) this.contrastControlService.getCharacteristic(Characteristic.Brightness).updateValue(0);
+      if (this.contrastControlService) this.contrastControlService.getCharacteristic(Characteristic.On).updateValue(false);
+    }
+  }
+
   updateTvStatusFull() {
     this.updatePowerStatus();
     this.updateActiveInputSource();
@@ -1582,6 +1759,7 @@ class webosTvDevice {
     this.updateSoundOutputButtons();
     this.updateScreenStatus();
     this.updateScreenSaverStatus();
+    this.updatePictureSettingsServices();
   }
 
 
@@ -1960,6 +2138,29 @@ class webosTvDevice {
     }
   }
 
+  /*----------========== PICTURE SETTINGS HELPERS ==========----------*/
+
+  createPictureSettingsLightbulbService(name, id, onSetterFn, setterFn, getterFn) {
+    let tmpService = new Service.Lightbulb(name, id);
+    tmpService
+      .getCharacteristic(Characteristic.On)
+      .on('get', this.getPictureSettingsOnState.bind(this))
+      .on('set', onSetterFn.bind(this));
+    tmpService
+      .addCharacteristic(new Characteristic.Brightness())
+      .on('get', getterFn.bind(this))
+      .on('set', setterFn.bind(this));
+
+    return tmpService;
+  }
+
+  getPictureSettingsOnState(callback) {
+    let isOn = false;
+    if (this.lgTvCtrl.isTvOn()) {
+      isOn = true;
+    }
+    callback(null, isOn);
+  }
 
   /*----------========== HELPERS ==========----------*/
 
