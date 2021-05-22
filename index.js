@@ -914,7 +914,7 @@ class webosTvDevice {
       // save the configured picture mode button service
       newPictureModeButtonDef.switchService = newPictureModeButtonService;
 
-      this.configuredRemoteSequenceButtons.push(newPictureModeButtonDef);
+      this.configuredPictureModeButtons.push(newPictureModeButtonDef);
 
     });
   }
