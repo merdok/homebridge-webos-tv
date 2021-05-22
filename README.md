@@ -290,6 +290,7 @@ Whether the sound output buttons service is enabled. This allows to switch betwe
      - *pictureMode* - [required] one of the picture modes specified below,
      - *name* - [optional]  the picture mode button name
    - Not all picture modes might be available for all TVs.
+ <!---
  - `systemSettingsButtons` [optional] [advanced]
  Whether the system settings buttons service is enabled. This allows to change any system settings on the TV. **Default: "" (disabled)**
    - Due to the complexity, not available in the homebridge ui configuration. For possible configuration values see below.
@@ -298,6 +299,7 @@ Whether the sound output buttons service is enabled. This allows to switch betwe
      - *settings* - [required] settings which should be applied,
      - *name* - [optional]  the system settings button name
    - Not all picture modes might be available for all TVs.
+   --->
 
 #### Remote control values
 - *1*, *2*, *3*, *4*, *5*, *6*, *7*, *8*, *9*, *0*, *LIST*, *AD*, *DASH*,
@@ -320,6 +322,7 @@ Whether the sound output buttons service is enabled. This allows to switch betwe
 - *hdrStandard*, *hdrTechnicolor*, *hdrVivid*, *dolbyHdrCinema*,*dolbyHdrCinemaBright*,
 - *dolbyHdrDarkAmazon*, *dolbyHdrGame*, *dolbyHdrStandard*, *dolbyHdrVivid*, *dolbyStandard*
 
+<!---
 #### System settings
 To set system settings you need to specify a category and an object of settings which you would like to set. Known categories with settings:
 
@@ -417,6 +420,7 @@ To set system settings you need to specify a category and an object of settings 
   }
 }
 ```
+--->
 
 ## Troubleshooting
 If you have any issues with the plugin or TV services then you can run homebridge in debug mode, which will provide some additional information. This might be useful for debugging issues.
