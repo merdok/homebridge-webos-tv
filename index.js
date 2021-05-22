@@ -670,7 +670,7 @@ class webosTvDevice {
       this.tvAccesory.addService(newAppButtonService);
 
       // save the configured channel button service
-      newAppButtonDef.buttonService = newAppButtonService;
+      newAppButtonDef.switchService = newAppButtonService;
 
       this.configuredAppButtons[newAppButtonDef.appId + i] = newAppButtonDef; // need to add i here to the appid since a user can configure multiple appbuttons with the same appid
 
@@ -722,7 +722,7 @@ class webosTvDevice {
       this.tvAccesory.addService(newChannelButtonService);
 
       // save the configured channel button service
-      newChannelButtonDef.buttonService = newChannelButtonService;
+      newChannelButtonDef.switchService = newChannelButtonService;
 
       this.configuredChannelButtons[newChannelButtonDef.channelNumber] = newChannelButtonDef;
 
@@ -777,7 +777,7 @@ class webosTvDevice {
       this.tvAccesory.addService(newNotificationButtonService);
 
       // save the configured notification button service
-      newNotificationButtonDef.buttonService = newNotificationButtonService;
+      newNotificationButtonDef.switchService = newNotificationButtonService;
 
       this.configuredNotificationButtons.push(newNotificationButtonDef);
     });
@@ -819,7 +819,7 @@ class webosTvDevice {
       this.tvAccesory.addService(newRemoteControlButtonService);
 
       // save the configured remote control button service
-      newRemoteControlButtonDef.buttonService = newRemoteControlButtonService;
+      newRemoteControlButtonDef.switchService = newRemoteControlButtonService;
 
       this.configuredRemoteControlButtons.push(newRemoteControlButtonDef);
     });
@@ -867,7 +867,7 @@ class webosTvDevice {
       this.tvAccesory.addService(newSoundOutputButtonService);
 
       // save the configured sound output button service
-      newSoundOutputButtonDef.buttonService = newSoundOutputButtonService;
+      newSoundOutputButtonDef.switchService = newSoundOutputButtonService;
 
       this.configuredSoundOutputButtons[newSoundOutputButtonDef.soundOutput] = newSoundOutputButtonDef;
 
@@ -910,7 +910,7 @@ class webosTvDevice {
       this.tvAccesory.addService(newPictureModeButtonService);
 
       // save the configured sound output button service
-      newPictureModeButtonDef.buttonService = newPictureModeButtonService;
+      newPictureModeButtonDef.switchService = newPictureModeButtonService;
 
       this.configuredRemoteSequenceButtons.push(newPictureModeButtonDef);
 
@@ -964,7 +964,7 @@ class webosTvDevice {
       this.tvAccesory.addService(newRemoteSequenceButtonService);
 
       // save the configured remote sequence button service
-      newRemoteSequenceButtonDef.buttonService = newRemoteSequenceButtonService;
+      newRemoteSequenceButtonDef.switchService = newRemoteSequenceButtonService;
 
       this.configuredRemoteSequenceButtons.push(newRemoteSequenceButtonDef);
 
@@ -1544,7 +1544,7 @@ class webosTvDevice {
       let soundOutputDef = this.configuredSoundOutputButtons[soundOutput];
       if (soundOutputDef) {
         setTimeout(() => {
-          soundOutputDef.buttonService.getCharacteristic(Characteristic.On).updateValue(false);
+          soundOutputDef.switchService.getCharacteristic(Characteristic.On).updateValue(false);
         }, BUTTON_RESET_TIMEOUT);
       }
     }
@@ -1595,7 +1595,7 @@ class webosTvDevice {
     if (this.configuredNotificationButtons) {
       setTimeout(() => {
         this.configuredNotificationButtons.forEach((item, i) => {
-          item.buttonService.getCharacteristic(Characteristic.On).updateValue(false);
+          item.switchService.getCharacteristic(Characteristic.On).updateValue(false);
         });
       }, BUTTON_RESET_TIMEOUT);
     }
@@ -1605,7 +1605,7 @@ class webosTvDevice {
     if (this.configuredRemoteControlButtons) {
       setTimeout(() => {
         this.configuredRemoteControlButtons.forEach((item, i) => {
-          item.buttonService.getCharacteristic(Characteristic.On).updateValue(false);
+          item.switchService.getCharacteristic(Characteristic.On).updateValue(false);
         });
       }, BUTTON_RESET_TIMEOUT);
     }
@@ -1615,7 +1615,7 @@ class webosTvDevice {
     if (this.configuredRemoteSequenceButtons) {
       setTimeout(() => {
         this.configuredRemoteSequenceButtons.forEach((item, i) => {
-          item.buttonService.getCharacteristic(Characteristic.On).updateValue(false);
+          item.switchService.getCharacteristic(Characteristic.On).updateValue(false);
         });
       }, BUTTON_RESET_TIMEOUT);
     }
@@ -1625,7 +1625,7 @@ class webosTvDevice {
     if (this.configuredPictureModeButtons) {
       setTimeout(() => {
         this.configuredPictureModeButtons.forEach((item, i) => {
-          item.buttonService.getCharacteristic(Characteristic.On).updateValue(false);
+          item.switchService.getCharacteristic(Characteristic.On).updateValue(false);
         });
       }, BUTTON_RESET_TIMEOUT);
     }
@@ -1797,7 +1797,7 @@ class webosTvDevice {
       Object.entries(this.configuredAppButtons).forEach(([key, val]) => {
         let appId = val.appId;
         if (appId === this.lgTvCtrl.getForegroundAppAppId()) {
-          val.buttonService.getCharacteristic(Characteristic.On).updateValue(false);
+          val.switchService.getCharacteristic(Characteristic.On).updateValue(false);
         }
       });
     }
@@ -1808,9 +1808,9 @@ class webosTvDevice {
       Object.entries(this.configuredAppButtons).forEach(([key, val]) => {
         let appId = val.appId;
         if (appId === this.lgTvCtrl.getForegroundAppAppId()) {
-          val.buttonService.getCharacteristic(Characteristic.On).updateValue(true);
+          val.switchService.getCharacteristic(Characteristic.On).updateValue(true);
         } else {
-          val.buttonService.getCharacteristic(Characteristic.On).updateValue(false);
+          val.switchService.getCharacteristic(Characteristic.On).updateValue(false);
         }
       });
     }
@@ -1819,7 +1819,7 @@ class webosTvDevice {
   disableAllAppButtons() {
     if (this.configuredAppButtons) {
       Object.entries(this.configuredAppButtons).forEach(([key, val]) => {
-        val.buttonService.getCharacteristic(Characteristic.On).updateValue(false);
+        val.switchService.getCharacteristic(Characteristic.On).updateValue(false);
       });
     }
   }
@@ -1831,7 +1831,7 @@ class webosTvDevice {
     if (this.configuredChannelButtons) {
       let channelDef = this.configuredChannelButtons[this.lgTvCtrl.getCurrentLiveTvChannelNumber()];
       if (channelDef) {
-        channelDef.buttonService.getCharacteristic(Characteristic.On).updateValue(false);
+        channelDef.switchService.getCharacteristic(Characteristic.On).updateValue(false);
       }
     }
   }
@@ -1841,9 +1841,9 @@ class webosTvDevice {
       Object.entries(this.configuredChannelButtons).forEach(([key, val]) => {
         let channelNum = val.channelNumber;
         if (channelNum === this.lgTvCtrl.getCurrentLiveTvChannelNumber()) {
-          val.buttonService.getCharacteristic(Characteristic.On).updateValue(true);
+          val.switchService.getCharacteristic(Characteristic.On).updateValue(true);
         } else {
-          val.buttonService.getCharacteristic(Characteristic.On).updateValue(false);
+          val.switchService.getCharacteristic(Characteristic.On).updateValue(false);
         }
       });
     }
@@ -1852,7 +1852,7 @@ class webosTvDevice {
   disableAllChannelButtons() {
     if (this.configuredChannelButtons) {
       Object.entries(this.configuredChannelButtons).forEach(([key, val]) => {
-        val.buttonService.getCharacteristic(Characteristic.On).updateValue(false);
+        val.switchService.getCharacteristic(Characteristic.On).updateValue(false);
       });
     }
   }
@@ -1864,7 +1864,7 @@ class webosTvDevice {
     if (this.configuredSoundOutputButtons) {
       let soundOutputDef = this.configuredSoundOutputButtons[this.lgTvCtrl.getActiveSoundOutput()];
       if (soundOutputDef) {
-        soundOutputDef.buttonService.getCharacteristic(Characteristic.On).updateValue(false);
+        soundOutputDef.switchService.getCharacteristic(Characteristic.On).updateValue(false);
       }
     }
   }
@@ -1874,9 +1874,9 @@ class webosTvDevice {
       Object.entries(this.configuredSoundOutputButtons).forEach(([key, val]) => {
         let soundOutput = val.soundOutput;
         if (soundOutput === this.lgTvCtrl.getActiveSoundOutput()) {
-          val.buttonService.getCharacteristic(Characteristic.On).updateValue(true);
+          val.switchService.getCharacteristic(Characteristic.On).updateValue(true);
         } else {
-          val.buttonService.getCharacteristic(Characteristic.On).updateValue(false);
+          val.switchService.getCharacteristic(Characteristic.On).updateValue(false);
         }
       });
     }
@@ -1885,7 +1885,7 @@ class webosTvDevice {
   disableAllSoundOutputButtons() {
     if (this.configuredSoundOutputButtons) {
       Object.entries(this.configuredSoundOutputButtons).forEach(([key, val]) => {
-        val.buttonService.getCharacteristic(Characteristic.On).updateValue(false);
+        val.switchService.getCharacteristic(Characteristic.On).updateValue(false);
       });
     }
   }
