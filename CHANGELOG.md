@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [2.2.0] - 2021-05-24
+### Added
+- New `backlightControl` property which when enabled allows to control the TV backlight setting
+- New `brightnessControl` property which when enabled allows to control the TV brightness setting
+- New `colorControl` property which when enabled allows to control the TV color setting
+- New `contrastControl` property which when enabled allows to control the TV contrast setting
+- New `pictureModeButtons` property which allows to create picture mode buttons to quickly switch between picture modes on the TV
+
+### Changed
+- Improved the readability of switches by removing the TV name prefix
+
+### Fixed
+- Fixed some minor issues
+
+
 ## [2.1.4] - 2021-04-13
 ### Changed
 - Optimize config.schema.json, organize services in sections
