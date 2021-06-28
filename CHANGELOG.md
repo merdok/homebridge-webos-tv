@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [2.2.1] - 2021-06-29
+### Fixed
+- Fix popup which might have appeared when using the picture mode buttons
+
+
 ## [2.2.0] - 2021-05-24
 ### Added
 - New `backlightControl` property which when enabled allows to control the TV backlight setting

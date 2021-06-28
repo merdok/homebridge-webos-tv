@@ -7,7 +7,7 @@ let Service, Characteristic, Homebridge, Accessory;
 
 const PLUGIN_NAME = 'homebridge-webos-tv';
 const PLATFORM_NAME = 'webostv';
-const PLUGIN_VERSION = '2.2.0';
+const PLUGIN_VERSION = '2.2.1';
 
 // General constants
 const NOT_EXISTING_INPUT = 999999;
