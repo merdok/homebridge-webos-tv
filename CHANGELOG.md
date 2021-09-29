@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.3] - 2021-09-30
+### Fixed
+- Improve picture mode buttons on TVs with webOS version 3.5 and less
+
+
 ## [2.2.2] - 2021-07-02
 ### Fixed
 - Improve picture mode buttons on TVs with webOS version 3.5 and less
