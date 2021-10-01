@@ -6,9 +6,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.4] - 2021-10-01
+### Added
+- Lock dependency versions to prevent dependencies breaking the plugin
+
+### Fixed
+- Update screen control switch when screen is turned off/on directly on the TV
+
+
 ## [2.2.3] - 2021-09-30
 ### Fixed
-- Improve picture mode buttons on TVs with webOS version 3.5 and less
+- Improve screen off/on detection
 
 
 ## [2.2.2] - 2021-07-02
