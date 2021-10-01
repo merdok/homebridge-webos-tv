@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.5] - 2021-10-01
+### Fixed
+- Fix dependencies
+
+
 ## [2.2.4] - 2021-10-01
 ### Added
 - Lock dependency versions to prevent dependencies breaking the plugin
