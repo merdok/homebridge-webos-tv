@@ -311,7 +311,8 @@
                       "headphone",
                       "tv_external_speaker",
                       "tv_speaker_headphone",
-                      "bt_soundbar"
+                      "bt_soundbar",
+                      "soundbar"
                     ]
                   },
                   "name": {

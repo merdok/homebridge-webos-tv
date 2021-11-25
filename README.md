@@ -288,6 +288,7 @@ Whether the sound output buttons service is enabled. This allows to switch betwe
     - *tv_external_speaker* - tv speaker and optical,
     - *tv_speaker_headphone* - tv speaker and headphones
     - *bt_soundbar* - bluetooth soundbar and bluetooth devices
+    - *soundbar* - optical
   - You can also set an array of objects as the value. An object can have the following properties:
     - *soundOutput* - [required] one of the sound outputs specified above,
     - *name* - [optional]  the sound output button name
