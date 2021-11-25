@@ -279,13 +279,13 @@ Whether the remote sequence buttons service is enabled. This allows to run a seq
 - `soundOutputButtons` [optional]
 Whether the sound output buttons service is enabled. This allows to switch between sound outputs on the TV. **Default: "" (disabled)**
   - Set an array of sound outputs as the value. Example values are:
-    - *tv_speaker* - internal tv speaker,
-    - *external_optical* - optical audio,
-    - *external_arc* - hdmi arc,
-    - *lineout* - line out,
-    - *headphone* - headphones,
-    - *external_speaker* - audio out (optical/hdmi arc),
-    - *tv_external_speaker* - tv speaker and optical,
+    - *tv_speaker* - internal tv speaker
+    - *external_optical* - optical audio
+    - *external_arc* - hdmi arc
+    - *lineout* - line out
+    - *headphone* - headphones
+    - *external_speaker* - audio out (optical/hdmi arc)
+    - *tv_external_speaker* - tv speaker and optical
     - *tv_speaker_headphone* - tv speaker and headphones
     - *bt_soundbar* - bluetooth soundbar and bluetooth devices
     - *soundbar* - optical
