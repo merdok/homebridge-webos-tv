@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+## [2.2.7] - 2022-02-02
+### Changed
+- As Node.js 12.x will not be supported anymore by homebridge as of April 2022, the minimum required Node.js was bumped to 16.x, please make sure to update: https://github.com/homebridge/homebridge/wiki/How-To-Update-Node.js
+- Bump homebridge version dependency
+
 ## [2.2.6] - 2021-10-14
 ### Fixed
 - Update dependencies
