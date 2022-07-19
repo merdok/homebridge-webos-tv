@@ -90,8 +90,16 @@
                   "const": "both"
                 },
                 {
-                  "title": "Slider",
+                  "title": "Slider (as lightbulb)",
                   "const": "slider"
+                },
+                {
+                  "title": "Lightbulb",
+                  "const": "lightbulb"
+                },
+                {
+                  "title": "Fan",
+                  "const": "fan"
                 },
                 {
                   "title": "Buttons",

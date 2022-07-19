@@ -562,8 +562,8 @@ class webosTvDevice {
       return;
     }
 
-    // slider/lightbulb
-    if (this.volumeControl === true || this.volumeControl === "both" || this.volumeControl === 'slider') {
+    // slider - lightbulb or fan
+    if (this.volumeControl === true || this.volumeControl === "both" || this.volumeControl === 'slider' || this.volumeControl === 'lightbulb') {
       this.volumeAsLightbulbService = new Service.Lightbulb('Volume', 'volumeService');
       this.volumeAsLightbulbService
         .getCharacteristic(Characteristic.On)
@@ -575,7 +575,19 @@ class webosTvDevice {
         .on('set', this.setLightbulbVolume.bind(this));
 
       this.tvAccesory.addService(this.volumeAsLightbulbService);
+    } else if (this.volumeControl === "fan") {
+      this.volumeAsFanService = new Service.Fanv2('Volume', 'volumeService');
+      this.volumeAsFanService
+        .getCharacteristic(Characteristic.Active)
+        .onGet(this.getFanMuteState.bind(this))
+        .onSet(this.setFanMuteState.bind(this));
+      this.volumeAsFanService.addCharacteristic(Characteristic.RotationSpeed)
+        .onGet(this.getRotationSpeedVolume.bind(this))
+        .onSet(this.setRotationSpeedVolume.bind(this));
+
+      this.tvAccesory.addService(this.volumeAsFanService);
     }
+
 
     // volume up/down buttons
     if (this.volumeControl === true || this.volumeControl === "both" || this.volumeControl === 'buttons') {
@@ -1389,6 +1401,45 @@ class webosTvDevice {
     callback();
   }
 
+  // Mute/Volume emulated as a fan
+
+  getFanMuteState() {
+    let isTvMuted = true;
+    if (this.lgTvCtrl.isTvOn()) {
+      isTvMuted = this.lgTvCtrl.isMuted();
+    }
+    return !isTvMuted ? Characteristic.Active.ACTIVE : Characteristic.Active.INACTIVE;
+  }
+
+  setFanMuteState(state) {
+    if (this.lgTvCtrl.isTvOn()) {
+      let value = state === Characteristic.Active.ACTIVE;
+      this.lgTvCtrl.setMute(!value);
+    } else {
+      setTimeout(() => {
+        this.volumeAsFanService.getCharacteristic(Characteristic.Active).updateValue(Characteristic.Active.INACTIVE);
+      }, BUTTON_RESET_TIMEOUT);
+    }
+  }
+
+  getRotationSpeedVolume() {
+    let tvVolume = 0;
+    if (this.lgTvCtrl.isTvOn()) {
+      tvVolume = this.lgTvCtrl.getVolumeLevel();
+    }
+    return tvVolume;
+  }
+
+  setRotationSpeedVolume(value) {
+    if (this.lgTvCtrl.isTvOn()) {
+      this.lgTvCtrl.setVolumeLevel(value);
+    } else {
+      setTimeout(() => {
+        this.volumeAsFanService.getCharacteristic(Characteristic.RotationSpeed).updateValue(0);
+      }, BUTTON_RESET_TIMEOUT);
+    }
+  }
+
   // screen control switch
   getTvScreenState(callback) {
     let isTvScreenOn = false;
@@ -1667,16 +1718,21 @@ class webosTvDevice {
   }
 
   updateTvAudioStatus() {
-    if (this.lgTvCtrl && this.lgTvCtrl.isTvOn()) {
-      if (this.tvSpeakerService) this.tvSpeakerService.getCharacteristic(Characteristic.Mute).updateValue(this.lgTvCtrl.isMuted());
-      if (this.tvSpeakerService) this.tvSpeakerService.getCharacteristic(Characteristic.Volume).updateValue(this.lgTvCtrl.getVolumeLevel());
-      if (this.volumeAsLightbulbService) this.volumeAsLightbulbService.getCharacteristic(Characteristic.On).updateValue(!this.lgTvCtrl.isMuted()); // invert muted value because it is a lightbulb
-      if (this.volumeAsLightbulbService) this.volumeAsLightbulbService.getCharacteristic(Characteristic.Brightness).updateValue(this.lgTvCtrl.getVolumeLevel());
-    } else {
-      if (this.tvSpeakerService) this.tvSpeakerService.getCharacteristic(Characteristic.Mute).updateValue(true);
-      if (this.tvSpeakerService) this.tvSpeakerService.getCharacteristic(Characteristic.Volume).updateValue(0);
-      if (this.volumeAsLightbulbService) this.volumeAsLightbulbService.getCharacteristic(Characteristic.Brightness).updateValue(0);
-      if (this.volumeAsLightbulbService) this.volumeAsLightbulbService.getCharacteristic(Characteristic.On).updateValue(false);
+    if (this.lgTvCtrl) {
+      if (this.lgTvCtrl.isTvOn()) {
+        if (this.tvSpeakerService) this.tvSpeakerService.getCharacteristic(Characteristic.Mute).updateValue(this.lgTvCtrl.isMuted());
+        if (this.tvSpeakerService) this.tvSpeakerService.getCharacteristic(Characteristic.Volume).updateValue(this.lgTvCtrl.getVolumeLevel());
+        if (this.volumeAsLightbulbService) this.volumeAsLightbulbService.getCharacteristic(Characteristic.On).updateValue(!this.lgTvCtrl.isMuted()); // invert muted value because it is a lightbulb
+        if (this.volumeAsLightbulbService) this.volumeAsLightbulbService.getCharacteristic(Characteristic.Brightness).updateValue(this.lgTvCtrl.getVolumeLevel());
+      } else {
+        if (this.tvSpeakerService) this.tvSpeakerService.getCharacteristic(Characteristic.Mute).updateValue(true);
+        if (this.tvSpeakerService) this.tvSpeakerService.getCharacteristic(Characteristic.Volume).updateValue(0);
+        if (this.volumeAsLightbulbService) this.volumeAsLightbulbService.getCharacteristic(Characteristic.Brightness).updateValue(0);
+        if (this.volumeAsLightbulbService) this.volumeAsLightbulbService.getCharacteristic(Characteristic.On).updateValue(false);
+      }
+
+      if (this.volumeAsFanService) this.volumeAsFanService.getCharacteristic(Characteristic.Active).updateValue(this.getFanMuteState());
+      if (this.volumeAsFanService) this.volumeAsFanService.getCharacteristic(Characteristic.RotationSpeed).updateValue(this.getRotationSpeedVolume());
     }
   }
 

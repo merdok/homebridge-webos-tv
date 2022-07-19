@@ -214,11 +214,13 @@ The max allowed volume which can be set using the TV. Range 1-100. **Default: 10
 - `volumeControl` [optional]
 Whether the volume control service is enabled. **Default: "both"**  
   - Available values:
-    - *"both"* or *true* - slider and buttons
+    - *"both"* or *true* - slider (as lightbulb) and buttons
     - *"none"* or *false* - no volume control
-    - *"slider"* - just slider
-    - *"buttons"* - just buttons
-  - The slider volume control is not supported for ARC sound outputs
+    - *"slider"* - just slider (as lightbulb)
+    - *"lightbulb"* - as lightbulb accessory
+    - *"fan"* - as fan accessory
+    - *"buttons"* - just buttons (Up or Down)
+  - The slider (lightbulb and fan) volume control is not supported for ARC sound outputs
 - `channelControl` [optional]
 Whether the channel control service is enabled. **Default: true**
 - `mediaControl` [optional]
