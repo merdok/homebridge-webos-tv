@@ -3,7 +3,7 @@ import * as mkdirp from 'mkdirp';
 import LgTvController from './lib/LgTvController.js';
 import Events from './lib/Events.js';
 
-let Service, Characteristic, Homebridge, Accessory;
+let Service, Characteristic, Homebridge, Accessory, HapStatusError, HAPStatus;
 
 const PLUGIN_NAME = 'homebridge-webos-tv';
 const PLATFORM_NAME = 'webostv';
@@ -20,6 +20,8 @@ export default (homebridge) => {
   Characteristic = homebridge.hap.Characteristic;
   Homebridge = homebridge;
   Accessory = homebridge.platformAccessory;
+  HapStatusError = homebridge.hap.HapStatusError;
+  HAPStatus = homebridge.hap.HAPStatus;
   homebridge.registerPlatform(PLUGIN_NAME, PLATFORM_NAME, webosTvPlatform, true);
 };
 
@@ -325,44 +327,31 @@ class webosTvDevice {
       .setCharacteristic(Characteristic.SleepDiscoveryMode, Characteristic.SleepDiscoveryMode.ALWAYS_DISCOVERABLE);
     this.tvService
       .getCharacteristic(Characteristic.Active)
-      .on('get', this.getPowerState.bind(this))
-      .on('set', this.setPowerState.bind(this));
+      .onGet(this.getPowerState.bind(this))
+      .onSet(this.setPowerState.bind(this));
 
     this.tvService
       .setCharacteristic(Characteristic.ActiveIdentifier, NOT_EXISTING_INPUT); // do not preselect any inputs since there are no default inputs
     this.tvService
       .getCharacteristic(Characteristic.ActiveIdentifier)
-      .on('set', (inputIdentifier, callback) => {
-        this.logDebug('Input source changed, new input source identifier: %d, source appId: %s', inputIdentifier, this.configuredInputs[inputIdentifier].appId);
-        if (this.configuredInputs[inputIdentifier]) {
-          this.lgTvCtrl.turnOnTvAndLaunchApp(this.configuredInputs[inputIdentifier].appId, this.configuredInputs[inputIdentifier].params);
-        }
-        callback();
-      })
-      .on('get', (callback) => {
-        callback(null, this.getActiveInputId());
-      });
+      .onGet(this.getActiveIdentifier.bind(this))
+      .onSet(this.setActiveIdentifier.bind(this));
 
     this.tvService
       .getCharacteristic(Characteristic.RemoteKey)
-      .on('set', this.remoteKeyPress.bind(this));
+      .onSet(this.remoteKeyPress.bind(this));
 
     this.tvService
       .getCharacteristic(Characteristic.PowerModeSelection)
-      .on('set', (newValue, callback) => {
-        this.logDebug('Requested tv settings (PowerModeSelection): ' + newValue);
-        this.lgTvCtrl.sendRemoteInputSocketCommand('MENU');
-        callback();
-      });
+      .onSet(this.setPowerModeSelection.bind(this));
 
 
     // not supported yet??
     /*
     this.tvService
       .getCharacteristic(Characteristic.PictureMode)
-      .on('set', function(newValue, callback) {
+      .onSet((newValue) => {
     	console.log('set PictureMode => setNewValue: ' + newValue);
-    	callback(null);
       });
       */
 
@@ -381,22 +370,15 @@ class webosTvDevice {
       .setCharacteristic(Characteristic.VolumeControlType, Characteristic.VolumeControlType.ABSOLUTE);
     this.tvSpeakerService
       .getCharacteristic(Characteristic.VolumeSelector)
-      .on('set', (state, callback) => {
-        this.logDebug('Volume change over the remote control (VolumeSelector), pressed: %s', state === Characteristic.VolumeSelector.DECREMENT ? 'Down' : 'Up');
-        if (state === Characteristic.VolumeSelector.DECREMENT) {
-          this.setVolumeDown(true, callback);
-        } else {
-          this.setVolumeUp(true, callback);
-        }
-      });
+      .onSet(this.setVolumeSelectorState.bind(this));
     this.tvSpeakerService
       .getCharacteristic(Characteristic.Mute)
-      .on('get', this.getMuteState.bind(this))
-      .on('set', this.setMuteState.bind(this));
+      .onGet(this.getMuteState.bind(this))
+      .onSet(this.setMuteState.bind(this));
     this.tvSpeakerService
       .addCharacteristic(Characteristic.Volume)
-      .on('get', this.getVolume.bind(this))
-      .on('set', this.setVolume.bind(this));
+      .onGet(this.getVolume.bind(this))
+      .onSet(this.setVolume.bind(this));
 
     this.tvService.addLinkedService(this.tvSpeakerService);
     this.tvAccesory.addService(this.tvSpeakerService);
@@ -514,16 +496,14 @@ class webosTvDevice {
 
       // set visibility state
       inputSourceService.getCharacteristic(Characteristic.TargetVisibilityState)
-        .on('set', (state, callback) => {
+        .onSet((state) => {
           this.setInputTargetVisibility(state, newInputDef);
-          callback();
         });
 
       // set input name
       inputSourceService.getCharacteristic(Characteristic.ConfiguredName)
-        .on('set', (value, callback) => {
+        .onSet((value) => {
           this.setInputConfiguredName(value, newInputDef);
-          callback();
         });
 
       // add a reference to the input source to the new input and add it to the configured inputs list
@@ -567,12 +547,12 @@ class webosTvDevice {
       this.volumeAsLightbulbService = new Service.Lightbulb('Volume', 'volumeService');
       this.volumeAsLightbulbService
         .getCharacteristic(Characteristic.On)
-        .on('get', this.getLightbulbMuteState.bind(this))
-        .on('set', this.setLightbulbMuteState.bind(this));
+        .onGet(this.getLightbulbMuteState.bind(this))
+        .onSet(this.setLightbulbMuteState.bind(this));
       this.volumeAsLightbulbService
         .addCharacteristic(new Characteristic.Brightness())
-        .on('get', this.getLightbulbVolume.bind(this))
-        .on('set', this.setLightbulbVolume.bind(this));
+        .onGet(this.getLightbulbVolume.bind(this))
+        .onSet(this.setLightbulbVolume.bind(this));
 
       this.tvAccesory.addService(this.volumeAsLightbulbService);
     } else if (this.volumeControl === "fan") {
@@ -644,8 +624,8 @@ class webosTvDevice {
     this.screenControlService = new Service.Switch('Screen', 'screenControlService');
     this.screenControlService
       .getCharacteristic(Characteristic.On)
-      .on('get', this.getTvScreenState.bind(this))
-      .on('set', this.setTvScreenState.bind(this));
+      .onGet(this.getTvScreenState.bind(this))
+      .onSet(this.setTvScreenState.bind(this));
 
     this.tvAccesory.addService(this.screenControlService);
   }
@@ -659,8 +639,8 @@ class webosTvDevice {
     this.screenSaverControlService = new Service.Switch('Screen Saver', 'screenSaverControlService');
     this.screenSaverControlService
       .getCharacteristic(Characteristic.On)
-      .on('get', this.getScreenSaverState.bind(this))
-      .on('set', this.setScreenSaverState.bind(this));
+      .onGet(this.getScreenSaverState.bind(this))
+      .onSet(this.setScreenSaverState.bind(this));
 
     this.tvAccesory.addService(this.screenSaverControlService);
   }
@@ -721,11 +701,11 @@ class webosTvDevice {
       let newAppButtonService = new Service.Switch(newAppButtonDef.name, 'appButtonService' + i);
       newAppButtonService
         .getCharacteristic(Characteristic.On)
-        .on('get', (callback) => {
-          this.getAppButtonState(callback, newAppButtonDef.appId);
+        .onGet(() => {
+          return this.getAppButtonState(newAppButtonDef.appId);
         })
-        .on('set', (state, callback) => {
-          this.setAppButtonState(state, callback, newAppButtonDef);
+        .onSet((state) => {
+          this.setAppButtonState(state, newAppButtonDef);
         });
 
       this.tvAccesory.addService(newAppButtonService);
@@ -772,11 +752,11 @@ class webosTvDevice {
       let newChannelButtonService = new Service.Switch(newChannelButtonDef.name, 'channelButtonService' + i);
       newChannelButtonService
         .getCharacteristic(Characteristic.On)
-        .on('get', (callback) => {
-          this.getChannelButtonState(callback, newChannelButtonDef.channelNumber);
+        .onGet(() => {
+          return this.getChannelButtonState(newChannelButtonDef.channelNumber);
         })
-        .on('set', (state, callback) => {
-          this.setChannelButtonState(state, callback, newChannelButtonDef);
+        .onSet((state) => {
+          this.setChannelButtonState(state, newChannelButtonDef);
         });
 
       // add to the tv service
@@ -831,8 +811,8 @@ class webosTvDevice {
       }
 
       // create the stateless button service
-      let newNotificationButtonService = this.createStatlessSwitchService(newNotificationButtonDef.name, 'notificationButtonService' + i, (state, callback) => {
-        this.setNotificationButtonState(state, callback, newNotificationButtonDef);
+      let newNotificationButtonService = this.createStatlessSwitchService(newNotificationButtonDef.name, 'notificationButtonService' + i, (state) => {
+        this.setNotificationButtonState(state, newNotificationButtonDef);
       });
 
       this.tvAccesory.addService(newNotificationButtonService);
@@ -873,8 +853,8 @@ class webosTvDevice {
       newRemoteControlButtonDef.name = value.name || 'Remote - ' + newRemoteControlButtonDef.action;
 
       // create the stateless button service
-      let newRemoteControlButtonService = this.createStatlessSwitchService(newRemoteControlButtonDef.name, 'remoteControlButtonService' + i, (state, callback) => {
-        this.setRemoteControlButtonState(state, callback, newRemoteControlButtonDef.action);
+      let newRemoteControlButtonService = this.createStatlessSwitchService(newRemoteControlButtonDef.name, 'remoteControlButtonService' + i, (state) => {
+        this.setRemoteControlButtonState(state, newRemoteControlButtonDef.action);
       });
 
       this.tvAccesory.addService(newRemoteControlButtonService);
@@ -918,11 +898,11 @@ class webosTvDevice {
       let newSoundOutputButtonService = new Service.Switch(newSoundOutputButtonDef.name, 'soundOutputButtonService' + i);
       newSoundOutputButtonService
         .getCharacteristic(Characteristic.On)
-        .on('get', (callback) => {
-          this.getSoundOutputButtonState(callback, newSoundOutputButtonDef.soundOutput);
+        .onGet(() => {
+          return this.getSoundOutputButtonState(newSoundOutputButtonDef.soundOutput);
         })
-        .on('set', (state, callback) => {
-          this.setSoundOutputButtonState(state, callback, newSoundOutputButtonDef.soundOutput);
+        .onSet((state) => {
+          this.setSoundOutputButtonState(state, newSoundOutputButtonDef.soundOutput);
         });
 
       this.tvAccesory.addService(newSoundOutputButtonService);
@@ -964,8 +944,8 @@ class webosTvDevice {
       newPictureModeButtonDef.name = value.name || 'Picture Mode - ' + newPictureModeButtonDef.pictureMode;
 
       // create the stateless button service
-      let newPictureModeButtonService = this.createStatlessSwitchService(newPictureModeButtonDef.name, 'pictureModeButtonsService' + i, (state, callback) => {
-        this.setPictureModeButtonState(state, callback, newPictureModeButtonDef.pictureMode);
+      let newPictureModeButtonService = this.createStatlessSwitchService(newPictureModeButtonDef.name, 'pictureModeButtonsService' + i, (state) => {
+        this.setPictureModeButtonState(state, newPictureModeButtonDef.pictureMode);
       });
 
       this.tvAccesory.addService(newPictureModeButtonService);
@@ -1013,8 +993,8 @@ class webosTvDevice {
       newSystemSettingsButtonDef.name = value.name || 'System Settings - ' + i;
 
       // create the stateless button service
-      let newSystemModeSettingsService = this.createStatlessSwitchService(newSystemSettingsButtonDef.name, 'systemSettingsService' + i, (state, callback) => {
-        this.setSystemSettingsButtonState(state, callback, newSystemSettingsButtonDef);
+      let newSystemModeSettingsService = this.createStatlessSwitchService(newSystemSettingsButtonDef.name, 'systemSettingsService' + i, (state) => {
+        this.setSystemSettingsButtonState(state, newSystemSettingsButtonDef);
       });
 
       this.tvAccesory.addService(newSystemModeSettingsService);
@@ -1067,8 +1047,8 @@ class webosTvDevice {
       }
 
       // create the stateless button service
-      let newRemoteSequenceButtonService = this.createStatlessSwitchService(newRemoteSequenceButtonDef.name, 'remoteSequenceButtonsService' + i, (state, callback) => {
-        this.setRemoteSequenceButtonState(state, callback, newRemoteSequenceButtonDef);
+      let newRemoteSequenceButtonService = this.createStatlessSwitchService(newRemoteSequenceButtonDef.name, 'remoteSequenceButtonsService' + i, (state) => {
+        this.setRemoteSequenceButtonState(state, newRemoteSequenceButtonDef);
       });
 
       this.tvAccesory.addService(newRemoteSequenceButtonService);
@@ -1087,58 +1067,65 @@ class webosTvDevice {
   /*---=== Tv service ===---*/
 
   // Power
-  getPowerState(callback) {
-    let isTvOn = false;
-    if (this.lgTvCtrl) {
-      isTvOn = this.lgTvCtrl.isTvOn();
-    }
-    callback(null, isTvOn);
+  getPowerState() {
+    return this.isTvOn() ? Characteristic.Active.ACTIVE : Characteristic.Active.INACTIVE;
   }
 
-  setPowerState(state, callback) {
+  setPowerState(state) {
     if (this.lgTvCtrl) {
       let isPowerOn = state === Characteristic.Active.ACTIVE;
       this.lgTvCtrl.setTvPowerState(isPowerOn);
-      callback();
     } else {
-      callback(this.createError(`cannot set power state`));
+      throw new HapStatusError(HAPStatus.SERVICE_COMMUNICATION_FAILURE);
+    }
+  }
+
+  // Active identifier
+  getActiveIdentifier() {
+    return this.getActiveInputId();
+  }
+
+  setActiveIdentifier(inputIdentifier) {
+    this.logDebug('Input source changed, new input source identifier: %d, source appId: %s', inputIdentifier, this.configuredInputs[inputIdentifier].appId);
+    if (this.configuredInputs[inputIdentifier]) {
+      this.lgTvCtrl.turnOnTvAndLaunchApp(this.configuredInputs[inputIdentifier].appId, this.configuredInputs[inputIdentifier].params);
+    }
+  }
+
+  // Volume selector
+  setVolumeSelectorState(state) {
+    this.logDebug('Volume change over the remote control (VolumeSelector), pressed: %s', state === Characteristic.VolumeSelector.DECREMENT ? 'Down' : 'Up');
+    if (state === Characteristic.VolumeSelector.DECREMENT) {
+      this.tvVolumeDown();
+    } else {
+      this.tvVolumeUp();
     }
   }
 
   // Mute
-  getMuteState(callback) {
-    let isTvMuted = true;
-    if (this.lgTvCtrl.isTvOn()) {
-      isTvMuted = this.lgTvCtrl.isMuted();
-    }
-    callback(null, isTvMuted);
+  getMuteState() {
+    return this.isTvMuted();
   }
 
-  setMuteState(state, callback) {
-    if (this.lgTvCtrl.isTvOn()) {
+  setMuteState(state) {
+    if (this.isTvOn()) {
       this.lgTvCtrl.setMute(state);
     }
-    callback();
   }
 
   // volume level
-  getVolume(callback) {
-    let tvVolume = 0;
-    if (this.lgTvCtrl.isTvOn()) {
-      tvVolume = this.lgTvCtrl.getVolumeLevel();
-    }
-    callback(null, tvVolume);
+  getVolume() {
+    return this.getTvVolume();
   }
 
-  setVolume(level, callback) {
-    if (this.lgTvCtrl.isTvOn()) {
+  setVolume(level) {
+    if (this.isTvOn()) {
       this.lgTvCtrl.setVolumeLevel(level);
     }
-    callback();
   }
 
   // cc remote control
-  remoteKeyPress(remoteKey, callback) {
+  remoteKeyPress(remoteKey) {
     switch (remoteKey) {
       case Characteristic.RemoteKey.REWIND:
         this.lgTvCtrl.sendRemoteInputSocketCommand('REWIND');
@@ -1148,11 +1135,9 @@ class webosTvDevice {
         break;
       case Characteristic.RemoteKey.NEXT_TRACK:
         this.logDebug('Next track remote key not supported');
-        callback();
         break;
       case Characteristic.RemoteKey.PREVIOUS_TRACK:
         this.logDebug('Previous track remote key not supported');
-        callback();
         break;
       case Characteristic.RemoteKey.ARROW_UP:
         this.lgTvCtrl.sendRemoteInputSocketCommand(this.ccRemoteRemap.arrowup || 'UP');
@@ -1186,8 +1171,12 @@ class webosTvDevice {
         this.lgTvCtrl.sendRemoteInputSocketCommand(this.ccRemoteRemap.information || 'INFO');
         break;
     }
+  }
 
-    callback();
+  //power mode selection
+  setPowerModeSelection(newValue) {
+    this.logDebug('Requested tv settings (PowerModeSelection): ' + newValue);
+    this.lgTvCtrl.sendRemoteInputSocketCommand('MENU');
   }
 
   //inputs config
@@ -1219,83 +1208,70 @@ class webosTvDevice {
   /*--== Stateless ==--*/
 
   // volume up/down switches
-  setVolumeUp(state, callback) {
-    if (this.lgTvCtrl.isTvOn()) {
-      this.lgTvCtrl.volumeUp();
-    }
+  setVolumeUp(state) {
+    this.tvVolumeUp();
     this.resetVolumeControlButtons();
-    callback();
   }
 
-  setVolumeDown(state, callback) {
-    if (this.lgTvCtrl.isTvOn()) {
-      this.lgTvCtrl.volumeDown();
-    }
+  setVolumeDown(state) {
+    this.tvVolumeDown();
     this.resetVolumeControlButtons();
-    callback();
   }
 
   // channel up /down switches
-  setChannelUp(state, callback) {
-    if (this.lgTvCtrl.isTvOn()) {
+  setChannelUp(state) {
+    if (this.isTvOn()) {
       this.lgTvCtrl.channelUp();
     }
     this.resetChannelControlButtons();
-    callback();
   }
 
-  setChannelDown(state, callback) {
-    if (this.lgTvCtrl.isTvOn()) {
+  setChannelDown(state) {
+    if (this.isTvOn()) {
       this.lgTvCtrl.channelDown();
     }
     this.resetChannelControlButtons();
-    callback();
   }
 
   // media control switches
-  setPlay(state, callback) {
-    if (this.lgTvCtrl.isTvOn()) {
+  setPlay(state) {
+    if (this.isTvOn()) {
       this.lgTvCtrl.mediaPlay();
     }
     this.resetMediaControlButtons();
-    callback();
   }
 
-  setPause(state, callback) {
-    if (this.lgTvCtrl.isTvOn()) {
+  setPause(state) {
+    if (this.isTvOn()) {
       this.lgTvCtrl.mediaPause();
     }
     this.resetMediaControlButtons();
-    callback();
   }
 
-  setStop(state, callback) {
-    if (this.lgTvCtrl.isTvOn()) {
+  setStop(state) {
+    if (this.isTvOn()) {
       this.lgTvCtrl.mediaStop();
     }
     this.resetMediaControlButtons();
-    callback();
   }
 
-  setRewind(state, callback) {
-    if (this.lgTvCtrl.isTvOn()) {
+  setRewind(state) {
+    if (this.isTvOn()) {
       this.lgTvCtrl.mediaRewind();
     }
     this.resetMediaControlButtons();
-    callback();
   }
 
-  setFastForward(state, callback) {
-    if (this.lgTvCtrl.isTvOn()) {
+  setFastForward(state) {
+    if (this.isTvOn()) {
       this.lgTvCtrl.mediaFastForward();
     }
     this.resetMediaControlButtons();
-    callback();
   }
 
   // notification buttons
-  setNotificationButtonState(state, callback, notificationButtonDef) {
-    if (this.lgTvCtrl.isTvOn()) {
+  setNotificationButtonState(state, notificationButtonDef) {
+    if (this.isTvOn()) {
       let onClick = null;
       let notifyMsg = notificationButtonDef.message;
       if (notificationButtonDef.appId) {
@@ -1313,21 +1289,19 @@ class webosTvDevice {
       this.lgTvCtrl.openToast(notifyMsg, null, null, onClick);
     }
     this.resetNotificationButtons();
-    callback();
   }
 
   // remote control buttons
-  setRemoteControlButtonState(state, callback, rcButtonAction) {
-    if (this.lgTvCtrl.isTvOn()) {
+  setRemoteControlButtonState(state, rcButtonAction) {
+    if (this.isTvOn()) {
       this.lgTvCtrl.sendRemoteInputSocketCommand(rcButtonAction);
     }
     this.resetRemoteControlButtons();
-    callback();
   }
 
   // remote sequence buttons
-  setRemoteSequenceButtonState(state, callback, remoteSeqDef) {
-    if (this.lgTvCtrl.isTvOn()) {
+  setRemoteSequenceButtonState(state, remoteSeqDef) {
+    if (this.isTvOn()) {
       let curRemoteKeyNum = 0;
       let remoteKeyFunc = () => {
         let curRemoteKey = remoteSeqDef.sequence[curRemoteKeyNum];
@@ -1342,77 +1316,63 @@ class webosTvDevice {
       remoteKeyFunc();
     }
     this.resetRemoteSequenceButtons();
-    callback();
   }
 
   // picture mode buttons
-  setPictureModeButtonState(state, callback, pictureModeStr) {
-    if (this.lgTvCtrl.isTvOn()) {
+  setPictureModeButtonState(state, pictureModeStr) {
+    if (this.isTvOn()) {
       this.lgTvCtrl.setPictureMode(pictureModeStr);
     }
     this.resetPictureModeButtons();
-    callback();
   }
 
   // picture settings buttons
-  setSystemSettingsButtonState(state, callback, systemSettingsDef) {
-    if (this.lgTvCtrl.isTvOn()) {
+  setSystemSettingsButtonState(state, systemSettingsDef) {
+    if (this.isTvOn()) {
       this.lgTvCtrl.setSystemSettings(systemSettingsDef.category, systemSettingsDef.settings);
     }
     this.resetSystemSettingsButtons();
-    callback();
   }
 
 
   /*--== Stateful ==--*/
 
   // Mute/Volume emulated as a lightbulb
-  getLightbulbMuteState(callback) {
-    let isTvMuted = true;
-    if (this.lgTvCtrl.isTvOn()) {
-      isTvMuted = this.lgTvCtrl.isMuted();
-    }
-    callback(null, !isTvMuted); // invert value because it is a light bulb
+  getLightbulbMuteState() {
+    return !this.isTvMuted(); // invert value because it is a light bulb
   }
 
-  setLightbulbMuteState(state, callback) {
-    if (this.lgTvCtrl.isTvOn()) {
+  setLightbulbMuteState(state) {
+    if (this.isTvOn()) {
       this.lgTvCtrl.setMute(!state); // this is a light bulb switch so whenever it is off then set mute to true hence state invert
     } else {
       setTimeout(() => {
         this.volumeAsLightbulbService.getCharacteristic(Characteristic.On).updateValue(false);
       }, BUTTON_RESET_TIMEOUT);
     }
-    callback();
   }
 
-  getLightbulbVolume(callback) {
-    this.getVolume(callback);
+  getLightbulbVolume() {
+    return this.getTvVolume();
   }
 
-  setLightbulbVolume(level, callback) {
-    if (this.lgTvCtrl.isTvOn()) {
+  setLightbulbVolume(level) {
+    if (this.isTvOn()) {
       this.lgTvCtrl.setVolumeLevel(level);
     } else {
       setTimeout(() => {
         this.volumeAsLightbulbService.getCharacteristic(Characteristic.Brightness).updateValue(0);
       }, BUTTON_RESET_TIMEOUT);
     }
-    callback();
   }
 
   // Mute/Volume emulated as a fan
-
   getFanMuteState() {
-    let isTvMuted = true;
-    if (this.lgTvCtrl.isTvOn()) {
-      isTvMuted = this.lgTvCtrl.isMuted();
-    }
-    return !isTvMuted ? Characteristic.Active.ACTIVE : Characteristic.Active.INACTIVE;
+    return this.isTvMuted() ? Characteristic.Active.ACTIVE : Characteristic.Active.INACTIVE; // invert value because it is a fan
   }
 
   setFanMuteState(state) {
-    if (this.lgTvCtrl.isTvOn()) {
+    if (this.isTvOn()) {
       let value = state === Characteristic.Active.ACTIVE;
       this.lgTvCtrl.setMute(!value);
     } else {
@@ -1423,15 +1383,11 @@ class webosTvDevice {
   }
 
   getRotationSpeedVolume() {
-    let tvVolume = 0;
-    if (this.lgTvCtrl.isTvOn()) {
-      tvVolume = this.lgTvCtrl.getVolumeLevel();
-    }
-    return tvVolume;
+    return this.getTvVolume();
   }
 
   setRotationSpeedVolume(value) {
-    if (this.lgTvCtrl.isTvOn()) {
+    if (this.isTvOn()) {
       this.lgTvCtrl.setVolumeLevel(value);
     } else {
       setTimeout(() => {
@@ -1441,16 +1397,16 @@ class webosTvDevice {
   }
 
   // screen control switch
-  getTvScreenState(callback) {
+  getTvScreenState() {
     let isTvScreenOn = false;
-    if (this.lgTvCtrl.isTvOn()) {
+    if (this.isTvOn()) {
       isTvScreenOn = this.lgTvCtrl.isTvScreenOn();
     }
-    callback(null, isTvScreenOn);
+    return isTvScreenOn;
   }
 
-  setTvScreenState(state, callback) {
-    if (this.lgTvCtrl.isTvOn()) {
+  setTvScreenState(state) {
+    if (this.isTvOn()) {
       if (state) {
         this.lgTvCtrl.turnOnTvScreen();
       } else {
@@ -1460,20 +1416,19 @@ class webosTvDevice {
       // if tv is off then instantly turn off the switch
       this.turnOffScreenControlButton();
     }
-    callback();
   }
 
   // screen saver control switch
-  getScreenSaverState(callback) {
+  getScreenSaverState() {
     let isScreenSaverOn = false;
-    if (this.lgTvCtrl.isTvOn()) {
+    if (this.isTvOn()) {
       isScreenSaverOn = this.lgTvCtrl.isScreenSaverActive();
     }
-    callback(null, isScreenSaverOn);
+    return isScreenSaverOn;
   }
 
-  setScreenSaverState(state, callback) {
-    if (this.lgTvCtrl.isTvOn()) {
+  setScreenSaverState(state) {
+    if (this.isTvOn()) {
       if (state) {
         this.lgTvCtrl.showScreenSaver();
       } else {
@@ -1483,20 +1438,19 @@ class webosTvDevice {
       // if tv is off then instantly turn off the switch
       this.turnOffScreenSaverControlButton();
     }
-    callback();
   }
 
   // app buttons
-  getAppButtonState(callback, appId) {
+  getAppButtonState(appId) {
     let appButtonEnabled = false;
-    if (this.lgTvCtrl.isTvOn()) {
+    if (this.isTvOn()) {
       appButtonEnabled = this.lgTvCtrl.getForegroundAppAppId() === appId;
     }
-    callback(null, appButtonEnabled);
+    return appButtonEnabled;
   }
 
-  setAppButtonState(state, callback, appButtonDef) {
-    if (this.lgTvCtrl.isTvOn()) {
+  setAppButtonState(state, appButtonDef) {
+    if (this.isTvOn()) {
       if (state) {
         //disable currently active app button
         this.disableActiveAppButton();
@@ -1517,24 +1471,23 @@ class webosTvDevice {
           this.enableActiveAppButton()
         }, BUTTON_RESET_TIMEOUT);
       }
-    } else {
+    } else if (this.lgTvCtrl) {
       // if TV is off, then try to turn on tv and open the app
       this.lgTvCtrl.turnOnTvAndLaunchApp(appButtonDef.appId, appButtonDef.params);
     }
-    callback();
   }
 
   // channel buttons
-  getChannelButtonState(callback, channelNum) {
+  getChannelButtonState(channelNum) {
     let channelButtonEnabled = false;
-    if (this.lgTvCtrl.isTvOn()) {
+    if (this.isTvOn()) {
       channelButtonEnabled = this.lgTvCtrl.getCurrentLiveTvChannelNumber() === channelNum;
     }
-    callback(null, channelButtonEnabled);
+    return channelButtonEnabled;
   }
 
-  setChannelButtonState(state, callback, channelButtonDef) {
-    if (this.lgTvCtrl.isTvOn()) {
+  setChannelButtonState(state, channelButtonDef) {
+    if (this.isTvOn()) {
       if (state) {
         //disable currently active channel
         this.disableActiveChannelButton();
@@ -1547,26 +1500,25 @@ class webosTvDevice {
           this.enableActiveChannelButton()
         }, BUTTON_RESET_TIMEOUT);
       }
-    } else {
+    } else if (this.lgTvCtrl) {
       // if TV is off, then try to turn on the tv and set the channel
       this.lgTvCtrl.turnOn().then(() => {
         this.lgTvCtrl.openLiveTvChannel(channelButtonDef.channelNumber, channelButtonDef.channelId);
       })
     }
-    callback();
   }
 
   // sound output buttons
-  getSoundOutputButtonState(callback, soundOutput) {
+  getSoundOutputButtonState(soundOutput) {
     let soundOutputButtonEnabled = false;
-    if (this.lgTvCtrl.isTvOn()) {
+    if (this.isTvOn()) {
       soundOutputButtonEnabled = this.lgTvCtrl.getActiveSoundOutput() === soundOutput;
     }
-    callback(null, soundOutputButtonEnabled);
+    return soundOutputButtonEnabled;
   }
 
-  setSoundOutputButtonState(state, callback, soundOutput) {
-    if (this.lgTvCtrl.isTvOn()) {
+  setSoundOutputButtonState(state, soundOutput) {
+    if (this.isTvOn()) {
       if (state) {
         //disable currently active sound output button
         this.disableActiveSoundOutputButton();
@@ -1583,162 +1535,176 @@ class webosTvDevice {
       // if TV is off then instantly disable the pressed button
       this.turnOffSoundOutputButton(soundOutput);
     }
-    callback();
   }
 
   // backlight
-  setLightbulbBacklightOnState(state, callback) {
+  setLightbulbBacklightOnState(state) {
     // reset only when trying to turn off the switch
     // do nothing when trying to turn on since sliding causes this to be called with state = true
-    if (!state) {
-      this.lgTvCtrl.setBacklight(0);
-      setTimeout(() => {
-        this.updatePictureSettingsServices();
-      }, BUTTON_RESET_TIMEOUT);
+    if (this.isTvOn()) {
+      if (!state) {
+        this.lgTvCtrl.setBacklight(0);
+        setTimeout(() => {
+          this.updatePictureSettingsServices();
+        }, BUTTON_RESET_TIMEOUT);
+      }
     }
-    callback();
   }
 
-  getLightbulbBacklight(callback) {
-    let contrast = 0;
-    if (this.lgTvCtrl.isTvOn()) {
-      contrast = this.lgTvCtrl.getBacklight();
+  getLightbulbBacklight() {
+    let backlight = 0;
+    if (this.isTvOn()) {
+      backlight = this.lgTvCtrl.getBacklight();
     }
-    callback(null, contrast);
+    return backlight;
   }
 
-  setLightbulbBacklight(backlight, callback) {
-    if (this.lgTvCtrl.isTvOn()) {
+  setLightbulbBacklight(backlight) {
+    if (this.isTvOn()) {
       this.lgTvCtrl.setBacklight(backlight)
     }
-    callback();
   }
 
   // brightness
-  setLightbulbBrightnessOnState(state, callback) {
+  setLightbulbBrightnessOnState(state) {
     // reset only when trying to turn off the switch
     // do nothing when trying to turn on since sliding causes this to be called with state = true
-    if (!state) {
-      this.lgTvCtrl.setBrightness(0);
-      setTimeout(() => {
-        this.updatePictureSettingsServices();
-      }, BUTTON_RESET_TIMEOUT);
+    if (this.isTvOn()) {
+      if (!state) {
+        this.lgTvCtrl.setBrightness(0);
+        setTimeout(() => {
+          this.updatePictureSettingsServices();
+        }, BUTTON_RESET_TIMEOUT);
+      }
     }
-    callback();
   }
 
-  getLightbulbBrightness(callback) {
-    let contrast = 0;
-    if (this.lgTvCtrl.isTvOn()) {
-      contrast = this.lgTvCtrl.getBrightness();
+  getLightbulbBrightness() {
+    let brightness = 0;
+    if (this.isTvOn()) {
+      brightness = this.lgTvCtrl.getBrightness();
     }
-    callback(null, contrast);
+    return brightness;
   }
 
-  setLightbulbBrightness(brightness, callback) {
-    if (this.lgTvCtrl.isTvOn()) {
+  setLightbulbBrightness(brightness) {
+    if (this.isTvOn()) {
       this.lgTvCtrl.setBrightness(brightness)
     }
-    callback();
   }
 
   // color
-  setLightbulbColorOnState(state, callback) {
+  setLightbulbColorOnState(state) {
     // reset only when trying to turn off the switch
     // do nothing when trying to turn on since sliding causes this to be called with state = true
-    if (!state) {
-      this.lgTvCtrl.setColor(0);
-      setTimeout(() => {
-        this.updatePictureSettingsServices();
-      }, BUTTON_RESET_TIMEOUT);
+    if (this.isTvOn()) {
+      if (!state) {
+        this.lgTvCtrl.setColor(0);
+        setTimeout(() => {
+          this.updatePictureSettingsServices();
+        }, BUTTON_RESET_TIMEOUT);
+      }
     }
-    callback();
   }
 
-  getLightbulbColor(callback) {
-    let contrast = 0;
-    if (this.lgTvCtrl.isTvOn()) {
-      contrast = this.lgTvCtrl.getColor();
+  getLightbulbColor() {
+    let color = 0;
+    if (this.isTvOn()) {
+      color = this.lgTvCtrl.getColor();
     }
-    callback(null, contrast);
+    return color;
   }
 
-  setLightbulbColor(color, callback) {
-    if (this.lgTvCtrl.isTvOn()) {
+  setLightbulbColor(color) {
+    if (this.isTvOn()) {
       this.lgTvCtrl.setColor(color)
     }
-    callback();
   }
 
   // contrast
-  setLightbulbContrastOnState(state, callback) {
+  setLightbulbContrastOnState(state) {
     // reset only when trying to turn off the switch
     // do nothing when trying to turn on since sliding causes this to be called with state = true
-    if (!state) {
-      this.lgTvCtrl.setContrast(0);
-      setTimeout(() => {
-        this.updatePictureSettingsServices();
-      }, BUTTON_RESET_TIMEOUT);
+    if (this.isTvOn()) {
+      if (!state) {
+        this.lgTvCtrl.setContrast(0);
+        setTimeout(() => {
+          this.updatePictureSettingsServices();
+        }, BUTTON_RESET_TIMEOUT);
+      }
     }
-    callback();
   }
 
-  getLightbulbContrast(callback) {
+  getLightbulbContrast() {
     let contrast = 0;
-    if (this.lgTvCtrl.isTvOn()) {
+    if (this.isTvOn()) {
       contrast = this.lgTvCtrl.getContrast();
     }
-    callback(null, contrast);
+    return contrast;
   }
 
-  setLightbulbContrast(contrast, callback) {
-    if (this.lgTvCtrl.isTvOn()) {
+  setLightbulbContrast(contrast) {
+    if (this.isTvOn()) {
       this.lgTvCtrl.setContrast(contrast)
     }
-    callback();
   }
 
+  /*----------========== VOLUME/MUTE HELPERS ==========----------*/
+
+  isTvMuted() {
+    let isTvMuted = true;
+    if (this.isTvOn()) {
+      isTvMuted = this.lgTvCtrl.isMuted();
+    }
+    return isTvMuted;
+  }
+
+  getTvVolume() {
+    let tvVolume = 0;
+    if (this.isTvOn()) {
+      tvVolume = this.lgTvCtrl.getVolumeLevel();
+    }
+    return tvVolume;
+  }
+
+  tvVolumeUp() {
+    if (this.isTvOn()) {
+      this.lgTvCtrl.volumeUp();
+    }
+  }
+
+  tvVolumeDown() {
+    if (this.isTvOn()) {
+      this.lgTvCtrl.volumeDown();
+    }
+  }
 
   /*----------========== STATUS HELPERS ==========----------*/
 
+  isTvOn() {
+    return this.lgTvCtrl && this.lgTvCtrl.isTvOn();
+  }
+
   updatePowerStatus() {
-    if (this.lgTvCtrl && this.lgTvCtrl.isTvOn()) {
-      if (this.tvService) this.tvService.getCharacteristic(Characteristic.Active).updateValue(Characteristic.Active.ACTIVE);
-    } else {
-      if (this.tvService) this.tvService.getCharacteristic(Characteristic.Active).updateValue(Characteristic.Active.INACTIVE);
-    }
+    if (this.tvService) this.tvService.getCharacteristic(Characteristic.Active).updateValue(this.getPowerState());
   }
 
   updateActiveInputSource() {
-    if (this.lgTvCtrl && this.lgTvCtrl.isTvOn()) {
-      if (this.tvService) this.tvService.getCharacteristic(Characteristic.ActiveIdentifier).updateValue(this.getActiveInputId());
-    } else {
-      if (this.tvService) this.tvService.getCharacteristic(Characteristic.ActiveIdentifier).updateValue(NOT_EXISTING_INPUT);
-    }
+    if (this.tvService) this.tvService.getCharacteristic(Characteristic.ActiveIdentifier).updateValue(this.getActiveInputId());
   }
 
   updateTvAudioStatus() {
-    if (this.lgTvCtrl) {
-      if (this.lgTvCtrl.isTvOn()) {
-        if (this.tvSpeakerService) this.tvSpeakerService.getCharacteristic(Characteristic.Mute).updateValue(this.lgTvCtrl.isMuted());
-        if (this.tvSpeakerService) this.tvSpeakerService.getCharacteristic(Characteristic.Volume).updateValue(this.lgTvCtrl.getVolumeLevel());
-        if (this.volumeAsLightbulbService) this.volumeAsLightbulbService.getCharacteristic(Characteristic.On).updateValue(!this.lgTvCtrl.isMuted()); // invert muted value because it is a lightbulb
-        if (this.volumeAsLightbulbService) this.volumeAsLightbulbService.getCharacteristic(Characteristic.Brightness).updateValue(this.lgTvCtrl.getVolumeLevel());
-      } else {
-        if (this.tvSpeakerService) this.tvSpeakerService.getCharacteristic(Characteristic.Mute).updateValue(true);
-        if (this.tvSpeakerService) this.tvSpeakerService.getCharacteristic(Characteristic.Volume).updateValue(0);
-        if (this.volumeAsLightbulbService) this.volumeAsLightbulbService.getCharacteristic(Characteristic.Brightness).updateValue(0);
-        if (this.volumeAsLightbulbService) this.volumeAsLightbulbService.getCharacteristic(Characteristic.On).updateValue(false);
-      }
-
-      if (this.volumeAsFanService) this.volumeAsFanService.getCharacteristic(Characteristic.Active).updateValue(this.getFanMuteState());
-      if (this.volumeAsFanService) this.volumeAsFanService.getCharacteristic(Characteristic.RotationSpeed).updateValue(this.getRotationSpeedVolume());
-    }
+    if (this.tvSpeakerService) this.tvSpeakerService.getCharacteristic(Characteristic.Mute).updateValue(this.getMuteState());
+    if (this.tvSpeakerService) this.tvSpeakerService.getCharacteristic(Characteristic.Volume).updateValue(this.getVolume());
+    if (this.volumeAsLightbulbService) this.volumeAsLightbulbService.getCharacteristic(Characteristic.On).updateValue(this.getLightbulbMuteState());
+    if (this.volumeAsLightbulbService) this.volumeAsLightbulbService.getCharacteristic(Characteristic.Brightness).updateValue(this.getLightbulbVolume());
+    if (this.volumeAsFanService) this.volumeAsFanService.getCharacteristic(Characteristic.Active).updateValue(this.getFanMuteState());
+    if (this.volumeAsFanService) this.volumeAsFanService.getCharacteristic(Characteristic.RotationSpeed).updateValue(this.getRotationSpeedVolume());
   }
 
   updateAppButtons() {
     if (this.configuredAppButtons) {
-      if (this.lgTvCtrl && this.lgTvCtrl.isTvOn()) {
+      if (this.isTvOn()) {
         // check if there there is an app button for the current active app and enable it
         this.enableActiveAppButton();
       } else {
@@ -1750,7 +1716,7 @@ class webosTvDevice {
 
   updateChannelButtons() {
     if (this.configuredChannelButtons) {
-      if (this.lgTvCtrl && this.lgTvCtrl.isTvOn() && this.lgTvCtrl.isLiveTvActive()) {
+      if (this.isTvOn() && this.lgTvCtrl.isLiveTvActive()) {
         // tv is on and live tv active, check if there is an channel button for active channel and set it to on and the rest to off
         this.enableActiveChannelButton();
       } else {
@@ -1762,7 +1728,7 @@ class webosTvDevice {
 
   updateSoundOutputButtons() {
     if (this.configuredSoundOutputButtons) {
-      if (this.lgTvCtrl && this.lgTvCtrl.isTvOn()) {
+      if (this.isTvOn()) {
         // tv is on check which sound output is enabled and enable the button if exists
         this.enableActiveSoundOutputButton();
       } else {
@@ -1773,41 +1739,22 @@ class webosTvDevice {
   }
 
   updateScreenStatus() {
-    if (this.lgTvCtrl && this.lgTvCtrl.isTvOn()) {
-      if (this.screenControlService) this.screenControlService.getCharacteristic(Characteristic.On).updateValue(this.lgTvCtrl.isTvScreenOn());
-    } else {
-      if (this.screenControlService) this.screenControlService.getCharacteristic(Characteristic.On).updateValue(false);
-    }
+    if (this.screenControlService) this.screenControlService.getCharacteristic(Characteristic.On).updateValue(this.getTvScreenState());
   }
 
   updateScreenSaverStatus() {
-    if (this.lgTvCtrl && this.lgTvCtrl.isTvOn()) {
-      if (this.screenSaverControlService) this.screenSaverControlService.getCharacteristic(Characteristic.On).updateValue(this.lgTvCtrl.isScreenSaverActive());
-    } else {
-      if (this.screenSaverControlService) this.screenSaverControlService.getCharacteristic(Characteristic.On).updateValue(false);
-    }
+    if (this.screenSaverControlService) this.screenSaverControlService.getCharacteristic(Characteristic.On).updateValue(this.getScreenSaverState());
   }
 
   updatePictureSettingsServices() {
-    if (this.lgTvCtrl && this.lgTvCtrl.isTvOn()) {
-      if (this.backlightControlService) this.backlightControlService.getCharacteristic(Characteristic.On).updateValue(true);
-      if (this.backlightControlService) this.backlightControlService.getCharacteristic(Characteristic.Brightness).updateValue(this.lgTvCtrl.getBacklight());
-      if (this.brightnessControlService) this.brightnessControlService.getCharacteristic(Characteristic.On).updateValue(true);
-      if (this.brightnessControlService) this.brightnessControlService.getCharacteristic(Characteristic.Brightness).updateValue(this.lgTvCtrl.getBrightness());
-      if (this.colorControlService) this.colorControlService.getCharacteristic(Characteristic.On).updateValue(true);
-      if (this.colorControlService) this.colorControlService.getCharacteristic(Characteristic.Brightness).updateValue(this.lgTvCtrl.getColor());
-      if (this.contrastControlService) this.contrastControlService.getCharacteristic(Characteristic.On).updateValue(true);
-      if (this.contrastControlService) this.contrastControlService.getCharacteristic(Characteristic.Brightness).updateValue(this.lgTvCtrl.getContrast());
-    } else {
-      if (this.backlightControlService) this.backlightControlService.getCharacteristic(Characteristic.Brightness).updateValue(0);
-      if (this.backlightControlService) this.backlightControlService.getCharacteristic(Characteristic.On).updateValue(false);
-      if (this.brightnessControlService) this.brightnessControlService.getCharacteristic(Characteristic.Brightness).updateValue(0);
-      if (this.brightnessControlService) this.brightnessControlService.getCharacteristic(Characteristic.On).updateValue(false);
-      if (this.colorControlService) this.colorControlService.getCharacteristic(Characteristic.Brightness).updateValue(0);
-      if (this.colorControlService) this.colorControlService.getCharacteristic(Characteristic.On).updateValue(false);
-      if (this.contrastControlService) this.contrastControlService.getCharacteristic(Characteristic.Brightness).updateValue(0);
-      if (this.contrastControlService) this.contrastControlService.getCharacteristic(Characteristic.On).updateValue(false);
-    }
+    if (this.backlightControlService) this.backlightControlService.getCharacteristic(Characteristic.On).updateValue(this.getPictureSettingsOnState());
+    if (this.backlightControlService) this.backlightControlService.getCharacteristic(Characteristic.Brightness).updateValue(this.getLightbulbBacklight());
+    if (this.brightnessControlService) this.brightnessControlService.getCharacteristic(Characteristic.On).updateValue(this.getPictureSettingsOnState());
+    if (this.brightnessControlService) this.brightnessControlService.getCharacteristic(Characteristic.Brightness).updateValue(this.getLightbulbBrightness());
+    if (this.colorControlService) this.colorControlService.getCharacteristic(Characteristic.On).updateValue(this.getPictureSettingsOnState());
+    if (this.colorControlService) this.colorControlService.getCharacteristic(Characteristic.Brightness).updateValue(this.getLightbulbColor());
+    if (this.contrastControlService) this.contrastControlService.getCharacteristic(Characteristic.On).updateValue(this.getPictureSettingsOnState());
+    if (this.contrastControlService) this.contrastControlService.getCharacteristic(Characteristic.Brightness).updateValue(this.getLightbulbContrast());
   }
 
   updateTvStatusFull() {
@@ -1854,15 +1801,15 @@ class webosTvDevice {
     let newStatelessSwitchService = new Service.Switch(name, id);
     newStatelessSwitchService
       .getCharacteristic(Characteristic.On)
-      .on('get', this.getStatelessSwitchState.bind(this))
-      .on('set', (state, callback) => {
-        setterFn(state, callback);
+      .onGet(this.getStatelessSwitchState.bind(this))
+      .onSet((state) => {
+        setterFn(state);
       });
     return newStatelessSwitchService;
   }
 
-  getStatelessSwitchState(callback) {
-    callback(null, false);
+  getStatelessSwitchState() {
+    return false;
   }
 
   resetVolumeControlButtons() {
@@ -1963,7 +1910,7 @@ class webosTvDevice {
   /*----------========== INPUT HELPERS ==========----------*/
 
   getActiveInputId() {
-    if (this.lgTvCtrl.isTvOn()) {
+    if (this.isTvOn()) {
       let activeInputId = Object.keys(this.configuredInputs).find(key => {
         return this.configuredInputs[key].appId === this.lgTvCtrl.getForegroundAppAppId();
       });
@@ -2204,22 +2151,18 @@ class webosTvDevice {
     let tmpService = new Service.Lightbulb(name, id);
     tmpService
       .getCharacteristic(Characteristic.On)
-      .on('get', this.getPictureSettingsOnState.bind(this))
-      .on('set', onSetterFn.bind(this));
+      .onGet(this.getPictureSettingsOnState.bind(this))
+      .onSet(onSetterFn.bind(this));
     tmpService
       .addCharacteristic(new Characteristic.Brightness())
-      .on('get', getterFn.bind(this))
-      .on('set', setterFn.bind(this));
+      .onGet(getterFn.bind(this))
+      .onSet(setterFn.bind(this));
 
     return tmpService;
   }
 
-  getPictureSettingsOnState(callback) {
-    let isOn = false;
-    if (this.lgTvCtrl.isTvOn()) {
-      isOn = true;
-    }
-    callback(null, isOn);
+  getPictureSettingsOnState() {
+    return this.isTvOn();
   }
 
   /*----------========== HELPERS ==========----------*/
