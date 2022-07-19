@@ -1,7 +1,7 @@
-const fs = require('fs');
-const mkdirp = require('mkdirp');
-const LgTvController = require('./lib/LgTvController.js');
-const Events = require('./lib/Events.js');
+import * as fs from 'fs';
+import * as mkdirp from 'mkdirp';
+import LgTvController from './lib/LgTvController.js';
+import Events from './lib/Events.js';
 
 let Service, Characteristic, Homebridge, Accessory;
 
@@ -15,7 +15,7 @@ const DEFAULT_INPUT_SOURCES_LIMIT = 45;
 const BUTTON_RESET_TIMEOUT = 20; // in milliseconds
 const AUTOMATIONS_TRIGGER_TIMEOUT = 400; // in milliseconds
 
-module.exports = (homebridge) => {
+export default (homebridge) => {
   Service = homebridge.hap.Service;
   Characteristic = homebridge.hap.Characteristic;
   Homebridge = homebridge;
