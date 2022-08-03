@@ -30,7 +30,10 @@
     "lgtv2": "^1.6.3",
     "mkdirp": "^1.0.4",
     "tcp-ping": "^0.1.1",
-    "wake_on_lan": "^1.0.0"
+    "wake_on_lan": "^1.0.0",
+    "chalk": "^5.0.1",
+    "yargs": "^17.5.1",
+    "env-paths": "^3.0.0"
   },
   "repository": {
     "type": "git",
@@ -39,5 +42,8 @@
   "bugs": {
     "url": "https://github.com/merdok/homebridge-webos-tv/issues"
   },
-  "homepage": "https://github.com/merdok/homebridge-webos-tv#readme"
+  "homepage": "https://github.com/merdok/homebridge-webos-tv#readme",
+  "bin": {
+    "webostv": "./cli/index.js"
+  }
 }

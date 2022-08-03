@@ -434,6 +434,10 @@ To set system settings you need to specify a category and an object of settings 
 ```
 --->
 
+## CLI
+The plugin also offers a command line interface to control your TV directly from the command line.  
+Just type `webostv` in the console to get a list of available options.
+
 ## Troubleshooting
 If you have any issues with the plugin or TV services then you can run homebridge in debug mode, which will provide some additional information. This might be useful for debugging issues.
 
