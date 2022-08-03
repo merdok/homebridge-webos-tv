@@ -207,6 +207,8 @@ The directory where TV model info should be saved. **Default: "~/.homebridge/.we
 The TV state background polling interval in seconds. **Default: 5**
 - `deepDebugLog` [optional]
 Enables additional more detailed debug log. Useful when trying to figure out issues with the plugin. **Default: false**
+- `silentLog` [optional]
+When enabled all log output will only appear in the debug mode. **Default: false**
 - `hideTvService` [optional]
 Whether to hide the TV service. This is recommended if your TV supports native HomeKit integration, since the TV accessory already exists.  **Default: false**  
 - `volumeLimit` [optional]

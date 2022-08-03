@@ -53,10 +53,14 @@ class webosTvDevice {
     this.alivePollingInterval = config.pollingInterval || 5;
     this.alivePollingInterval = this.alivePollingInterval * 1000;
     this.deepDebugLog = config.deepDebugLog;
-    this.inputSourcesLimit = config.inputSourcesLimit || DEFAULT_INPUT_SOURCES_LIMIT;
+    this.silentLog = config.silentLog;
     if (this.deepDebugLog === undefined) {
       this.deepDebugLog = false;
     }
+    if (this.silentLog === undefined) {
+      this.silentLog = false;
+    }
+    this.inputSourcesLimit = config.inputSourcesLimit || DEFAULT_INPUT_SOURCES_LIMIT;
     this.isHideTvService = config.hideTvService;
     if (this.isHideTvService === undefined) {
       this.isHideTvService = false;
@@ -166,6 +170,7 @@ class webosTvDevice {
     this.lgTvCtrl = new LgTvController(this.ip, this.mac, this.name, this.keyFile, this.broadcastAdr, this.alivePollingInterval, this.log);
     this.lgTvCtrl.setVolumeLimit(this.volumeLimit);
     this.lgTvCtrl.setDeepDebugLogEnabled(this.deepDebugLog);
+    this.lgTvCtrl.setSilentLogEnabled(this.silentLog);
     this.lgTvCtrl.connect();
 
 

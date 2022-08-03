@@ -62,6 +62,11 @@
               "description": "Enables additional more detailed debug log. Useful when trying to figure out issues with the plugin.",
               "type": "boolean"
             },
+            "silentLog": {
+              "title": "Enable silent log",
+              "description": "When enabled all log output will only appear in the debug mode.",
+              "type": "boolean"
+            },
             "hideTvService": {
               "title": "Hide the TV service",
               "description": "Recommended when the TV already supports native HomeKit integration to prevent double TV accessories.",
@@ -403,7 +408,8 @@
               "devices[].keyFile",
               "devices[].prefsDir",
               "devices[].hideTvService",
-              "devices[].deepDebugLog"
+              "devices[].deepDebugLog",
+              "devices[].silentLog"
             ]
           },
           {
