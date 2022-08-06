@@ -1145,35 +1145,35 @@ class webosTvDevice {
         this.logDebug('Previous track remote key not supported');
         break;
       case Characteristic.RemoteKey.ARROW_UP:
-        this.lgTvCtrl.sendRemoteInputSocketCommand(this.ccRemoteRemap.arrowup || 'UP');
+        this.lgTvCtrl.sendRemoteInputSocketCommand(this.getCcRemapCmd('arrowup', 'UP'));
         break;
       case Characteristic.RemoteKey.ARROW_DOWN:
-        this.lgTvCtrl.sendRemoteInputSocketCommand(this.ccRemoteRemap.arrowdown || 'DOWN');
+        this.lgTvCtrl.sendRemoteInputSocketCommand(this.getCcRemapCmd('arrowdown', 'DOWN'));
         break;
       case Characteristic.RemoteKey.ARROW_LEFT:
-        this.lgTvCtrl.sendRemoteInputSocketCommand(this.ccRemoteRemap.arrowleft || 'LEFT');
+        this.lgTvCtrl.sendRemoteInputSocketCommand(this.getCcRemapCmd('arrowleft', 'LEFT'));
         break;
       case Characteristic.RemoteKey.ARROW_RIGHT:
-        this.lgTvCtrl.sendRemoteInputSocketCommand(this.ccRemoteRemap.arrowright || 'RIGHT');
+        this.lgTvCtrl.sendRemoteInputSocketCommand(this.getCcRemapCmd('arrowright', 'RIGHT'));
         break;
       case Characteristic.RemoteKey.SELECT:
-        this.lgTvCtrl.sendRemoteInputSocketCommand(this.ccRemoteRemap.select || 'ENTER');
+        this.lgTvCtrl.sendRemoteInputSocketCommand(this.getCcRemapCmd('select', 'ENTER'));
         break;
       case Characteristic.RemoteKey.BACK:
-        this.lgTvCtrl.sendRemoteInputSocketCommand(this.ccRemoteRemap.back || 'BACK');
+        this.lgTvCtrl.sendRemoteInputSocketCommand(this.getCcRemapCmd('back', 'BACK'));
         break;
       case Characteristic.RemoteKey.EXIT:
         this.lgTvCtrl.sendRemoteInputSocketCommand('EXIT');
         break;
       case Characteristic.RemoteKey.PLAY_PAUSE:
-        if (this.ccRemoteRemap.playpause) {
-          this.lgTvCtrl.sendRemoteInputSocketCommand(this.ccRemoteRemap.playpause);
+        if (this.getCcRemapCmd('playpause')) {
+          this.lgTvCtrl.sendRemoteInputSocketCommand(this.getCcRemapCmd('playpause'));
         } else {
           this.lgTvCtrl.sendPlayPause();
         }
         break;
       case Characteristic.RemoteKey.INFORMATION:
-        this.lgTvCtrl.sendRemoteInputSocketCommand(this.ccRemoteRemap.information || 'INFO');
+        this.lgTvCtrl.sendRemoteInputSocketCommand(this.getCcRemapCmd('information', 'INFO'));
         break;
     }
   }
@@ -2150,6 +2150,7 @@ class webosTvDevice {
     }
   }
 
+
   /*----------========== PICTURE SETTINGS HELPERS ==========----------*/
 
   createPictureSettingsLightbulbService(name, id, onSetterFn, setterFn, getterFn) {
@@ -2169,6 +2170,20 @@ class webosTvDevice {
   getPictureSettingsOnState() {
     return this.isTvOn();
   }
+
+
+  /*----------========== CC REMOTE HELPERS ==========----------*/
+
+  getCcRemapCmd(key, defaultCmd) {
+    let curAppId = this.lgTvCtrl.getForegroundAppAppId();
+    let remoteCmd = this.ccRemoteRemap[key]; // first get the global one
+    let appSpecific = this.ccRemoteRemap[curAppId]; // check whether we have app specific
+    if (appSpecific && appSpecific[key]) {
+      remoteCmd = appSpecific[key]; // if we have app specific the overdefine global one
+    }
+    return remoteCmd || defaultCmd;
+  }
+
 
   /*----------========== HELPERS ==========----------*/
 

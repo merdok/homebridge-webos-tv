@@ -147,7 +147,11 @@ Example configuration:
             "select": "PROGRAM",
             "back": "BACK",
             "playpause": "YELLOW",
-            "information": "TELETEXT"
+            "information": "TELETEXT",
+            "youtube.leanback.v4":{
+               "information": "MUTE",
+               "select": "HOME"
+            }
           },
           "pictureModeButtons": [
             "eco",
@@ -242,6 +246,7 @@ Whether the contrast control service is enabled. Allows to control the contrast 
 - `ccRemoteRemap` [optional]
 Allows to remap the control center remote buttons. For possible values, see section below. **Default: no remap**
   - Set an object with the following properties: *arrowup*, *arrowdown*, *arrowleft*, *arrowright*, *select*, *back*, *playpause*, *information*
+  - For specific apps a dedicated configuration can be created, simply specify a property with the *appId* of the desired app as key and the value as object with the above properties
   - See example above on how the property should look like
 - `appButtons` [optional]
 Dedicated app buttons which will appear for the TV. Can be used to trigger automations and can be controlled by Siri. **Default: "" (disabled)**
