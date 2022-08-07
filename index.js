@@ -117,6 +117,7 @@ class webosTvDevice {
     this.remoteSequenceButtons = config.remoteSequenceButtons;
     this.pictureModeButtons = config.pictureModeButtons;
     this.systemSettingsButtons = config.systemSettingsButtons;
+    this.triggers = config.triggers;
 
 
     this.logInfo(`Init - got TV configuration, initializing device with name: ${this.name}`);
@@ -219,6 +220,7 @@ class webosTvDevice {
 
     this.lgTvCtrl.on(Events.AUDIO_STATUS_CHANGED, () => {
       this.updateTvAudioStatus();
+      this.updateOccupancyTriggers();
     });
 
     this.lgTvCtrl.on(Events.LIVE_TV_CHANNEL_CHANGED, () => {
@@ -251,6 +253,7 @@ class webosTvDevice {
 
     this.lgTvCtrl.on(Events.PICTURE_SETTINGS_CHANGED, (res) => {
       this.updatePictureSettingsServices();
+      this.updateOccupancyTriggers();
     });
 
   }
@@ -295,6 +298,7 @@ class webosTvDevice {
     this.prepareRemoteSequenceButtonsService();
     this.preparePictureModeButtonService();
     this.prepareSystemSettingsButtonService();
+    this.prepareTriggersService();
   }
 
   //
@@ -1067,6 +1071,38 @@ class webosTvDevice {
   }
 
 
+  prepareTriggersService() {
+    if (!this.triggers) {
+      return;
+    }
+
+    if (this.triggers.volume) {
+      this.volumeTriggerDef = this.createTriggerOccupancySensor('volume', this.getTvVolume.bind(this));
+      this.tvAccesory.addService(this.volumeTriggerDef.service);
+    }
+
+    if (this.triggers.backlight) {
+      this.backlightTriggerDef = this.createTriggerOccupancySensor('backlight', this.getLightbulbBacklight.bind(this));
+      this.tvAccesory.addService(this.backlightTriggerDef.service);
+    }
+
+    if (this.triggers.brightness) {
+      this.brightnessTriggerDef = this.createTriggerOccupancySensor('brightness', this.getLightbulbBrightness.bind(this));
+      this.tvAccesory.addService(this.brightnessTriggerDef.service);
+    }
+
+    if (this.triggers.color) {
+      this.colorTriggerDef = this.createTriggerOccupancySensor('color', this.getLightbulbColor.bind(this));
+      this.tvAccesory.addService(this.colorTriggerDef.service);
+    }
+
+    if (this.triggers.contrast) {
+      this.contrastTriggerDef = this.createTriggerOccupancySensor('contrast', this.getLightbulbContrast.bind(this));
+      this.tvAccesory.addService(this.contrastTriggerDef.service);
+    }
+  }
+
+
   /*----------========== HOMEBRIDGE STATE SETTERS/GETTERS ==========----------*/
 
   /*---=== Tv service ===---*/
@@ -1654,6 +1690,16 @@ class webosTvDevice {
     }
   }
 
+  // occupancy triggers
+  getTriggerOccupancyDetected(newTriggerDef) {
+    let occupancy = Characteristic.OccupancyDetected.OCCUPANCY_NOT_DETECTED;
+    if (this.isTvOn()) {
+      let isAboveThreshold = newTriggerDef.actaulValFn() >= newTriggerDef.threshold;
+      occupancy = isAboveThreshold ? Characteristic.OccupancyDetected.OCCUPANCY_DETECTED : Characteristic.OccupancyDetected.OCCUPANCY_NOT_DETECTED;
+    }
+    return occupancy;
+  }
+
   /*----------========== VOLUME/MUTE HELPERS ==========----------*/
 
   isTvMuted() {
@@ -1762,6 +1808,15 @@ class webosTvDevice {
     if (this.contrastControlService) this.contrastControlService.getCharacteristic(Characteristic.Brightness).updateValue(this.getLightbulbContrast());
   }
 
+  updateOccupancyTriggers() {
+    if (this.volumeTriggerDef) this.volumeTriggerDef.service.getCharacteristic(Characteristic.OccupancyDetected).updateValue(this.getTriggerOccupancyDetected(this.volumeTriggerDef));
+    if (this.backlightTriggerDef) this.backlightTriggerDef.service.getCharacteristic(Characteristic.OccupancyDetected).updateValue(this.getTriggerOccupancyDetected(this.backlightTriggerDef));
+    if (this.brightnessTriggerDef) this.brightnessTriggerDef.service.getCharacteristic(Characteristic.OccupancyDetected).updateValue(this.getTriggerOccupancyDetected(this.brightnessTriggerDef));
+    if (this.colorTriggerDef) this.colorTriggerDef.service.getCharacteristic(Characteristic.OccupancyDetected).updateValue(this.getTriggerOccupancyDetected(this.colorTriggerDef));
+    if (this.contrastTriggerDef) this.contrastTriggerDef.service.getCharacteristic(Characteristic.OccupancyDetected).updateValue(this.getTriggerOccupancyDetected(this.contrastTriggerDef));
+  }
+
+
   updateTvStatusFull() {
     this.updatePowerStatus();
     this.updateActiveInputSource();
@@ -1772,6 +1827,7 @@ class webosTvDevice {
     this.updateScreenStatus();
     this.updateScreenSaverStatus();
     this.updatePictureSettingsServices();
+    this.updateOccupancyTriggers();
   }
 
 
@@ -2182,6 +2238,56 @@ class webosTvDevice {
       remoteCmd = appSpecific[key]; // if we have app specific the overdefine global one
     }
     return remoteCmd || defaultCmd;
+  }
+
+
+  /*----------========== OCCUPANCY TRIGGERS HELPERS ==========----------*/
+
+  createTriggerOccupancySensor(triggerType, actaulValFn) {
+    if (!this.triggers || !this.triggers[triggerType]) {
+      return;
+    }
+
+    if (!actaulValFn) {
+      this.logDebug(`Missing actaul value function for trigger!`);
+      return;
+    }
+
+    let triggerThreshold = this.triggers[triggerType].threshold;
+    let triggerName = this.triggers[triggerType].name;
+
+    if (!triggerThreshold || !Number.isFinite(triggerThreshold)) {
+      this.logWarn(`Missing threshold value. Cannot create a ${triggerType} trigger!`);
+      return;
+    }
+
+    if (triggerThreshold < 0 || triggerThreshold > 100) {
+      this.logWarn(`Invalid trigger threshold -> ${triggerThreshold}! The ${triggerType} trigger threshold needs to be in the range 0-100`);
+      return;
+    }
+
+    // create a new trigger definition
+    let newTriggerDef = {};
+
+    if (!triggerName) {
+      triggerName = triggerType.charAt(0).toUpperCase() + triggerType.slice(1) + ' Trigger - ' + triggerThreshold;
+    }
+
+    newTriggerDef.threshold = triggerThreshold;
+    newTriggerDef.actaulValFn = actaulValFn;
+
+    newTriggerDef.service = new Service.OccupancySensor(triggerName, `${triggerType}TriggerService`);
+    newTriggerDef.service
+      .getCharacteristic(Characteristic.OccupancyDetected)
+      .onGet(() => {
+        return this.getTriggerOccupancyDetected(newTriggerDef);
+      })
+    newTriggerDef.service
+      .addCharacteristic(Characteristic.StatusActive)
+      .onGet(() => {
+        return this.isTvOn();
+      })
+    return newTriggerDef;
   }
 
 

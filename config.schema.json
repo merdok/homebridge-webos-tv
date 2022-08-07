@@ -378,6 +378,82 @@
                   }
                 }
               }
+            },
+            "triggers": {
+              "title": "Occupancy triggers",
+              "type": "object",
+              "properties": {
+                "volume": {
+                  "title": "Volume",
+                  "type": "object",
+                  "properties": {
+                    "threshold": {
+                      "title": "Threshold",
+                      "type": "number"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    }
+                  }
+                },
+                "backlight": {
+                  "title": "Backlight",
+                  "type": "object",
+                  "properties": {
+                    "threshold": {
+                      "title": "Threshold",
+                      "type": "number"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    }
+                  }
+                },
+                "brightness": {
+                  "title": "Brightness",
+                  "type": "object",
+                  "properties": {
+                    "threshold": {
+                      "title": "Threshold",
+                      "type": "number"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    }
+                  }
+                },
+                "color": {
+                  "title": "Color",
+                  "type": "object",
+                  "properties": {
+                    "threshold": {
+                      "title": "Threshold",
+                      "type": "number"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    }
+                  }
+                },
+                "contrast": {
+                  "title": "Contrast",
+                  "type": "object",
+                  "properties": {
+                    "threshold": {
+                      "title": "Threshold",
+                      "type": "number"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    }
+                  }
+                }
+              }
             }
           }
         }
@@ -549,6 +625,58 @@
             "items": [
               "devices[].pictureModeButtons[].pictureMode",
               "devices[].pictureModeButtons[].name"
+            ]
+          },
+          {
+            "key": "devices[].triggers",
+            "type": "fieldset",
+            "expandable": true,
+            "expanded": false,
+            "items": [{
+                "key": "devices[].triggers.volume",
+                "title": "Volume",
+                "type": "object",
+                "items": [
+                  "devices[].triggers.volume.threshold",
+                  "devices[].triggers.volume.name"
+                ]
+              },
+              {
+                "key": "devices[].triggers.backlight",
+                "title": "Backlight",
+                "type": "object",
+                "items": [
+                  "devices[].triggers.backlight.threshold",
+                  "devices[].triggers.backlight.name"
+                ]
+              },
+              {
+                "key": "devices[].triggers.brightness",
+                "title": "Brightness",
+                "type": "object",
+                "items": [
+                  "devices[].triggers.brightness.threshold",
+                  "devices[].triggers.brightness.name"
+                ]
+              },
+              {
+                "key": "devices[].triggers.color",
+                "title": "Color",
+                "type": "object",
+                "items": [
+                  "devices[].triggers.color.threshold",
+                  "devices[].triggers.color.name"
+                ]
+              },
+              {
+                "key": "devices[].triggers.contrast",
+                "title": "Contrast",
+                "type": "object",
+                "items": [
+                  "devices[].triggers.contrast.threshold",
+                  "devices[].triggers.contrast.name"
+                ]
+              }
             ]
           }
         ]

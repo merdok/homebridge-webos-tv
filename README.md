@@ -149,15 +149,24 @@ Example configuration:
             "playpause": "YELLOW",
             "information": "TELETEXT",
             "youtube.leanback.v4":{
-               "information": "MUTE",
-               "select": "HOME"
+              "information": "MUTE",
+              "select": "HOME"
             }
           },
           "pictureModeButtons": [
             "eco",
             "game",
             "cinema"
-          ]
+          ],
+          "triggers": {
+            "volume":{
+              "threshold": 50,
+              "name": "Volume above 50"
+            },
+            "backlight":{
+              "threshold": 70
+            }
+          }
         }
       ]
     }
@@ -302,13 +311,21 @@ Whether the sound output buttons service is enabled. This allows to switch betwe
     - *soundOutput* - [required] one of the sound outputs specified above,
     - *name* - [optional]  the sound output button name
    - Depending on the TV and connected devices to the TV there might also be other values. In that case just switch sound outputs on the TV and check the homebridge log.
- - `pictureModeButtons` [optional]
- Whether the picture mode buttons service is enabled. This allows to switch between picture modes on the TV. **Default: "" (disabled)**
-   - Set an array of picture modes as the value. Available values are below.
-   - You can also set an array of objects as the value. An object can have the following properties:
-     - *pictureMode* - [required] one of the picture modes specified below,
-     - *name* - [optional]  the picture mode button name
-   - Not all picture modes might be available for all TVs.
+- `pictureModeButtons` [optional]
+Whether the picture mode buttons service is enabled. This allows to switch between picture modes on the TV. **Default: "" (disabled)**
+  - Set an array of picture modes as the value. Available values are below.
+  - You can also set an array of objects as the value. An object can have the following properties:
+    - *pictureMode* - [required] one of the picture modes specified below,
+    - *name* - [optional]  the picture mode button name
+  - Not all picture modes might be available for all TVs.
+- `triggers` [optional]
+Whether the triggers service is enabled. This allows to create occupancy sensors which trigger when the specified threshold is reached. **Default: "" (disabled)**
+  - Triggers can be set for the following tv properties: *volume*, *backlight*, *brightness*, *color*, *contrast*
+  - Set as an object of trigger properties as key and a trigger object as value. An object can have the following properties:
+    - *threshold* - [required] the threshold value which will trigger the occupancy,
+    - *name* - [optional] the trigger name
+  - See example above on how the property should look like
+
  <!---
  - `systemSettingsButtons` [optional] [advanced]
  Whether the system settings buttons service is enabled. This allows to change any system settings on the TV. **Default: "" (disabled)**
