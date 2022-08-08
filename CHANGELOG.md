@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [2.3.0] - 2022-08-09
+### Added
+- New `triggers` property which allows to add occupancy sensors which trigger at a certain threshold for specific tv properties
+- New `silentLog` property which when enabled allows to disable all log output
+- Added a command line interface to control your TV directly from the command line
+- Volume control can now be configured as a fan in a addition to the lightbulb
+- Allow to configure per app specific control center remote remap
+
+### Changed
+- The plugin is now based on pure ESM
+
+
 ## [2.2.7] - 2022-02-02
 ### Changed
 - As Node.js 12.x will not be supported anymore by homebridge as of April 2022, the minimum required Node.js was bumped to 16.x, please make sure to update: https://github.com/homebridge/homebridge/wiki/How-To-Update-Node.js
