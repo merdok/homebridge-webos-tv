@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import * as mkdirp from 'mkdirp';
+import mkdirp from 'mkdirp';
 import LgTvController from './lib/LgTvController.js';
 import Events from './lib/Events.js';
 
