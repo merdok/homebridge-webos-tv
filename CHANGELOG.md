@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
-## [2.3.0] - 2022-08-09
+## [2.3.1] - 2022-08-09
 ### Added
 - New `triggers` property which allows to add occupancy sensors which trigger at a certain threshold for specific tv properties
 - New `silentLog` property which when enabled allows to disable all log output
@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - The plugin is now based on pure ESM
+
+### Fixed
+- Fix a potential crash during startup
 
 
 ## [2.2.7] - 2022-02-02
