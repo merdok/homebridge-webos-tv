@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.2] - 2022-08-31
+### Fixed
+- Fix fan as volume state
+
 
 ## [2.3.1] - 2022-08-09
 ### Added
