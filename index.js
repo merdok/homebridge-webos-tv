@@ -1409,7 +1409,7 @@ class webosTvDevice {
 
   // Mute/Volume emulated as a fan
   getFanMuteState() {
-    return this.isTvMuted() ? Characteristic.Active.ACTIVE : Characteristic.Active.INACTIVE; // invert value because it is a fan
+    return !this.isTvMuted() ? Characteristic.Active.ACTIVE : Characteristic.Active.INACTIVE; // invert value because it is a fan
   }
 
   setFanMuteState(state) {
