@@ -1,5 +1,6 @@
 {
   "name": "homebridge-webos-tv",
+  "displayName": "webOS TV",
   "version": "2.3.2",
   "description": "Homebridge plugin for LG webOS TVs",
   "type": "module",
