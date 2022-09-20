@@ -1127,9 +1127,12 @@ class webosTvDevice {
   }
 
   setActiveIdentifier(inputIdentifier) {
-    this.logDebug('Input source changed, new input source identifier: %d, source appId: %s', inputIdentifier, this.configuredInputs[inputIdentifier].appId);
+    this.logDebug('Trying to switch input to identifier: %d', inputIdentifier);
     if (this.configuredInputs[inputIdentifier]) {
+      this.logDebug('Input source changed, new input source identifier: %d, source appId: %s', inputIdentifier, this.configuredInputs[inputIdentifier].appId);
       this.lgTvCtrl.turnOnTvAndLaunchApp(this.configuredInputs[inputIdentifier].appId, this.configuredInputs[inputIdentifier].params);
+    } else {
+      this.logDebug('No configured input with identifier: %d found!', inputIdentifier);
     }
   }
 
