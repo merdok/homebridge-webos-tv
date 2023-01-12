@@ -2,7 +2,7 @@ import * as log from "../log.js";
 import chalk from "chalk";
 import WebosTvHelper from "../../lib/tools/WebosTvHelper.js";
 
-export const command = "luna-message <ip> <mac> <message> <payloadJson>";
+export const command = "luna-send <ip> <mac> <message> <payloadJson>";
 export const description = "Send a message to the Luna bus of the TV";
 export const builder = {
   timeout: {
