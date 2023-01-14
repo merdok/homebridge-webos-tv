@@ -20,17 +20,19 @@ export const builder = {
 };
 
 export const handler = async (argv) => {
-  const { ip, mac, message, payloadJson, timeout, debug } = argv;
+  const {
+    ip,
+    mac,
+    message,
+    payloadJson,
+    timeout,
+    debug
+  } = argv;
+
   const payloadStruct = payloadJson ? JSON.parse(payloadJson) : {};
 
   try {
-    log.info(
-      `Trying to send the Luna message: ${chalk.green.bold(
-        message
-      )} with payload ${chalk.green.bold(
-        payloadJson
-      )} on the TV (${chalk.yellow(ip)})`
-    );
+    log.info(`Trying to send the Luna message: ${chalk.green.bold(message)} with payload ${chalk.green.bold(payloadJson)} on the TV (${chalk.yellow(ip)})`);
     let lgTvCtrl = await WebosTvHelper.connect(ip, mac, debug, timeout);
     await lgTvCtrl.lunaSend(message, payloadStruct);
     log.success(`Sent message`);

@@ -2,7 +2,7 @@ import * as log from '../../log.js';
 import chalk from 'chalk';
 import WebosTvHelper from '../../../lib/tools/WebosTvHelper.js';
 
-export const command = 'set <ip> <mac> <pictureMode>';
+export const command = 'set-picture-mode <ip> <mac> <pictureMode>';
 export const description = 'Set TV picture mode to the specified mode';
 export const builder = {
   timeout: {
