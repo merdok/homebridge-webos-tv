@@ -20,9 +20,16 @@ import * as volume from './commands/volume.js';
 import * as toast from './commands/toast.js';
 import * as app from './commands/app.js';
 import * as settings from './commands/settings.js';
+import * as lunaSend from './commands/lunaSend.js';
 //import * as tv from './commands/tv.js';
 
-yargs(hideBin(process.argv)).command(pair).command(power).command(volume).command(toast).command(app).command(settings)
+yargs(hideBin(process.argv))
+  .command(pair)
+  .command(power)
+  .command(volume)
+  .command(toast)
+  .command(app)
+  .command(settings)
+  .command(lunaSend)
   .recommendCommands()
-  .demandCommand()
-  .argv;
+  .demandCommand().argv;
