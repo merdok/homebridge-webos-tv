@@ -3,7 +3,9 @@
 //import path from 'path';
 //import { fileURLToPath } from 'url';
 import yargs from 'yargs';
-import { hideBin } from 'yargs/helpers';
+import {
+  hideBin
+} from 'yargs/helpers';
 
 //const __filename = fileURLToPath(import.meta.url);
 //const __dirname = path.dirname(__filename);
@@ -24,12 +26,6 @@ import * as lunaSend from './commands/lunaSend.js';
 //import * as tv from './commands/tv.js';
 
 yargs(hideBin(process.argv))
-  .command(pair)
-  .command(power)
-  .command(volume)
-  .command(toast)
-  .command(app)
-  .command(settings)
-  .command(lunaSend)
+  .command([pair, power, volume, toast, app, settings, lunaSend])
   .recommendCommands()
   .demandCommand().argv;

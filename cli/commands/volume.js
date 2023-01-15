@@ -6,9 +6,6 @@ import * as unmute from './volume/unmute.js';
 export const command = 'volume <action>';
 export const description = 'Control the TV volume';
 export const builder = yargs => {
-  yargs.command(get);
-  yargs.command(set);
-  yargs.command(mute);
-  yargs.command(unmute);
+  yargs.command([get, set, mute, unmute]);
 }
 export const handler = () => {};
