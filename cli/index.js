@@ -17,6 +17,7 @@ yargs(hideBin(process.argv)).commandDir(path.join(__dirname, 'commands'))
 */
 
 import * as pair from './commands/pair.js';
+import * as request from './commands/request.js';
 import * as power from './commands/power.js';
 import * as volume from './commands/volume.js';
 import * as toast from './commands/toast.js';
@@ -26,6 +27,6 @@ import * as lunaSend from './commands/lunaSend.js';
 //import * as tv from './commands/tv.js';
 
 yargs(hideBin(process.argv))
-  .command([pair, power, volume, toast, app, settings, lunaSend])
+  .command([pair, request, power, volume, toast, app, settings, lunaSend])
   .recommendCommands()
   .demandCommand().argv;

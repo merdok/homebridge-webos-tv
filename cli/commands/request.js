@@ -2,8 +2,8 @@ import * as log from '../log.js';
 import chalk from 'chalk';
 import WebosTvHelper from '../../lib/tools/WebosTvHelper.js';
 
-export const command = 'luna-send <ip> <mac> <message> [payload]';
-export const description = 'Send a message to the Luna bus of the TV';
+export const command = 'request <ip> <mac> <methodUri> [payload]';
+export const description = 'Send a raw request to the TV with the specified payload';
 export const builder = {
   timeout: {
     required: false,
@@ -19,11 +19,11 @@ export const builder = {
   }
 };
 
-export const handler = async (argv) => {
+export const handler = async argv => {
   const {
     ip,
     mac,
-    message,
+    methodUri,
     payload,
     timeout,
     debug
@@ -34,9 +34,10 @@ export const handler = async (argv) => {
   try {
     log.info(`Connecting to tv at ${chalk.yellow(ip)}`);
     let lgTvCtrl = await WebosTvHelper.connect(ip, mac, debug, timeout);
-    log.info(`Connected! Sending luna message: ${chalk.blueBright.bold(message)} - ${chalk.cyan.bold(JSON.stringify(parsedPayload))}`);
-    await lgTvCtrl.lunaSend(message, parsedPayload);
-    log.success(`Luna message sent!`);
+    log.info(`Connected! Sending request: ${chalk.blueBright.bold(methodUri)} - ${chalk.cyan.bold(JSON.stringify(parsedPayload))}`);
+    const res = await lgTvCtrl.tvRequest(methodUri, parsedPayload);
+    log.success(`Response from TV:`);
+    log.plain(`${chalk.bold(JSON.stringify(res, null, 2))}`);
   } catch (err) {
     log.error(err.message);
   }
