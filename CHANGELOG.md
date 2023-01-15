@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.4] - 2023-01-16
+### Added
+- Add `request` cli command.
+- Add `luns-send` cli command. Thanks @kopiro for contribution!
+- Add `set-picture-mode` cli command. Thanks @Keagel for contribution!
+
+
 ## [2.3.3] - 2022-09-21
 ### Fixed
 - Fix potential crash during input change

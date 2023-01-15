@@ -1,7 +1,7 @@
 {
   "name": "homebridge-webos-tv",
   "displayName": "webOS TV",
-  "version": "2.3.3",
+  "version": "2.3.4",
   "description": "Homebridge plugin for LG webOS TVs",
   "type": "module",
   "exports": "./index.js",
@@ -16,6 +16,8 @@
     "webos4",
     "webos5",
     "webos6",
+    "webos22",
+    "webos23",
     "lgtv",
     "homebridge",
     "webos",
@@ -33,7 +35,7 @@
     "tcp-ping": "^0.1.1",
     "wake_on_lan": "^1.0.0",
     "chalk": "^5.0.1",
-    "yargs": "^17.5.1",
+    "yargs": "^17.6.0",
     "env-paths": "^3.0.0"
   },
   "repository": {
