@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.5] - 2023-01-21
+### Fixed
+- Fixed issues with newer webos firmware versions where SSL is required for a connection
+
+
 ## [2.3.4] - 2023-01-16
 ### Added
 - Add `request` cli command.
