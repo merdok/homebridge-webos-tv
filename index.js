@@ -89,6 +89,14 @@ class webosTvDevice {
     if (this.screenSaverControl === undefined) {
       this.screenSaverControl = false;
     }
+    this.serviceMenuButton = config.serviceMenuButton;
+    if (this.serviceMenuButton === undefined) {
+      this.serviceMenuButton = false;
+    }
+    this.ezAdjustButton = config.ezAdjustButton;
+    if (this.ezAdjustButton === undefined) {
+      this.ezAdjustButton = false;
+    }
     this.backlightControl = config.backlightControl;
     if (this.backlightControl === undefined) {
       this.backlightControl = false;
@@ -289,6 +297,8 @@ class webosTvDevice {
     this.prepareMediaControlService();
     this.prepareScreenControlService();
     this.prepareScreenSaverControlService();
+    this.preparServiceMenuButtonService();
+    this.prepareEzAdjustButtonService();
     this.preparePictureSettingsControlServices();
     this.prepareAppButtonService();
     this.prepareChannelButtonService();
@@ -652,6 +662,24 @@ class webosTvDevice {
       .onSet(this.setScreenSaverState.bind(this));
 
     this.tvAccesory.addService(this.screenSaverControlService);
+  }
+
+  preparServiceMenuButtonService() {
+    if (!this.serviceMenuButton) {
+      return;
+    }
+
+    this.serviceMenuButtonService = this.createStatlessSwitchService('Service Menu', 'serviceMenuButtonService', this.setServiceMenu.bind(this));
+    this.tvAccesory.addService(this.serviceMenuButtonService);
+  }
+
+  prepareEzAdjustButtonService() {
+    if (!this.ezAdjustButton) {
+      return;
+    }
+
+    this.ezAdjustButtonService = this.createStatlessSwitchService('ezAdjust', 'ezAdjustButtonService', this.setEzAdjust.bind(this));
+    this.tvAccesory.addService(this.ezAdjustButtonService);
   }
 
   preparePictureSettingsControlServices() {
@@ -1378,6 +1406,22 @@ class webosTvDevice {
     this.resetSystemSettingsButtons();
   }
 
+  //service menu button
+  setServiceMenu(state) {
+    if (this.isTvOn()) {
+      this.lgTvCtrl.openServiceMenu();
+    }
+    this.resetServiceMenuButton();
+  }
+
+  //ezAdjust button
+  setEzAdjust(state) {
+    if (this.isTvOn()) {
+      this.lgTvCtrl.openEzAdjust();
+    }
+    this.resetEzAdjustButton();
+  }
+
 
   /*--== Stateful ==--*/
 
@@ -1948,6 +1992,18 @@ class webosTvDevice {
         });
       }, BUTTON_RESET_TIMEOUT);
     }
+  }
+
+  resetServiceMenuButton() {
+    setTimeout(() => {
+      if (this.serviceMenuButtonService) this.serviceMenuButtonService.getCharacteristic(Characteristic.On).updateValue(false);
+    }, BUTTON_RESET_TIMEOUT);
+  }
+
+  resetEzAdjustButton() {
+    setTimeout(() => {
+      if (this.ezAdjustButtonService) this.ezAdjustButtonService.getCharacteristic(Characteristic.On).updateValue(false);
+    }, BUTTON_RESET_TIMEOUT);
   }
 
   triggerVolumeUpAutomations() {

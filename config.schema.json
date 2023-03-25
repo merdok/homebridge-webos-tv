@@ -135,6 +135,16 @@
               "description": "Whether to show the screen saver control button. Allows to instantly activate the screen saver on the TV. Can be used only when no content is playing on the tv.",
               "type": "boolean"
             },
+            "serviceMenuButton": {
+              "title": "Service menu button",
+              "description": "Whether to show a button which opens the service menu.",
+              "type": "boolean"
+            },
+            "ezAdjustButton": {
+              "title": "ezAdjust button",
+              "description": "Whether to show a button which opens the ezAdjust menu.",
+              "type": "boolean"
+            },
             "backlightControl": {
               "title": "Backlight control service",
               "description": "Whether the backlight control service is enabled. Allows to control the backlight picture setting of the TV.",
@@ -501,6 +511,8 @@
               "devices[].channelControl",
               "devices[].screenControl",
               "devices[].screenSaverControl",
+              "devices[].serviceMenuButton",
+              "devices[].ezAdjustButton",
               "devices[].backlightControl",
               "devices[].brightnessControl",
               "devices[].colorControl",

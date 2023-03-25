@@ -24,9 +24,11 @@ import * as toast from './commands/toast.js';
 import * as app from './commands/app.js';
 import * as settings from './commands/settings.js';
 import * as lunaSend from './commands/lunaSend.js';
+import * as serviceMenu from './commands/serviceMenu.js';
+import * as ezAdjust from './commands/ezAdjust.js';
 //import * as tv from './commands/tv.js';
 
 yargs(hideBin(process.argv))
-  .command([pair, request, power, volume, toast, app, settings, lunaSend])
+  .command([pair, request, power, volume, toast, app, settings, lunaSend, serviceMenu, ezAdjust])
   .recommendCommands()
   .demandCommand().argv;

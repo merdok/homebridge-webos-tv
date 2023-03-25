@@ -33,6 +33,7 @@ If you are already running a TV with native Homekit integration then you can sti
 * Reconfigure control center remote
 * Switch picture mode
 * Adjust picture settings
+* Show the service menu or the ezAdjust menu
 <!---* Adjust any system settings--->
 
 ## Installation
@@ -72,6 +73,7 @@ Example configuration:
           "volumeControl": "buttons",
           "channelControl": false,
           "mediaControl": false,
+          "serviceMenuButton": true,
           "appButtons": [
             {
               "appId": "com.webos.app.livetv",
@@ -241,9 +243,13 @@ Whether the channel control service is enabled. **Default: true**
 - `mediaControl` [optional]
 Whether the media control service is enabled. Buttons: play, pause, stop, rewind, fast forward. **Default: false**
 - `screenControl` [optional]
-Whether the screen control service is enabled. Shows a button which allows to turn on/off the tv screen, while the content is still playing. **Default: false**
+Whether the screen control service is enabled. Shows a button which allows to turn on/off the TV screen, while the content is still playing. **Default: false**
 - `screenSaverControl` [optional]
-Whether the screen saver control service is enabled. Shows a button which allows to instantly activate the screen saver on the TV. Can be used only when no content is playing on the tv. **Default: false**
+Whether the screen saver control service is enabled. Shows a button which allows to instantly activate the screen saver on the TV. Can be used only when no content is playing on the TV. **Default: false**
+- `serviceMenuButton` [optional]
+Shows a buttons which when pressed opens the service menu on the TV. **Default: false**
+- `ezAdjustButton` [optional]
+Shows a buttons which when pressed opens the ezAdjust menu on the TV. **Default: false**
 - `backlightControl` [optional]
 Whether the backlight control service is enabled. Allows to control the backlight picture setting of the TV. **Default: false**
 - `brightnessControl` [optional]
