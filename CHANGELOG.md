@@ -6,6 +6,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.4.0] - 2023-03-27
+### Added
+- New `serviceMenuButton` property which when enabled shows a button that when pressed opens the service menu
+- New `ezAdjustButton` property which when enabled shows a button that when pressed opens the ezAdjust menu
+- Add `serviceMenu` cli command
+- Add `ezAdjust` cli command
+- New `soundModeButtons` property which allows to create sound mode buttons to quickly switch between sound modes on the TV
+- Add support for sound mode change and `set-sound-mode` cli command. Thanks @pengsrc for contribution!
+
+### Fixed
+- Fix channel change service subscription when Live TV is not the starting app
+- Fix switch naming
+
+
 ## [2.3.5] - 2023-01-21
 ### Fixed
 - Fixed issues with newer webos firmware versions where SSL is required for a connection
@@ -13,7 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.3.4] - 2023-01-16
 ### Added
-- Add `request` cli command.
+- Add `request` cli command
 - Add `luns-send` cli command. Thanks @kopiro for contribution!
 - Add `set-picture-mode` cli command. Thanks @Keagel for contribution!
 
