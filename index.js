@@ -392,7 +392,10 @@ class webosTvDevice {
   }
 
   prepareTvSpeakerService() {
-    this.tvSpeakerService = new Service.TelevisionSpeaker(this.name + ' Volume', 'tvSpeakerService');
+    const serviceName = this.name + ' Volume';
+    this.tvSpeakerService = new Service.TelevisionSpeaker(serviceName, 'tvSpeakerService');
+    this.tvSpeakerService
+      .setCharacteristic(Characteristic.ConfiguredName, serviceName);
     this.tvSpeakerService
       .setCharacteristic(Characteristic.Active, Characteristic.Active.ACTIVE)
       .setCharacteristic(Characteristic.VolumeControlType, Characteristic.VolumeControlType.ABSOLUTE);
@@ -573,6 +576,8 @@ class webosTvDevice {
     // slider - lightbulb or fan
     if (this.volumeControl === true || this.volumeControl === "both" || this.volumeControl === 'slider' || this.volumeControl === 'lightbulb') {
       this.volumeAsLightbulbService = new Service.Lightbulb('Volume', 'volumeService');
+      this.volumeAsLightbulbService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+      this.volumeAsLightbulbService.setCharacteristic(Characteristic.ConfiguredName, 'Volume');
       this.volumeAsLightbulbService
         .getCharacteristic(Characteristic.On)
         .onGet(this.getLightbulbMuteState.bind(this))
@@ -585,6 +590,8 @@ class webosTvDevice {
       this.tvAccesory.addService(this.volumeAsLightbulbService);
     } else if (this.volumeControl === "fan") {
       this.volumeAsFanService = new Service.Fanv2('Volume', 'volumeService');
+      this.volumeAsFanService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+      this.volumeAsFanService.setCharacteristic(Characteristic.ConfiguredName, 'Volume');
       this.volumeAsFanService
         .getCharacteristic(Characteristic.Active)
         .onGet(this.getFanMuteState.bind(this))
@@ -650,6 +657,8 @@ class webosTvDevice {
 
     // create the service
     this.screenControlService = new Service.Switch('Screen', 'screenControlService');
+    this.screenControlService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+    this.screenControlService.setCharacteristic(Characteristic.ConfiguredName, 'Screen');
     this.screenControlService
       .getCharacteristic(Characteristic.On)
       .onGet(this.getTvScreenState.bind(this))
@@ -665,6 +674,8 @@ class webosTvDevice {
 
     // create the service
     this.screenSaverControlService = new Service.Switch('Screen Saver', 'screenSaverControlService');
+    this.screenSaverControlService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+    this.screenSaverControlService.setCharacteristic(Characteristic.ConfiguredName, 'Screen Saver');
     this.screenSaverControlService
       .getCharacteristic(Characteristic.On)
       .onGet(this.getScreenSaverState.bind(this))
@@ -744,16 +755,14 @@ class webosTvDevice {
       newAppButtonDef.params = value.params || {};
 
       // create the service
-      let newAppButtonService = new Service.Switch(newAppButtonDef.name, 'appButtonService' + i);
-      newAppButtonService
-        .getCharacteristic(Characteristic.On)
-        .onGet(() => {
+      let newAppButtonService = this.createStatefulSwitchService(newAppButtonDef.name, 'appButtonService' + i,
+        () => {
           return this.getAppButtonState(newAppButtonDef.appId);
-        })
-        .onSet((state) => {
-          this.setAppButtonState(state, newAppButtonDef);
+        }, (state) => {
+          this.setNotificationButtonState(state, newNotificationButtonDef);
         });
 
+      // add to the tv service
       this.tvAccesory.addService(newAppButtonService);
 
       // save the configured channel button service
@@ -795,13 +804,10 @@ class webosTvDevice {
       newChannelButtonDef.name = value.name || 'Channel - ' + newChannelButtonDef.channelNumber;
 
       // create the service
-      let newChannelButtonService = new Service.Switch(newChannelButtonDef.name, 'channelButtonService' + i);
-      newChannelButtonService
-        .getCharacteristic(Characteristic.On)
-        .onGet(() => {
+      let newChannelButtonService = this.createStatefulSwitchService(newChannelButtonDef.name, 'channelButtonService' + i,
+        () => {
           return this.getChannelButtonState(newChannelButtonDef.channelNumber);
-        })
-        .onSet((state) => {
+        }, (state) => {
           this.setChannelButtonState(state, newChannelButtonDef);
         });
 
@@ -941,16 +947,14 @@ class webosTvDevice {
       newSoundOutputButtonDef.name = value.name || 'Sound Output - ' + newSoundOutputButtonDef.soundOutput;
 
       // create the service
-      let newSoundOutputButtonService = new Service.Switch(newSoundOutputButtonDef.name, 'soundOutputButtonService' + i);
-      newSoundOutputButtonService
-        .getCharacteristic(Characteristic.On)
-        .onGet(() => {
+      let newSoundOutputButtonService = this.createStatefulSwitchService(newSoundOutputButtonDef.name, 'soundOutputButtonService' + i,
+        () => {
           return this.getSoundOutputButtonState(newSoundOutputButtonDef.soundOutput);
-        })
-        .onSet((state) => {
+        }, (state) => {
           this.setSoundOutputButtonState(state, newSoundOutputButtonDef.soundOutput);
         });
 
+      // add to the tv service
       this.tvAccesory.addService(newSoundOutputButtonService);
 
       // save the configured sound output button service
@@ -1032,16 +1036,14 @@ class webosTvDevice {
       newSoundModeButtonDef.name = value.name || 'Sound Mode - ' + newSoundModeButtonDef.soundMode;
 
       // create the service
-      let newSoundModeButtonService = new Service.Switch(newSoundModeButtonDef.name, 'soundModeButtonsService' + i);
-      newSoundModeButtonService
-        .getCharacteristic(Characteristic.On)
-        .onGet(() => {
+      let newSoundModeButtonService = this.createStatefulSwitchService(newSoundModeButtonDef.name, 'soundModeButtonsService' + i,
+        () => {
           return this.getSoundModeButtonState(newSoundModeButtonDef.soundMode);
-        })
-        .onSet((state) => {
+        }, (state) => {
           this.setSoundModeButtonState(state, newSoundModeButtonDef.soundMode);
         });
 
+      // add to the tv service
       this.tvAccesory.addService(newSoundModeButtonService);
 
       // save the configured sound mode button service
@@ -1978,6 +1980,17 @@ class webosTvDevice {
 
   /*----------========== STATEFUL SERVICES HELPERS ==========----------*/
 
+  createStatefulSwitchService(name, id, getterFn, setterFn) {
+    let newStatefulSwitchService = new Service.Switch(name, id);
+    newStatefulSwitchService
+      .getCharacteristic(Characteristic.On)
+      .onGet(getterFn.bind(this))
+      .onSet(setterFn.bind(this));
+
+    this.setServiceConfiguredName(newStatefulSwitchService, name);
+    return newStatefulSwitchService;
+  }
+
   disableActiveStatefulServiceButton(configuredButtons, valueToDisable) {
     if (configuredButtons) {
       let buttonDef = configuredButtons[valueToDisable];
@@ -2049,6 +2062,8 @@ class webosTvDevice {
       .onSet((state) => {
         setterFn(state);
       });
+
+    this.setServiceConfiguredName(newStatelessSwitchService, name);
     return newStatelessSwitchService;
   }
 
@@ -2373,6 +2388,7 @@ class webosTvDevice {
       .onGet(getterFn.bind(this))
       .onSet(setterFn.bind(this));
 
+    this.setServiceConfiguredName(tmpService, name);
     return tmpService;
   }
 
@@ -2440,6 +2456,8 @@ class webosTvDevice {
       .onGet(() => {
         return this.isTvOn();
       })
+
+    this.setServiceConfiguredName(newTriggerDef.service, triggerName);
     return newTriggerDef;
   }
 
@@ -2461,6 +2479,13 @@ class webosTvDevice {
 
   createError(msg) {
     return new Error(`[${this.name}] TV is not connected, ` + msg);
+  }
+
+  setServiceConfiguredName(service, name) {
+    if (service) {
+      service.addOptionalCharacteristic(Characteristic.ConfiguredName);
+      service.setCharacteristic(Characteristic.ConfiguredName, name);
+    }
   }
 
 
