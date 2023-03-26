@@ -33,6 +33,7 @@ If you are already running a TV with native Homekit integration then you can sti
 * Reconfigure control center remote
 * Switch picture mode
 * Adjust picture settings
+* Switch sound mode
 * Show the service menu or the ezAdjust menu
 <!---* Adjust any system settings--->
 
@@ -159,6 +160,10 @@ Example configuration:
             "eco",
             "game",
             "cinema"
+          ],
+          "soundModeButtons": [
+            "standard",
+            "music"
           ],
           "triggers": {
             "volume":{
@@ -293,7 +298,7 @@ Whether the remote control buttons service is enabled. This allows to emulate re
   - Set an array of commands as the value.
   - You can also set an array of objects as the value. An object can have the following properties:
     - *action* - [required] one of the action specified above,
-    - *name* - [optional]  the remote control button name
+    - *name* - [optional] the remote control button name
 - `remoteSequenceButtons` [optional]
 Whether the remote sequence buttons service is enabled. This allows to run a sequence of remote control button presses. **Default: "" (disabled)**
   - Set an array of objects as the value. An object can have the following properties:
@@ -315,15 +320,22 @@ Whether the sound output buttons service is enabled. This allows to switch betwe
     - *soundbar* - optical
   - You can also set an array of objects as the value. An object can have the following properties:
     - *soundOutput* - [required] one of the sound outputs specified above,
-    - *name* - [optional]  the sound output button name
+    - *name* - [optional] the sound output button name
    - Depending on the TV and connected devices to the TV there might also be other values. In that case just switch sound outputs on the TV and check the homebridge log.
 - `pictureModeButtons` [optional]
 Whether the picture mode buttons service is enabled. This allows to switch between picture modes on the TV. **Default: "" (disabled)**
   - Set an array of picture modes as the value. Available values are below.
   - You can also set an array of objects as the value. An object can have the following properties:
     - *pictureMode* - [required] one of the picture modes specified below,
-    - *name* - [optional]  the picture mode button name
+    - *name* - [optional] the picture mode button name
   - Not all picture modes might be available for all TVs.
+- `soundModeButtons` [optional]
+Whether the sound mode buttons service is enabled. This allows to switch between sound modes on the TV. **Default: "" (disabled)**
+  - Set an array of sound modes as the value. Available values are below.
+  - You can also set an array of objects as the value. An object can have the following properties:
+    - *soundMode* - [required] one of the sound modes specified below,
+    - *name* - [optional] the sound mode button name
+  - Not all sound modes might be available for all TVs.
 - `triggers` [optional]
 Whether the triggers service is enabled. This allows to create occupancy sensors which trigger when the specified threshold is reached. **Default: "" (disabled)**
   - Triggers can be set for the following tv properties: *volume*, *backlight*, *brightness*, *color*, *contrast*
@@ -363,6 +375,9 @@ Whether the triggers service is enabled. This allows to create occupancy sensors
 - *vivid*, *hdrEffect*,  *hdrCinema*, *hdrCinemaBright*, *hdrExternal*, *hdrGame*,
 - *hdrStandard*, *hdrTechnicolor*, *hdrVivid*, *dolbyHdrCinema*,*dolbyHdrCinemaBright*,
 - *dolbyHdrDarkAmazon*, *dolbyHdrGame*, *dolbyHdrStandard*, *dolbyHdrVivid*, *dolbyStandard*
+
+#### Sound modes
+- *aiSoundPlus*, *standard*, *movie*, *news*, *sports*, *music*, *game*
 
 <!---
 #### System settings

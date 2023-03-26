@@ -389,6 +389,32 @@
                 }
               }
             },
+            "soundModeButtons": {
+              "title": "Sound mode buttons",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "soundMode": {
+                    "title": "Sound mode",
+                    "type": "string",
+                    "enum": [
+                      "aiSoundPlus",
+                      "standard",
+                      "movie",
+                      "news",
+                      "sports",
+                      "music",
+                      "game"
+                    ]
+                  },
+                  "name": {
+                    "title": "name",
+                    "type": "string"
+                  }
+                }
+              }
+            },
             "triggers": {
               "title": "Occupancy triggers",
               "type": "object",
@@ -637,6 +663,17 @@
             "items": [
               "devices[].pictureModeButtons[].pictureMode",
               "devices[].pictureModeButtons[].name"
+            ]
+          },
+          {
+            "key": "devices[].soundModeButtons",
+            "buttonText": "Add sound mode button",
+            "type": "fieldset",
+            "expandable": true,
+            "expanded": false,
+            "items": [
+              "devices[].soundModeButtons[].soundMode",
+              "devices[].soundModeButtons[].name"
             ]
           },
           {

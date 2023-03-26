@@ -124,6 +124,7 @@ class webosTvDevice {
     this.soundOutputButtons = config.soundOutputButtons;
     this.remoteSequenceButtons = config.remoteSequenceButtons;
     this.pictureModeButtons = config.pictureModeButtons;
+    this.soundModeButtons = config.soundModeButtons;
     this.systemSettingsButtons = config.systemSettingsButtons;
     this.triggers = config.triggers;
 
@@ -264,6 +265,13 @@ class webosTvDevice {
       this.updateOccupancyTriggers();
     });
 
+    this.lgTvCtrl.on(Events.SOUND_SETTINGS_CHANGED, (res) => {
+      if (this.lgTvCtrl.getCurrentSoundMode()) {
+        this.updateSoundModeButtons();
+      }
+    });
+
+    Events.SOUND_SETTINGS_CHANGED
   }
 
   /*----------========== SETUP SERVICES ==========----------*/
@@ -307,6 +315,7 @@ class webosTvDevice {
     this.prepareSoundOutputButtonService();
     this.prepareRemoteSequenceButtonsService();
     this.preparePictureModeButtonService();
+    this.prepareSoundModeButtonService();
     this.prepareSystemSettingsButtonService();
     this.prepareTriggersService();
   }
@@ -995,6 +1004,53 @@ class webosTvDevice {
     });
   }
 
+  prepareSoundModeButtonService() {
+    if (this.checkArrayConfigProperty(this.soundModeButtons, "soundModeButtons") === false) {
+      return;
+    }
+
+    this.configuredSoundModeButtons = [];
+
+    this.soundModeButtons.forEach((value, i) => {
+
+      // create a new sound mode button definition
+      let newSoundModeButtonDef = {};
+
+      // get the sound mode name
+      newSoundModeButtonDef.soundMode = value.soundMode || value;
+
+      // if soundMode null or empty then skip this sound mode button, soundMode is required for a sound mode button
+      if (!newSoundModeButtonDef.soundMode || newSoundModeButtonDef.soundMode === '' || typeof newSoundModeButtonDef.soundMode !== 'string') {
+        this.logWarn(`Missing soundMode or soundMode is not of type string. Cannot add sound mode button!`);
+        return;
+      }
+
+      // make sure the soundMode is string
+      newSoundModeButtonDef.soundMode = newSoundModeButtonDef.soundMode.toString();
+
+      // get name
+      newSoundModeButtonDef.name = value.name || 'Sound Mode - ' + newSoundModeButtonDef.soundMode;
+
+      // create the service
+      let newSoundModeButtonService = new Service.Switch(newSoundModeButtonDef.name, 'soundModeButtonsService' + i);
+      newSoundModeButtonService
+        .getCharacteristic(Characteristic.On)
+        .onGet(() => {
+          return this.getSoundModeButtonState(newSoundModeButtonDef.soundMode);
+        })
+        .onSet((state) => {
+          this.setSoundModeButtonState(state, newSoundModeButtonDef.soundMode);
+        });
+
+      this.tvAccesory.addService(newSoundModeButtonService);
+
+      // save the configured sound mode button service
+      newSoundModeButtonDef.switchService = newSoundModeButtonService;
+
+      this.configuredSoundModeButtons[newSoundModeButtonDef.soundMode] = newSoundModeButtonDef;
+
+    });
+  }
 
   prepareSystemSettingsButtonService() {
     if (this.checkArrayConfigProperty(this.systemSettingsButtons, "systemSettingsButtons") === false) {
@@ -1737,6 +1793,35 @@ class webosTvDevice {
     }
   }
 
+  // sound mode buttons
+  getSoundModeButtonState(soundMode) {
+    let soundModeButtonEnabled = false;
+    if (this.isTvOn()) {
+      soundModeButtonEnabled = this.lgTvCtrl.getCurrentSoundMode() === soundMode;
+    }
+    return soundModeButtonEnabled;
+  }
+
+  setSoundModeButtonState(state, soundMode) {
+    if (this.isTvOn()) {
+      if (state) {
+        //disable currently active sound mode button
+        this.disableActiveSoundModeButton();
+
+        //change the sound output to the selected one
+        this.lgTvCtrl.setSoundMode(soundMode);
+      } else {
+        // do not allow to turn off the switch,
+        setTimeout(() => {
+          this.enableActiveSoundModeButton()
+        }, BUTTON_RESET_TIMEOUT);
+      }
+    } else {
+      // if TV is off then instantly disable the pressed button
+      this.turnOffSoundModeButton(soundMode);
+    }
+  }
+
   // occupancy triggers
   getTriggerOccupancyDetected(newTriggerDef) {
     let occupancy = Characteristic.OccupancyDetected.OCCUPANCY_NOT_DETECTED;
@@ -1855,6 +1940,18 @@ class webosTvDevice {
     if (this.contrastControlService) this.contrastControlService.getCharacteristic(Characteristic.Brightness).updateValue(this.getLightbulbContrast());
   }
 
+  updateSoundModeButtons() {
+    if (this.configuredSoundModeButtons) {
+      if (this.isTvOn()) {
+        // tv is on check which sound mode is enabled and enable the button if exists
+        this.enableActiveSoundModeButton();
+      } else {
+        // tv is off, all sound mode buttons should be disabled
+        this.disableAllSoundModeButtons();
+      }
+    }
+  }
+
   updateOccupancyTriggers() {
     if (this.volumeTriggerDef) this.volumeTriggerDef.service.getCharacteristic(Characteristic.OccupancyDetected).updateValue(this.getTriggerOccupancyDetected(this.volumeTriggerDef));
     if (this.backlightTriggerDef) this.backlightTriggerDef.service.getCharacteristic(Characteristic.OccupancyDetected).updateValue(this.getTriggerOccupancyDetected(this.backlightTriggerDef));
@@ -1874,6 +1971,7 @@ class webosTvDevice {
     this.updateScreenStatus();
     this.updateScreenSaverStatus();
     this.updatePictureSettingsServices();
+    this.updateSoundModeButtons();
     this.updateOccupancyTriggers();
   }
 
@@ -1898,6 +1996,17 @@ class webosTvDevice {
       if (soundOutputDef) {
         setTimeout(() => {
           soundOutputDef.switchService.getCharacteristic(Characteristic.On).updateValue(false);
+        }, BUTTON_RESET_TIMEOUT);
+      }
+    }
+  }
+
+  turnOffSoundModeButton(soundMode) {
+    if (this.configuredSoundModeButtons) {
+      let soundModeDef = this.configuredSoundModeButtons[soundMode];
+      if (soundModeDef) {
+        setTimeout(() => {
+          soundModeDef.switchService.getCharacteristic(Characteristic.On).updateValue(false);
         }, BUTTON_RESET_TIMEOUT);
       }
     }
@@ -1978,6 +2087,16 @@ class webosTvDevice {
     if (this.configuredPictureModeButtons) {
       setTimeout(() => {
         this.configuredPictureModeButtons.forEach((item, i) => {
+          item.switchService.getCharacteristic(Characteristic.On).updateValue(false);
+        });
+      }, BUTTON_RESET_TIMEOUT);
+    }
+  }
+
+  resetSoundModeButtons() {
+    if (this.configuredSoundModeButtons) {
+      setTimeout(() => {
+        this.configuredSoundModeButtons.forEach((item, i) => {
           item.switchService.getCharacteristic(Characteristic.On).updateValue(false);
         });
       }, BUTTON_RESET_TIMEOUT);
@@ -2260,6 +2379,38 @@ class webosTvDevice {
   disableAllSoundOutputButtons() {
     if (this.configuredSoundOutputButtons) {
       Object.entries(this.configuredSoundOutputButtons).forEach(([key, val]) => {
+        val.switchService.getCharacteristic(Characteristic.On).updateValue(false);
+      });
+    }
+  }
+
+  /*----------========== SOUND OUTPUT BUTTON HELPERS ==========----------*/
+
+  disableActiveSoundModeButton() {
+    if (this.configuredSoundModeButtons) {
+      let soundModeDef = this.configuredSoundModeButtons[this.lgTvCtrl.getCurrentSoundMode()];
+      if (soundModeDef) {
+        soundModeDef.switchService.getCharacteristic(Characteristic.On).updateValue(false);
+      }
+    }
+  }
+
+  enableActiveSoundModeButton() {
+    if (this.configuredSoundModeButtons) {
+      Object.entries(this.configuredSoundModeButtons).forEach(([key, val]) => {
+        let soundMode = val.soundMode;
+        if (soundMode === this.lgTvCtrl.getCurrentSoundMode()) {
+          val.switchService.getCharacteristic(Characteristic.On).updateValue(true);
+        } else {
+          val.switchService.getCharacteristic(Characteristic.On).updateValue(false);
+        }
+      });
+    }
+  }
+
+  disableAllSoundModeButtons() {
+    if (this.configuredSoundModeButtons) {
+      Object.entries(this.configuredSoundModeButtons).forEach(([key, val]) => {
         val.switchService.getCharacteristic(Characteristic.On).updateValue(false);
       });
     }
