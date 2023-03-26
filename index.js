@@ -1978,6 +1978,47 @@ class webosTvDevice {
 
   /*----------========== STATEFUL SERVICES HELPERS ==========----------*/
 
+  disableActiveStatefulServiceButton(configuredButtons, valueToDisable) {
+    if (configuredButtons) {
+      let buttonDef = configuredButtons[valueToDisable];
+      if (buttonDef) {
+        buttonDef.switchService.getCharacteristic(Characteristic.On).updateValue(false);
+      }
+    }
+  }
+
+  enableActiveStatefulServiceButton(configuredButtons, valKey, valueToEnable) {
+    if (configuredButtons) {
+      Object.entries(configuredButtons).forEach(([key, val]) => {
+        let buttonVal = val[valKey];
+        if (buttonVal === valueToEnable) {
+          val.switchService.getCharacteristic(Characteristic.On).updateValue(true);
+        } else {
+          val.switchService.getCharacteristic(Characteristic.On).updateValue(false);
+        }
+      });
+    }
+  }
+
+  disableAllStatefulServiceButtons(configuredButtons) {
+    if (configuredButtons) {
+      Object.entries(configuredButtons).forEach(([key, val]) => {
+        val.switchService.getCharacteristic(Characteristic.On).updateValue(false);
+      });
+    }
+  }
+
+  turnOffStatefulServiceButton(configuredButtons, valToTurnOff) {
+    if (configuredButtons) {
+      let buttonDef = configuredButtons[valToTurnOff];
+      if (buttonDef) {
+        setTimeout(() => {
+          buttonDef.switchService.getCharacteristic(Characteristic.On).updateValue(false);
+        }, BUTTON_RESET_TIMEOUT);
+      }
+    }
+  }
+
   turnOffScreenControlButton() {
     setTimeout(() => {
       if (this.screenControlService) this.screenControlService.getCharacteristic(Characteristic.On).updateValue(false);
@@ -1991,25 +2032,11 @@ class webosTvDevice {
   }
 
   turnOffSoundOutputButton(soundOutput) {
-    if (this.configuredSoundOutputButtons) {
-      let soundOutputDef = this.configuredSoundOutputButtons[soundOutput];
-      if (soundOutputDef) {
-        setTimeout(() => {
-          soundOutputDef.switchService.getCharacteristic(Characteristic.On).updateValue(false);
-        }, BUTTON_RESET_TIMEOUT);
-      }
-    }
+    this.turnOffStatefulServiceButton(this.configuredSoundOutputButtons, soundOutput);
   }
 
   turnOffSoundModeButton(soundMode) {
-    if (this.configuredSoundModeButtons) {
-      let soundModeDef = this.configuredSoundModeButtons[soundMode];
-      if (soundModeDef) {
-        setTimeout(() => {
-          soundModeDef.switchService.getCharacteristic(Characteristic.On).updateValue(false);
-        }, BUTTON_RESET_TIMEOUT);
-      }
-    }
+    this.turnOffStatefulServiceButton(this.configuredSoundModeButtons, soundMode);
   }
 
   /*----------========== STATELESS SERVICES HELPERS ==========----------*/
@@ -2027,6 +2054,16 @@ class webosTvDevice {
 
   getStatelessSwitchState() {
     return false;
+  }
+
+  resetStatlessButtons(configuredButtons) {
+    if (configuredButtons) {
+      setTimeout(() => {
+        configuredButtons.forEach((item, i) => {
+          item.switchService.getCharacteristic(Characteristic.On).updateValue(false);
+        });
+      }, BUTTON_RESET_TIMEOUT);
+    }
   }
 
   resetVolumeControlButtons() {
@@ -2054,63 +2091,23 @@ class webosTvDevice {
   }
 
   resetNotificationButtons() {
-    if (this.configuredNotificationButtons) {
-      setTimeout(() => {
-        this.configuredNotificationButtons.forEach((item, i) => {
-          item.switchService.getCharacteristic(Characteristic.On).updateValue(false);
-        });
-      }, BUTTON_RESET_TIMEOUT);
-    }
+    this.resetStatlessButtons(this.configuredNotificationButtons);
   }
 
   resetRemoteControlButtons() {
-    if (this.configuredRemoteControlButtons) {
-      setTimeout(() => {
-        this.configuredRemoteControlButtons.forEach((item, i) => {
-          item.switchService.getCharacteristic(Characteristic.On).updateValue(false);
-        });
-      }, BUTTON_RESET_TIMEOUT);
-    }
+    this.resetStatlessButtons(this.configuredRemoteControlButtons);
   }
 
   resetRemoteSequenceButtons() {
-    if (this.configuredRemoteSequenceButtons) {
-      setTimeout(() => {
-        this.configuredRemoteSequenceButtons.forEach((item, i) => {
-          item.switchService.getCharacteristic(Characteristic.On).updateValue(false);
-        });
-      }, BUTTON_RESET_TIMEOUT);
-    }
+    this.resetStatlessButtons(this.configuredRemoteSequenceButtons);
   }
 
   resetPictureModeButtons() {
-    if (this.configuredPictureModeButtons) {
-      setTimeout(() => {
-        this.configuredPictureModeButtons.forEach((item, i) => {
-          item.switchService.getCharacteristic(Characteristic.On).updateValue(false);
-        });
-      }, BUTTON_RESET_TIMEOUT);
-    }
-  }
-
-  resetSoundModeButtons() {
-    if (this.configuredSoundModeButtons) {
-      setTimeout(() => {
-        this.configuredSoundModeButtons.forEach((item, i) => {
-          item.switchService.getCharacteristic(Characteristic.On).updateValue(false);
-        });
-      }, BUTTON_RESET_TIMEOUT);
-    }
+    this.resetStatlessButtons(this.configuredPictureModeButtons);
   }
 
   resetSystemSettingsButtons() {
-    if (this.configuredSystemSettingsButtons) {
-      setTimeout(() => {
-        this.configuredSystemSettingsButtons.forEach((item, i) => {
-          item.switchService.getCharacteristic(Characteristic.On).updateValue(false);
-        });
-      }, BUTTON_RESET_TIMEOUT);
-    }
+    this.resetStatlessButtons(this.configuredSystemSettingsButtons);
   }
 
   resetServiceMenuButton() {
@@ -2322,98 +2319,44 @@ class webosTvDevice {
   /*----------========== CHANNEL BUTTON HELPERS ==========----------*/
 
   disableActiveChannelButton() {
-    if (this.configuredChannelButtons) {
-      let channelDef = this.configuredChannelButtons[this.lgTvCtrl.getCurrentLiveTvChannelNumber()];
-      if (channelDef) {
-        channelDef.switchService.getCharacteristic(Characteristic.On).updateValue(false);
-      }
-    }
+    this.disableActiveStatefulServiceButton(this.configuredChannelButtons, this.lgTvCtrl.getCurrentLiveTvChannelNumber());
   }
 
   enableActiveChannelButton() {
-    if (this.configuredChannelButtons) {
-      Object.entries(this.configuredChannelButtons).forEach(([key, val]) => {
-        let channelNum = val.channelNumber;
-        if (channelNum === this.lgTvCtrl.getCurrentLiveTvChannelNumber()) {
-          val.switchService.getCharacteristic(Characteristic.On).updateValue(true);
-        } else {
-          val.switchService.getCharacteristic(Characteristic.On).updateValue(false);
-        }
-      });
-    }
+    this.enableActiveStatefulServiceButton(this.configuredChannelButtons, 'channelNumber', this.lgTvCtrl.getCurrentLiveTvChannelNumber());
   }
 
   disableAllChannelButtons() {
-    if (this.configuredChannelButtons) {
-      Object.entries(this.configuredChannelButtons).forEach(([key, val]) => {
-        val.switchService.getCharacteristic(Characteristic.On).updateValue(false);
-      });
-    }
+    this.disableAllStatefulServiceButtons(this.configuredChannelButtons);
   }
 
 
   /*----------========== SOUND OUTPUT BUTTON HELPERS ==========----------*/
 
   disableActiveSoundOutputButton() {
-    if (this.configuredSoundOutputButtons) {
-      let soundOutputDef = this.configuredSoundOutputButtons[this.lgTvCtrl.getActiveSoundOutput()];
-      if (soundOutputDef) {
-        soundOutputDef.switchService.getCharacteristic(Characteristic.On).updateValue(false);
-      }
-    }
+    this.disableActiveStatefulServiceButton(this.configuredSoundOutputButtons, this.lgTvCtrl.getActiveSoundOutput());
   }
 
   enableActiveSoundOutputButton() {
-    if (this.configuredSoundOutputButtons) {
-      Object.entries(this.configuredSoundOutputButtons).forEach(([key, val]) => {
-        let soundOutput = val.soundOutput;
-        if (soundOutput === this.lgTvCtrl.getActiveSoundOutput()) {
-          val.switchService.getCharacteristic(Characteristic.On).updateValue(true);
-        } else {
-          val.switchService.getCharacteristic(Characteristic.On).updateValue(false);
-        }
-      });
-    }
+    this.enableActiveStatefulServiceButton(this.configuredSoundOutputButtons, 'soundOutput', this.lgTvCtrl.getActiveSoundOutput());
   }
 
   disableAllSoundOutputButtons() {
-    if (this.configuredSoundOutputButtons) {
-      Object.entries(this.configuredSoundOutputButtons).forEach(([key, val]) => {
-        val.switchService.getCharacteristic(Characteristic.On).updateValue(false);
-      });
-    }
+    this.disableAllStatefulServiceButtons(this.configuredSoundOutputButtons);
   }
 
-  /*----------========== SOUND OUTPUT BUTTON HELPERS ==========----------*/
+  /*----------========== SOUND MODE BUTTON HELPERS ==========----------*/
 
   disableActiveSoundModeButton() {
-    if (this.configuredSoundModeButtons) {
-      let soundModeDef = this.configuredSoundModeButtons[this.lgTvCtrl.getCurrentSoundMode()];
-      if (soundModeDef) {
-        soundModeDef.switchService.getCharacteristic(Characteristic.On).updateValue(false);
-      }
-    }
+    this.disableActiveStatefulServiceButton(this.configuredSoundModeButtons, this.lgTvCtrl.getCurrentSoundMode());
   }
 
   enableActiveSoundModeButton() {
-    if (this.configuredSoundModeButtons) {
-      Object.entries(this.configuredSoundModeButtons).forEach(([key, val]) => {
-        let soundMode = val.soundMode;
-        if (soundMode === this.lgTvCtrl.getCurrentSoundMode()) {
-          val.switchService.getCharacteristic(Characteristic.On).updateValue(true);
-        } else {
-          val.switchService.getCharacteristic(Characteristic.On).updateValue(false);
-        }
-      });
-    }
+    this.enableActiveStatefulServiceButton(this.configuredSoundModeButtons, 'soundMode', this.lgTvCtrl.getCurrentSoundMode());
   }
 
   disableAllSoundModeButtons() {
-    if (this.configuredSoundModeButtons) {
-      Object.entries(this.configuredSoundModeButtons).forEach(([key, val]) => {
-        val.switchService.getCharacteristic(Characteristic.On).updateValue(false);
-      });
-    }
+    this.disableAllStatefulServiceButtons(this.configuredSoundModeButtons);
   }
 
 
