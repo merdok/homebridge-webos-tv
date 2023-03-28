@@ -759,7 +759,7 @@ class webosTvDevice {
         () => {
           return this.getAppButtonState(newAppButtonDef.appId);
         }, (state) => {
-          this.setNotificationButtonState(state, newNotificationButtonDef);
+          this.setAppButtonState(state, newAppButtonDef);
         });
 
       // add to the tv service
