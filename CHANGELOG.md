@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.4.1] - 2023-03-29
+### Changed
+- Increase the live tv subscription delay
+
+### Fixed
+- Fix appButtons not working
+
+
 ## [2.4.0] - 2023-03-27
 ### Added
 - New `serviceMenuButton` property which when enabled shows a button that when pressed opens the service menu
