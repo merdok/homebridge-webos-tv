@@ -6,7 +6,7 @@
 [![verified-by-homebridge](https://badgen.net/badge/homebridge/verified/purple)](https://github.com/homebridge/homebridge/wiki/Verified-Plugins#verified-plugins)
 [![homebridge-webos-tv](https://badgen.net/npm/v/homebridge-webos-tv?icon=npm)](https://www.npmjs.com/package/homebridge-webos-tv)
 [![mit-license](https://badgen.net/npm/license/lodash)](https://github.com/merdok/homebridge-webos-tv/blob/master/LICENSE)
-[![follow-me-on-twitter](https://badgen.net/twitter/follow/merdok_dev?icon=twitter)](https://twitter.com/merdok_dev)
+[![follow-me-on-twitter](https://badgen.net/badge/icon/twitter?icon=twitter&label=merdok_dev)](https://twitter.com/merdok_dev)
 [![join-discord](https://badgen.net/badge/icon/discord?icon=discord&label=homebridge-webos-tv)](https://discord.gg/F5e2UNT)
 <!---[![Discord](https://img.shields.io/discord/725015107985473598.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/5c8njh)--->
 
