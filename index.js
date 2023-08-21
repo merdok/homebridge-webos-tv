@@ -548,21 +548,24 @@ class webosTvDevice {
   }
 
   removeInputSource(inputDef) {
-    // removed it from configured inptuts
-    delete this.configuredInputs[inputDef.id];
+    // never remove live TV ...
+    if (inputDef.appId !== this.lgTvCtrl.getLiveTvAppId())
+    {
+      // removed it from configured inptuts
+      delete this.configuredInputs[inputDef.id];
 
-    // reset dummy info
-    let inputService = inputDef.inputService;
-    inputService
-      .setCharacteristic(Characteristic.Name, 'dummy')
-      .setCharacteristic(Characteristic.ConfiguredName, 'dummy')
-      .setCharacteristic(Characteristic.IsConfigured, Characteristic.IsConfigured.NOT_CONFIGURED)
-      .setCharacteristic(Characteristic.TargetVisibilityState, Characteristic.TargetVisibilityState.HIDDEN)
-      .setCharacteristic(Characteristic.CurrentVisibilityState, Characteristic.CurrentVisibilityState.HIDDEN);
+      // reset dummy info
+      let inputService = inputDef.inputService;
+      inputService
+        .setCharacteristic(Characteristic.Name, 'dummy')
+        .setCharacteristic(Characteristic.ConfiguredName, 'dummy')
+        .setCharacteristic(Characteristic.IsConfigured, Characteristic.IsConfigured.NOT_CONFIGURED)
+        .setCharacteristic(Characteristic.TargetVisibilityState, Characteristic.TargetVisibilityState.HIDDEN)
+        .setCharacteristic(Characteristic.CurrentVisibilityState, Characteristic.CurrentVisibilityState.HIDDEN);
 
-    // readd to the dummy list as free
-    this.dummyInputSourceServices.push(inputService);
-
+      // readd to the dummy list as free
+      this.dummyInputSourceServices.push(inputService);  
+    }
   }
 
 
