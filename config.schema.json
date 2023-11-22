@@ -345,6 +345,12 @@
                 }
               }
             },
+            "statefulPictureMode": {
+              "title": "Picture mode pseudo-state enabled",
+              "description": "Enable a pseudo-state for picture mode buttons. Because the active picture mode can't be retrieved dynamically, any picture mode buttons on the home app will always show as disabled. Toggle this on to enable a 'fake' state that should allow you to see which mode is enabled. Please note that when your bridge restarts, all picture mode buttons will reset and appear as disabled, even if your TV is actually on a different mode. Simply select your desired mode again to get the state in sync.",
+              "type": "boolean",
+              "default": true
+            },
             "pictureModeButtons": {
               "title": "Picture mode buttons",
               "type": "array",
@@ -521,7 +527,8 @@
               "devices[].prefsDir",
               "devices[].hideTvService",
               "devices[].deepDebugLog",
-              "devices[].silentLog"
+              "devices[].silentLog",
+              "devices[].statefulPictureMode"
             ]
           },
           {
@@ -682,14 +689,14 @@
             "expandable": true,
             "expanded": false,
             "items": [{
-                "key": "devices[].triggers.volume",
-                "title": "Volume",
-                "type": "object",
-                "items": [
-                  "devices[].triggers.volume.threshold",
-                  "devices[].triggers.volume.name"
-                ]
-              },
+              "key": "devices[].triggers.volume",
+              "title": "Volume",
+              "type": "object",
+              "items": [
+                "devices[].triggers.volume.threshold",
+                "devices[].triggers.volume.name"
+              ]
+            },
               {
                 "key": "devices[].triggers.backlight",
                 "title": "Backlight",
