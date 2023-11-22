@@ -156,6 +156,7 @@ Example configuration:
               "select": "HOME"
             }
           },
+          "statefulPictureMode": true,
           "pictureModeButtons": [
             "eco",
             "game",
@@ -229,6 +230,8 @@ The TV state background polling interval in seconds. **Default: 5**
 Enables additional more detailed debug log. Useful when trying to figure out issues with the plugin. **Default: false**
 - `silentLog` [optional]
 When enabled all log output will only appear in the debug mode. **Default: false**
+- `statefulPictureMode` [optional]
+Enable a pseudo-state for picture mode buttons. Because the active picture mode can't be retrieved dynamically, any picture mode buttons on the home app will always show as disabled. Toggle this on to enable a 'fake' state that should allow you to see which mode is enabled. Please note that when your bridge restarts, all picture mode buttons will reset and appear as disabled, even if your TV is actually on a different mode. Simply select your desired mode again to get the state in sync. **Default: true**
 - `hideTvService` [optional]
 Whether to hide the TV service. This is recommended if your TV supports native HomeKit integration, since the TV accessory already exists.  **Default: false**  
 - `volumeLimit` [optional]
@@ -329,6 +332,7 @@ Whether the picture mode buttons service is enabled. This allows to switch betwe
     - *pictureMode* - [required] one of the picture modes specified below,
     - *name* - [optional] the picture mode button name
   - Not all picture modes might be available for all TVs.
+  - See _statefulPictureMode_ for keeping picture mode buttons in sync with the TV
 - `soundModeButtons` [optional]
 Whether the sound mode buttons service is enabled. This allows to switch between sound modes on the TV. **Default: "" (disabled)**
   - Set an array of sound modes as the value. Available values are below.
