@@ -689,14 +689,14 @@
             "expandable": true,
             "expanded": false,
             "items": [{
-              "key": "devices[].triggers.volume",
-              "title": "Volume",
-              "type": "object",
-              "items": [
-                "devices[].triggers.volume.threshold",
-                "devices[].triggers.volume.name"
-              ]
-            },
+                "key": "devices[].triggers.volume",
+                "title": "Volume",
+                "type": "object",
+                "items": [
+                  "devices[].triggers.volume.threshold",
+                  "devices[].triggers.volume.name"
+                ]
+              },
               {
                 "key": "devices[].triggers.backlight",
                 "title": "Backlight",
