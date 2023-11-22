@@ -124,10 +124,6 @@ class webosTvDevice {
     this.soundOutputButtons = config.soundOutputButtons;
     this.remoteSequenceButtons = config.remoteSequenceButtons;
     this.pictureModeButtons = config.pictureModeButtons;
-    this.statefulPictureMode = config.statefulPictureMode;
-    if (this.statefulPictureMode === undefined) {
-      this.statefulPictureMode = true;
-    }
     this.soundModeButtons = config.soundModeButtons;
     this.systemSettingsButtons = config.systemSettingsButtons;
     this.triggers = config.triggers;
@@ -267,7 +263,7 @@ class webosTvDevice {
     this.lgTvCtrl.on(Events.PICTURE_SETTINGS_CHANGED, (res) => {
       this.updatePictureSettingsServices();
       this.updateOccupancyTriggers();
-      if (this.statefulPictureMode && this.lgTvCtrl.getCurrentPictureMode()) {
+      if (this.lgTvCtrl.getCurrentPictureMode()) {
         this.updatePictureModeButtons();
       }
     });
@@ -978,7 +974,6 @@ class webosTvDevice {
       return;
     }
 
-    this.logInfo(`Pseudo state for picture mode buttons enabled: ${this.statefulPictureMode}`)
     this.configuredPictureModeButtons = [];
 
     this.pictureModeButtons.forEach((value, i) => {
@@ -1001,20 +996,13 @@ class webosTvDevice {
       // get name
       newPictureModeButtonDef.name = value.name || 'Picture Mode - ' + newPictureModeButtonDef.pictureMode;
 
-      // create the stateless or pseudo-stateful button service
-      let newPictureModeButtonService
-      if (this.statefulPictureMode) {
-        newPictureModeButtonService = this.createStatefulSwitchService(newPictureModeButtonDef.name, 'pictureModeButtonsService' + i,
-            () => {
-              return this.getPictureModeButtonState(newPictureModeButtonDef.pictureMode);
-            }, (state) => {
-              this.setPictureModeButtonState(state, newPictureModeButtonDef.pictureMode, true);
-            });
-      } else {
-        newPictureModeButtonService = this.createStatlessSwitchService(newPictureModeButtonDef.name, 'pictureModeButtonsService' + i, (state) => {
-          this.setPictureModeButtonState(state, newPictureModeButtonDef.pictureMode, false);
+      // create the service
+      let newPictureModeButtonService = this.createStatefulSwitchService(newPictureModeButtonDef.name, 'pictureModeButtonsService' + i,
+        () => {
+          return this.getPictureModeButtonState(newPictureModeButtonDef.pictureMode);
+        }, (state) => {
+          this.setPictureModeButtonState(state, newPictureModeButtonDef.pictureMode, true);
         });
-      }
 
       this.tvAccesory.addService(newPictureModeButtonService);
 
@@ -1475,30 +1463,23 @@ class webosTvDevice {
     return pictureModeButtonEnabled;
   }
 
-  setPictureModeButtonState(state, pictureMode, isStateful) {
-    if (isStateful) {
-      if (this.isTvOn()) {
-        if (state) {
-          //disable currently active picture mode button
-          this.disableActivePictureModeButton();
+  setPictureModeButtonState(state, pictureMode) {
+    if (this.isTvOn()) {
+      if (state) {
+        //disable currently active picture mode button
+        this.disableActivePictureModeButton();
 
-          //change the picture output to the selected one
-          this.lgTvCtrl.setPictureMode(pictureMode);
-        } else {
-          // do not allow to turn off the switch,
-          setTimeout(() => {
-            this.enableActivePictureModeButton()
-          }, BUTTON_RESET_TIMEOUT);
-        }
+        //change the picture output to the selected one
+        this.lgTvCtrl.setPictureMode(pictureMode);
       } else {
-        // if TV is off then instantly disable the pressed button
-        this.turnOffPictureModeButton(pictureMode);
+        // do not allow to turn off the switch,
+        setTimeout(() => {
+          this.enableActivePictureModeButton()
+        }, BUTTON_RESET_TIMEOUT);
       }
     } else {
-      if (this.isTvOn()) {
-        this.lgTvCtrl.setPictureMode(pictureMode);
-      }
-      this.resetPictureModeButtons();
+      // if TV is off then instantly disable the pressed button
+      this.turnOffPictureModeButton(pictureMode);
     }
   }
 
@@ -2178,10 +2159,6 @@ class webosTvDevice {
 
   resetRemoteSequenceButtons() {
     this.resetStatlessButtons(this.configuredRemoteSequenceButtons);
-  }
-
-  resetPictureModeButtons() {
-    this.resetStatlessButtons(this.configuredPictureModeButtons);
   }
 
   resetSystemSettingsButtons() {
