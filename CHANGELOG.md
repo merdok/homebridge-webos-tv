@@ -6,9 +6,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [2.4.2] - 2023-11-25
+## [2.4.3] - 2023-12-08
+### Added
+- Add `filmMaker` picture mode. Thanks @ipichy for the info!
+
+### Fixed
+- Fix `silentLog` property not having any effect
+
+
+## [2.4.2] - 2023-11-26
 ### Changed
-- Added state option for picture mode buttons #505 Thanks @tcarlson25 for contribution!
+- Added state option for picture mode buttons. Thanks @tcarlson25 for contribution!
 
 
 ## [2.4.1] - 2023-03-29
