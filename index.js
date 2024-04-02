@@ -578,9 +578,9 @@ class webosTvDevice {
 
     // slider - lightbulb or fan
     if (this.volumeControl === true || this.volumeControl === "both" || this.volumeControl === 'slider' || this.volumeControl === 'lightbulb') {
-      this.volumeAsLightbulbService = new Service.Lightbulb('Volume', 'volumeService');
+      this.volumeAsLightbulbService = new Service.Lightbulb(this.name + ' Volume', 'volumeService');
       this.volumeAsLightbulbService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-      this.volumeAsLightbulbService.setCharacteristic(Characteristic.ConfiguredName, 'Volume');
+      this.volumeAsLightbulbService.setCharacteristic(Characteristic.ConfiguredName, this.name + ' Volume');
       this.volumeAsLightbulbService
         .getCharacteristic(Characteristic.On)
         .onGet(this.getLightbulbMuteState.bind(this))
@@ -592,9 +592,9 @@ class webosTvDevice {
 
       this.tvAccesory.addService(this.volumeAsLightbulbService);
     } else if (this.volumeControl === "fan") {
-      this.volumeAsFanService = new Service.Fanv2('Volume', 'volumeService');
+      this.volumeAsFanService = new Service.Fanv2(this.name + ' Volume', 'volumeService');
       this.volumeAsFanService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-      this.volumeAsFanService.setCharacteristic(Characteristic.ConfiguredName, 'Volume');
+      this.volumeAsFanService.setCharacteristic(Characteristic.ConfiguredName, this.name + ' Volume');
       this.volumeAsFanService
         .getCharacteristic(Characteristic.Active)
         .onGet(this.getFanMuteState.bind(this))
