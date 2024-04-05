@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.4.4] - 2024-04-06
+### Added
+- Add the tv name to the volume service. Thanks @berno22 for the contribution!
+- The `launch` cli command now accepts parameters. Thanks @wondertwins for the contribution!
+
+
 ## [2.4.3] - 2023-12-08
 ### Added
 - Add `filmMaker` picture mode. Thanks @ipichy for the info!
