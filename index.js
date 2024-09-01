@@ -354,13 +354,13 @@ class webosTvDevice {
 
     this.tvService = new Service.Television(this.name, 'tvService');
     this.tvService
-      .setCharacteristic(Characteristic.ConfiguredName, this.name);
-    this.tvService
       .setCharacteristic(Characteristic.SleepDiscoveryMode, Characteristic.SleepDiscoveryMode.ALWAYS_DISCOVERABLE);
     this.tvService
       .getCharacteristic(Characteristic.Active)
       .onGet(this.getPowerState.bind(this))
       .onSet(this.setPowerState.bind(this));
+
+    this.setServiceConfiguredName(this.tvService, this.name);
 
     this.tvService
       .setCharacteristic(Characteristic.ActiveIdentifier, NOT_EXISTING_INPUT); // do not preselect any inputs since there are no default inputs
@@ -399,8 +399,6 @@ class webosTvDevice {
     const serviceName = this.name + ' Volume';
     this.tvSpeakerService = new Service.TelevisionSpeaker(serviceName, 'tvSpeakerService');
     this.tvSpeakerService
-      .setCharacteristic(Characteristic.ConfiguredName, serviceName);
-    this.tvSpeakerService
       .setCharacteristic(Characteristic.Active, Characteristic.Active.ACTIVE)
       .setCharacteristic(Characteristic.VolumeControlType, Characteristic.VolumeControlType.ABSOLUTE);
     this.tvSpeakerService
@@ -415,6 +413,8 @@ class webosTvDevice {
       .onGet(this.getVolume.bind(this))
       .onSet(this.setVolume.bind(this));
 
+    this.setServiceConfiguredName(this.tvSpeakerService, serviceName);
+
     this.tvService.addLinkedService(this.tvSpeakerService);
     this.tvAccesory.addService(this.tvSpeakerService);
   }
@@ -428,10 +428,11 @@ class webosTvDevice {
       let dummyInputSource = new Service.InputSource('dummy', `input_${inputId}`);
       dummyInputSource
         .setCharacteristic(Characteristic.Identifier, inputId)
-        .setCharacteristic(Characteristic.ConfiguredName, 'dummy')
         .setCharacteristic(Characteristic.IsConfigured, Characteristic.IsConfigured.NOT_CONFIGURED)
         .setCharacteristic(Characteristic.TargetVisibilityState, Characteristic.TargetVisibilityState.HIDDEN)
         .setCharacteristic(Characteristic.CurrentVisibilityState, Characteristic.CurrentVisibilityState.HIDDEN);
+
+      this.setServiceConfiguredName(dummyInputSource, 'dummy');
 
       // add the new dummy input source service to the tv accessory
       this.tvService.addLinkedService(dummyInputSource);
@@ -523,11 +524,12 @@ class webosTvDevice {
 
       inputSourceService
         .setCharacteristic(Characteristic.Name, newInputDef.name)
-        .setCharacteristic(Characteristic.ConfiguredName, this.sanitizeHomeKitName(newInputDef.name))
         .setCharacteristic(Characteristic.IsConfigured, Characteristic.IsConfigured.CONFIGURED)
         .setCharacteristic(Characteristic.InputSourceType, Characteristic.InputSourceType.APPLICATION)
         .setCharacteristic(Characteristic.TargetVisibilityState, visible ? Characteristic.TargetVisibilityState.SHOWN : Characteristic.TargetVisibilityState.HIDDEN)
         .setCharacteristic(Characteristic.CurrentVisibilityState, visible ? Characteristic.CurrentVisibilityState.SHOWN : Characteristic.CurrentVisibilityState.HIDDEN);
+
+      this.setServiceConfiguredName(inputSourceService, newInputDef.name);
 
       // set visibility state
       inputSourceService.getCharacteristic(Characteristic.TargetVisibilityState)
@@ -559,10 +561,11 @@ class webosTvDevice {
     let inputService = inputDef.inputService;
     inputService
       .setCharacteristic(Characteristic.Name, 'dummy')
-      .setCharacteristic(Characteristic.ConfiguredName, 'dummy')
       .setCharacteristic(Characteristic.IsConfigured, Characteristic.IsConfigured.NOT_CONFIGURED)
       .setCharacteristic(Characteristic.TargetVisibilityState, Characteristic.TargetVisibilityState.HIDDEN)
       .setCharacteristic(Characteristic.CurrentVisibilityState, Characteristic.CurrentVisibilityState.HIDDEN);
+
+    this.setServiceConfiguredName(inputService, 'dummy');
 
     // readd to the dummy list as free
     this.dummyInputSourceServices.push(inputService);
@@ -579,9 +582,8 @@ class webosTvDevice {
 
     // slider - lightbulb or fan
     if (this.volumeControl === true || this.volumeControl === "both" || this.volumeControl === 'slider' || this.volumeControl === 'lightbulb') {
-      this.volumeAsLightbulbService = new Service.Lightbulb(this.name + ' Volume', 'volumeService');
-      this.volumeAsLightbulbService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-      this.volumeAsLightbulbService.setCharacteristic(Characteristic.ConfiguredName, this.name + ' Volume');
+      const serviceName = this.name + ' Volume';
+      this.volumeAsLightbulbService = new Service.Lightbulb(serviceName, 'volumeService');
       this.volumeAsLightbulbService
         .getCharacteristic(Characteristic.On)
         .onGet(this.getLightbulbMuteState.bind(this))
@@ -591,11 +593,12 @@ class webosTvDevice {
         .onGet(this.getLightbulbVolume.bind(this))
         .onSet(this.setLightbulbVolume.bind(this));
 
+      this.setServiceConfiguredName(this.volumeAsLightbulbService, serviceName);
+
       this.tvAccesory.addService(this.volumeAsLightbulbService);
     } else if (this.volumeControl === "fan") {
-      this.volumeAsFanService = new Service.Fanv2(this.name + ' Volume', 'volumeService');
-      this.volumeAsFanService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-      this.volumeAsFanService.setCharacteristic(Characteristic.ConfiguredName, this.name + ' Volume');
+      const serviceName = this.name + ' Volume';
+      this.volumeAsFanService = new Service.Fanv2(serviceName, 'volumeService');
       this.volumeAsFanService
         .getCharacteristic(Characteristic.Active)
         .onGet(this.getFanMuteState.bind(this))
@@ -603,6 +606,8 @@ class webosTvDevice {
       this.volumeAsFanService.addCharacteristic(Characteristic.RotationSpeed)
         .onGet(this.getRotationSpeedVolume.bind(this))
         .onSet(this.setRotationSpeedVolume.bind(this));
+
+      this.setServiceConfiguredName(this.volumeAsFanService, serviceName);
 
       this.tvAccesory.addService(this.volumeAsFanService);
     }
@@ -661,12 +666,12 @@ class webosTvDevice {
 
     // create the service
     this.screenControlService = new Service.Switch('Screen', 'screenControlService');
-    this.screenControlService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-    this.screenControlService.setCharacteristic(Characteristic.ConfiguredName, 'Screen');
     this.screenControlService
       .getCharacteristic(Characteristic.On)
       .onGet(this.getTvScreenState.bind(this))
       .onSet(this.setTvScreenState.bind(this));
+
+    this.setServiceConfiguredName(this.screenControlService, 'Screen');
 
     this.tvAccesory.addService(this.screenControlService);
   }
@@ -678,12 +683,12 @@ class webosTvDevice {
 
     // create the service
     this.screenSaverControlService = new Service.Switch('Screen Saver', 'screenSaverControlService');
-    this.screenSaverControlService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-    this.screenSaverControlService.setCharacteristic(Characteristic.ConfiguredName, 'Screen Saver');
     this.screenSaverControlService
       .getCharacteristic(Characteristic.On)
       .onGet(this.getScreenSaverState.bind(this))
       .onSet(this.setScreenSaverState.bind(this));
+
+    this.setServiceConfiguredName(this.screenSaverControlService, 'Screen Saver');
 
     this.tvAccesory.addService(this.screenSaverControlService);
   }
