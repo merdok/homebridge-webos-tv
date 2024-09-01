@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.4.5] - 2024-09-02
+### Added
+Added support for Homebridge 2.x
+
+
 ## [2.4.4] - 2024-04-06
 ### Added
 - Add the tv name to the volume service. Thanks @berno22 for the contribution!
