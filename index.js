@@ -3,7 +3,7 @@ import mkdirp from 'mkdirp';
 import LgTvController from './lib/LgTvController.js';
 import Events from './lib/Events.js';
 
-let Service, Characteristic, Homebridge, Accessory, HapStatusError, HAPStatus;
+let Service, Characteristic, Homebridge, Accessory, HapStatusError, HAPStatus, HAPStorage;
 
 const PLUGIN_NAME = 'homebridge-webos-tv';
 const PLATFORM_NAME = 'webostv';
@@ -22,6 +22,7 @@ export default (homebridge) => {
   Accessory = homebridge.platformAccessory;
   HapStatusError = homebridge.hap.HapStatusError;
   HAPStatus = homebridge.hap.HAPStatus;
+  HAPStorage = homebridge.hap.HAPStorage;
   homebridge.registerPlatform(PLUGIN_NAME, PLATFORM_NAME, webosTvPlatform, true);
 };
 
@@ -284,7 +285,7 @@ class webosTvDevice {
     this.UUID = Homebridge.hap.uuid.generate(this.mac + this.ip);
 
     // prepare the tv accessory
-    this.tvAccesory = new Accessory(this.name, this.UUID, Homebridge.hap.Accessory.Categories.TELEVISION);
+    this.tvAccesory = new Accessory(this.name, this.UUID, Homebridge.hap.Categories.TELEVISION);
 
     // prepare accessory services
     this.setupAccessoryServices();
@@ -522,7 +523,7 @@ class webosTvDevice {
 
       inputSourceService
         .setCharacteristic(Characteristic.Name, newInputDef.name)
-        .setCharacteristic(Characteristic.ConfiguredName, newInputDef.name)
+        .setCharacteristic(Characteristic.ConfiguredName, this.sanitizeHomeKitName(newInputDef.name))
         .setCharacteristic(Characteristic.IsConfigured, Characteristic.IsConfigured.CONFIGURED)
         .setCharacteristic(Characteristic.InputSourceType, Characteristic.InputSourceType.APPLICATION)
         .setCharacteristic(Characteristic.TargetVisibilityState, visible ? Characteristic.TargetVisibilityState.SHOWN : Characteristic.TargetVisibilityState.HIDDEN)
@@ -752,7 +753,7 @@ class webosTvDevice {
       newAppButtonDef.appId = newAppButtonDef.appId.replace(/\s/g, '');
 
       // get name
-      newAppButtonDef.name = value.name || 'App - ' + newAppButtonDef.appId;
+      newAppButtonDef.name = value.name || 'App ' + newAppButtonDef.appId;
 
       // params
       newAppButtonDef.params = value.params || {};
@@ -804,7 +805,7 @@ class webosTvDevice {
       newChannelButtonDef.channelId = value.channelId;
 
       // get name
-      newChannelButtonDef.name = value.name || 'Channel - ' + newChannelButtonDef.channelNumber;
+      newChannelButtonDef.name = value.name || 'Channel ' + newChannelButtonDef.channelNumber;
 
       // create the service
       let newChannelButtonService = this.createStatefulSwitchService(newChannelButtonDef.name, 'channelButtonService' + i,
@@ -848,7 +849,7 @@ class webosTvDevice {
       }
 
       // get name
-      newNotificationButtonDef.name = value.name || 'Notification - ' + newNotificationButtonDef.message;
+      newNotificationButtonDef.name = value.name || 'Notification ' + newNotificationButtonDef.message;
 
       // get the appId if specified
       newNotificationButtonDef.appId = value.appId;
@@ -905,7 +906,7 @@ class webosTvDevice {
       newRemoteControlButtonDef.action = newRemoteControlButtonDef.action.toString().toUpperCase();
 
       // get name
-      newRemoteControlButtonDef.name = value.name || 'Remote - ' + newRemoteControlButtonDef.action;
+      newRemoteControlButtonDef.name = value.name || 'Remote ' + newRemoteControlButtonDef.action;
 
       // create the stateless button service
       let newRemoteControlButtonService = this.createStatlessSwitchService(newRemoteControlButtonDef.name, 'remoteControlButtonService' + i, (state) => {
@@ -947,7 +948,7 @@ class webosTvDevice {
       newSoundOutputButtonDef.soundOutput = newSoundOutputButtonDef.soundOutput.toString();
 
       // get name
-      newSoundOutputButtonDef.name = value.name || 'Sound Output - ' + newSoundOutputButtonDef.soundOutput;
+      newSoundOutputButtonDef.name = value.name || 'Sound Output ' + newSoundOutputButtonDef.soundOutput;
 
       // create the service
       let newSoundOutputButtonService = this.createStatefulSwitchService(newSoundOutputButtonDef.name, 'soundOutputButtonService' + i,
@@ -994,7 +995,7 @@ class webosTvDevice {
       newPictureModeButtonDef.pictureMode = newPictureModeButtonDef.pictureMode.toString();
 
       // get name
-      newPictureModeButtonDef.name = value.name || 'Picture Mode - ' + newPictureModeButtonDef.pictureMode;
+      newPictureModeButtonDef.name = value.name || 'Picture Mode ' + newPictureModeButtonDef.pictureMode;
 
       // create the service
       let newPictureModeButtonService = this.createStatefulSwitchService(newPictureModeButtonDef.name, 'pictureModeButtonsService' + i,
@@ -1039,7 +1040,7 @@ class webosTvDevice {
       newSoundModeButtonDef.soundMode = newSoundModeButtonDef.soundMode.toString();
 
       // get name
-      newSoundModeButtonDef.name = value.name || 'Sound Mode - ' + newSoundModeButtonDef.soundMode;
+      newSoundModeButtonDef.name = value.name || 'Sound Mode ' + newSoundModeButtonDef.soundMode;
 
       // create the service
       let newSoundModeButtonService = this.createStatefulSwitchService(newSoundModeButtonDef.name, 'soundModeButtonsService' + i,
@@ -1091,7 +1092,7 @@ class webosTvDevice {
       }
 
       // get name
-      newSystemSettingsButtonDef.name = value.name || 'System Settings - ' + i;
+      newSystemSettingsButtonDef.name = value.name || 'System Settings ' + i;
 
       // create the stateless button service
       let newSystemModeSettingsService = this.createStatlessSwitchService(newSystemSettingsButtonDef.name, 'systemSettingsService' + i, (state) => {
@@ -1332,7 +1333,7 @@ class webosTvDevice {
     if (this.configuredInputs[inputDef.id]) {
       this.logDebug(`Changing input name from ${inputDef.name} to ${value} for input with id: ${inputDef.id}`);
       // update the characteristic
-      this.configuredInputs[inputDef.id].inputService.getCharacteristic(Characteristic.ConfiguredName).updateValue(value);
+      this.configuredInputs[inputDef.id].inputService.getCharacteristic(Characteristic.ConfiguredName).updateValue(this.sanitizeHomeKitName(value));
       // save the new name to the file
       this.updateNameInputConfigForAppId(inputDef.appId, value);
     }
@@ -2021,7 +2022,7 @@ class webosTvDevice {
   /*----------========== STATEFUL SERVICES HELPERS ==========----------*/
 
   createStatefulSwitchService(name, id, getterFn, setterFn) {
-    let newStatefulSwitchService = new Service.Switch(name, id);
+    let newStatefulSwitchService = new Service.Switch(this.sanitizeHomeKitName(name), id);
     newStatefulSwitchService
       .getCharacteristic(Characteristic.On)
       .onGet(getterFn.bind(this))
@@ -2099,7 +2100,7 @@ class webosTvDevice {
   /*----------========== STATELESS SERVICES HELPERS ==========----------*/
 
   createStatlessSwitchService(name, id, setterFn) {
-    let newStatelessSwitchService = new Service.Switch(name, id);
+    let newStatelessSwitchService = new Service.Switch(this.sanitizeHomeKitName(name), id);
     newStatelessSwitchService
       .getCharacteristic(Characteristic.On)
       .onGet(this.getStatelessSwitchState.bind(this))
@@ -2499,7 +2500,7 @@ class webosTvDevice {
     newTriggerDef.threshold = triggerThreshold;
     newTriggerDef.actaulValFn = actaulValFn;
 
-    newTriggerDef.service = new Service.OccupancySensor(triggerName, `${triggerType}TriggerService`);
+    newTriggerDef.service = new Service.OccupancySensor(this.sanitizeHomeKitName(triggerName), `${triggerType}TriggerService`);
     newTriggerDef.service
       .getCharacteristic(Characteristic.OccupancyDetected)
       .onGet(() => {
@@ -2538,10 +2539,14 @@ class webosTvDevice {
   setServiceConfiguredName(service, name) {
     if (service) {
       service.addOptionalCharacteristic(Characteristic.ConfiguredName);
-      service.setCharacteristic(Characteristic.ConfiguredName, name);
+      service.setCharacteristic(Characteristic.ConfiguredName, this.sanitizeHomeKitName(name));
     }
   }
 
+  sanitizeHomeKitName(name) {
+    // Returns a name containing only allowed HomeKit device name characters
+    return name.replace(/[^\p{L}\p{N} ']/ug, '').replace(/^[ ']*/, '').replace(/[ ']*$/, '') || 'Unnamed';
+  }
 
   /*----------========== LOG ==========----------*/
 
