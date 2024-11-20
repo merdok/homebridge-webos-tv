@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.4.6] - 2024-11-21
+### Added
+Added support for node.js v22
+
+
 ## [2.4.5] - 2024-09-02
 ### Added
 Added support for Homebridge 2.x
