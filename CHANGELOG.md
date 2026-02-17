@@ -6,9 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.4.8] - 2026-02-17
+### Added
+- Add `hdrFilmMaker` picture mode. Thanks @Dontodtod for the info!
+
+
 ## [2.4.7] - 2025-12-27
 ### Added
 Added support for node.js v24
+
 
 ## [2.4.6] - 2024-11-21
 ### Added
