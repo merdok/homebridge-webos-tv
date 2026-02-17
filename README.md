@@ -375,7 +375,7 @@ Whether the triggers service is enabled. This allows to create occupancy sensors
 - *vivid*, *hdrEffect*,  *hdrCinema*, *hdrCinemaBright*, *hdrExternal*, *hdrGame*,
 - *hdrStandard*, *hdrTechnicolor*, *hdrVivid*, *dolbyHdrCinema*,*dolbyHdrCinemaBright*,
 - *dolbyHdrDarkAmazon*, *dolbyHdrGame*, *dolbyHdrStandard*, *dolbyHdrVivid*, *dolbyStandard*,
-- *filmMaker*
+- *filmMaker*, *hdrFilmMaker*
 
 #### Sound modes
 - *aiSoundPlus*, *standard*, *movie*, *news*, *sports*, *music*, *game*

@@ -380,7 +380,8 @@
                       "dolbyHdrStandard",
                       "dolbyHdrVivid",
                       "dolbyStandard",
-                      "filmMaker"
+                      "filmMaker",
+                      "hdrFilmMaker"
                     ]
                   },
                   "name": {
