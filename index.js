@@ -501,6 +501,18 @@ class webosTvDevice {
 
     let inputIdentifiersChanged = false;
 
+    // Keep track of inputs which are known to be present while assigning
+    // identifiers. This lets the capacity fallback reclaim stale reservations
+    // from absent apps before touching identifiers belonging to present apps.
+    let presentInputAppIds = new Set(
+      Object.values(this.configuredInputs).map((inputDef) => inputDef.appId)
+    );
+    inputSourcesList.forEach((input) => {
+      if (input && typeof input.appId === 'string' && input.appId !== '') {
+        presentInputAppIds.add(input.appId.replace(/\s/g, ''));
+      }
+    });
+
     for (let value of inputSourcesList) {
 
       // create a new input definition
@@ -527,7 +539,7 @@ class webosTvDevice {
       // If there is no saved mapping yet, select the first identifier which
       // is not reserved by another known app. This keeps ActiveIdentifier
       // stable across restarts and changes in the order returned by webOS.
-      var inputSourceService = this.takeInputSourceServiceForAppId(newInputDef.appId);
+      var inputSourceService = this.takeInputSourceServiceForAppId(newInputDef.appId, presentInputAppIds);
       if (!inputSourceService) {
         this.logWarn(`No unreserved input identifier available for appId: ${newInputDef.appId}. Cannot add input source!`);
         continue;
@@ -2253,7 +2265,7 @@ class webosTvDevice {
     return Number.isInteger(identifier) && identifier >= 0 && identifier < this.inputSourcesLimit;
   }
 
-  takeInputSourceServiceForAppId(appId) {
+  takeInputSourceServiceForAppId(appId, presentInputAppIds = new Set()) {
     let savedIdentifier = this.tvInputIdentifiers[appId];
 
     if (this.isValidInputIdentifier(savedIdentifier)) {
@@ -2285,12 +2297,25 @@ class webosTvDevice {
       return this.dummyInputSourceServices.splice(freeInputIndex, 1)[0];
     }
 
-    // All remaining free services are reserved by apps which are currently
-    // absent. Preserve the old greedy behavior under capacity pressure:
-    // a present input takes the first free slot and the stale reservation is
-    // released. If the absent app returns later it will receive another free
-    // identifier, if one is available.
-    let inputSourceService = this.dummyInputSourceServices.shift();
+    // All remaining free services are reserved. Prefer reclaiming a stale
+    // reservation from an app which is not currently present. This preserves
+    // stable identifiers for present inputs while still keeping the previous
+    // greedy behavior when reservations would otherwise block a real input.
+    let reclaimInputIndex = this.dummyInputSourceServices.findIndex((inputSourceService) => {
+      let identifier = this.getInputSourceServiceIdentifier(inputSourceService);
+      let reservedAppId = Object.keys(this.tvInputIdentifiers).find((savedAppId) => {
+        return savedAppId !== appId && this.tvInputIdentifiers[savedAppId] === identifier;
+      });
+      return reservedAppId && presentInputAppIds.has(reservedAppId) === false;
+    });
+
+    // If the TV is genuinely over the input cap and every reservation belongs
+    // to another present app, fall back to the original greedy behavior.
+    if (reclaimInputIndex < 0) {
+      reclaimInputIndex = 0;
+    }
+
+    let inputSourceService = this.dummyInputSourceServices.splice(reclaimInputIndex, 1)[0];
     if (!inputSourceService) {
       return undefined;
     }
@@ -2302,7 +2327,7 @@ class webosTvDevice {
 
     if (reservedAppId) {
       delete this.tvInputIdentifiers[reservedAppId];
-      this.logDebug(`Reclaiming input identifier ${reclaimedIdentifier} from absent appId: ${reservedAppId}`);
+      this.logDebug(`Reclaiming input identifier ${reclaimedIdentifier} from appId: ${reservedAppId}`);
     }
 
     return inputSourceService;
