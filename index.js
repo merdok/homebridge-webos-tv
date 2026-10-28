@@ -2281,20 +2281,41 @@ class webosTvDevice {
       return reservedIdentifiers.has(this.getInputSourceServiceIdentifier(inputSourceService)) === false;
     });
 
-    if (freeInputIndex < 0) {
+    if (freeInputIndex >= 0) {
+      return this.dummyInputSourceServices.splice(freeInputIndex, 1)[0];
+    }
+
+    // All remaining free services are reserved by apps which are currently
+    // absent. Preserve the old greedy behavior under capacity pressure:
+    // a present input takes the first free slot and the stale reservation is
+    // released. If the absent app returns later it will receive another free
+    // identifier, if one is available.
+    let inputSourceService = this.dummyInputSourceServices.shift();
+    if (!inputSourceService) {
       return undefined;
     }
 
-    return this.dummyInputSourceServices.splice(freeInputIndex, 1)[0];
+    let reclaimedIdentifier = this.getInputSourceServiceIdentifier(inputSourceService);
+    let reservedAppId = Object.keys(this.tvInputIdentifiers).find((savedAppId) => {
+      return savedAppId !== appId && this.tvInputIdentifiers[savedAppId] === reclaimedIdentifier;
+    });
+
+    if (reservedAppId) {
+      delete this.tvInputIdentifiers[reservedAppId];
+      this.logDebug(`Reclaiming input identifier ${reclaimedIdentifier} from absent appId: ${reservedAppId}`);
+    }
+
+    return inputSourceService;
   }
 
   saveInputIdentifiersToFile() {
-    try {
-      fs.writeFileSync(this.tvInputIdentifiersFile, JSON.stringify(this.tvInputIdentifiers));
-      this.logDebug('Input identifiers successfully saved!');
-    } catch (err) {
-      this.logWarn('Error occured, could not write input identifiers file: %s', err);
-    }
+    fs.writeFile(this.tvInputIdentifiersFile, JSON.stringify(this.tvInputIdentifiers), (err) => {
+      if (err) {
+        this.logWarn('Error occured, could not write input identifiers file: %s', err);
+      } else {
+        this.logDebug('Input identifiers successfully saved!');
+      }
+    });
   }
 
   getActiveInputId() {
