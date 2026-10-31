@@ -170,11 +170,13 @@ class webosTvDevice {
     this.tvInfoFile = this.prefsDir + 'info_' + this.mac.split(':').join('');
     this.tvAvailableInputsFile = this.prefsDir + 'inputsAvailable_' + this.mac.split(':').join('');
     this.tvInputConfigFile = this.prefsDir + 'inputsConfg_' + this.mac.split(':').join('');
+    this.tvInputIdentifiersFile = this.prefsDir + 'inputIdentifiers_' + this.mac.split(':').join('');
 
     //prepare variables
     this.dummyInputSourceServices = [];
     this.configuredInputs = {};
     this.tvInputsConfig = {};
+    this.tvInputIdentifiers = {};
 
     // connect to the TV
     this.connectToTv();
@@ -467,6 +469,18 @@ class webosTvDevice {
       this.logDebug('No TV inputs config file found!');
     }
 
+    // read out the persistent appId -> HomeKit Identifier mapping
+    try {
+      let savedInputIdentifiers = JSON.parse(fs.readFileSync(this.tvInputIdentifiersFile));
+      if (savedInputIdentifiers && typeof savedInputIdentifiers === 'object' && Array.isArray(savedInputIdentifiers) === false) {
+        this.tvInputIdentifiers = savedInputIdentifiers;
+      } else {
+        this.logWarn('Saved input identifiers file is invalid. A new mapping will be created!');
+      }
+    } catch (err) {
+      this.logDebug('No saved input identifiers found yet. Current identifiers will be persisted on first load.');
+    }
+
     // add the saved inputs
     //Note to myself, i am saving the inputs in a file as a cache in order when the user starts homebridge and the tv is off that the cached inputs got added already.
     this.addInputSources(availableInputs);
@@ -485,14 +499,21 @@ class webosTvDevice {
 
     this.logDebug(`Adding ${inputSourcesList.length} new input sources!`);
 
-    for (let value of inputSourcesList) {
+    let inputIdentifiersChanged = false;
 
-      if (this.dummyInputSourceServices.length === 0) {
-        this.logWarn(`Inputs limit (${this.inputSourcesLimit}) reached. Cannot add any more new inputs!`);
-        break;
+    // Keep track of inputs which are known to be present while assigning
+    // identifiers. This lets the capacity fallback reclaim stale reservations
+    // from absent apps before touching identifiers belonging to present apps.
+    let presentInputAppIds = new Set(
+      Object.values(this.configuredInputs).map((inputDef) => inputDef.appId)
+    );
+    inputSourcesList.forEach((input) => {
+      if (input && typeof input.appId === 'string' && input.appId !== '') {
+        presentInputAppIds.add(input.appId.replace(/\s/g, ''));
       }
+    });
 
-      var inputSourceService = this.dummyInputSourceServices.shift(); // get the first free input source service
+    for (let value of inputSourcesList) {
 
       // create a new input definition
       let newInputDef = {};
@@ -503,12 +524,26 @@ class webosTvDevice {
       // if appId null or empty then skip this input, appId is required to open an app
       if (!newInputDef.appId || newInputDef.appId === '' || typeof newInputDef.appId !== 'string') {
         this.logWarn(`Missing appId or appId is not of type string. Cannot add input source!`);
-        this.dummyInputSourceServices.unshift(inputSourceService); // return the unused free input source service
         continue;
       }
 
       // remove all white spaces from the appId string
       newInputDef.appId = newInputDef.appId.replace(/\s/g, '');
+
+      if (this.dummyInputSourceServices.length === 0) {
+        this.logWarn(`Inputs limit (${this.inputSourcesLimit}) reached. Cannot add any more new inputs!`);
+        break;
+      }
+
+      // Reuse the HomeKit Identifier previously assigned to this appId.
+      // If there is no saved mapping yet, select the first identifier which
+      // is not reserved by another known app. This keeps ActiveIdentifier
+      // stable across restarts and changes in the order returned by webOS.
+      var inputSourceService = this.takeInputSourceServiceForAppId(newInputDef.appId, presentInputAppIds);
+      if (!inputSourceService) {
+        this.logWarn(`No unreserved input identifier available for appId: ${newInputDef.appId}. Cannot add input source!`);
+        continue;
+      }
 
       // name (name - input config, label - auto generated inputs)
       newInputDef.name = value.name || value.label || newInputDef.appId;
@@ -521,8 +556,13 @@ class webosTvDevice {
       // params
       newInputDef.params = value.params || {};
 
-      //input Identifier
-      newInputDef.id = inputSourceService.getCharacteristic(Characteristic.Identifier).value;
+      // input Identifier
+      newInputDef.id = this.getInputSourceServiceIdentifier(inputSourceService);
+
+      if (this.tvInputIdentifiers[newInputDef.appId] !== newInputDef.id) {
+        this.tvInputIdentifiers[newInputDef.appId] = newInputDef.id;
+        inputIdentifiersChanged = true;
+      }
 
       let visible = false;
       if (this.tvInputsConfig[newInputDef.appId] && this.tvInputsConfig[newInputDef.appId].visible === true) {
@@ -554,8 +594,12 @@ class webosTvDevice {
       newInputDef.inputService = inputSourceService;
       this.configuredInputs[newInputDef.id] = newInputDef;
 
-      this.logDebug(`Created new input source: appId: ${newInputDef.appId}, name: ${newInputDef.name}`);
+      this.logDebug(`Created new input source: appId: ${newInputDef.appId}, name: ${newInputDef.name}, identifier: ${newInputDef.id}`);
 
+    }
+
+    if (inputIdentifiersChanged) {
+      this.saveInputIdentifiersToFile();
     }
 
   }
@@ -2212,6 +2256,92 @@ class webosTvDevice {
 
 
   /*----------========== INPUT HELPERS ==========----------*/
+
+  getInputSourceServiceIdentifier(inputSourceService) {
+    return inputSourceService.getCharacteristic(Characteristic.Identifier).value;
+  }
+
+  isValidInputIdentifier(identifier) {
+    return Number.isInteger(identifier) && identifier >= 0 && identifier < this.inputSourcesLimit;
+  }
+
+  takeInputSourceServiceForAppId(appId, presentInputAppIds = new Set()) {
+    let savedIdentifier = this.tvInputIdentifiers[appId];
+
+    if (this.isValidInputIdentifier(savedIdentifier)) {
+      let savedInputIndex = this.dummyInputSourceServices.findIndex((inputSourceService) => {
+        return this.getInputSourceServiceIdentifier(inputSourceService) === savedIdentifier;
+      });
+
+      if (savedInputIndex >= 0) {
+        this.logDebug(`Reusing input identifier ${savedIdentifier} for appId: ${appId}`);
+        return this.dummyInputSourceServices.splice(savedInputIndex, 1)[0];
+      }
+
+      this.logWarn(`Saved input identifier ${savedIdentifier} for appId ${appId} is already in use. Assigning a new identifier!`);
+    }
+
+    let reservedIdentifiers = new Set(
+      Object.entries(this.tvInputIdentifiers)
+        .filter(([savedAppId, identifier]) => {
+          return savedAppId !== appId && this.isValidInputIdentifier(identifier);
+        })
+        .map(([, identifier]) => identifier)
+    );
+
+    let freeInputIndex = this.dummyInputSourceServices.findIndex((inputSourceService) => {
+      return reservedIdentifiers.has(this.getInputSourceServiceIdentifier(inputSourceService)) === false;
+    });
+
+    if (freeInputIndex >= 0) {
+      return this.dummyInputSourceServices.splice(freeInputIndex, 1)[0];
+    }
+
+    // All remaining free services are reserved. Prefer reclaiming a stale
+    // reservation from an app which is not currently present. This preserves
+    // stable identifiers for present inputs while still keeping the previous
+    // greedy behavior when reservations would otherwise block a real input.
+    let reclaimInputIndex = this.dummyInputSourceServices.findIndex((inputSourceService) => {
+      let identifier = this.getInputSourceServiceIdentifier(inputSourceService);
+      let reservedAppId = Object.keys(this.tvInputIdentifiers).find((savedAppId) => {
+        return savedAppId !== appId && this.tvInputIdentifiers[savedAppId] === identifier;
+      });
+      return reservedAppId && presentInputAppIds.has(reservedAppId) === false;
+    });
+
+    // If the TV is genuinely over the input cap and every reservation belongs
+    // to another present app, fall back to the original greedy behavior.
+    if (reclaimInputIndex < 0) {
+      reclaimInputIndex = 0;
+    }
+
+    let inputSourceService = this.dummyInputSourceServices.splice(reclaimInputIndex, 1)[0];
+    if (!inputSourceService) {
+      return undefined;
+    }
+
+    let reclaimedIdentifier = this.getInputSourceServiceIdentifier(inputSourceService);
+    let reservedAppId = Object.keys(this.tvInputIdentifiers).find((savedAppId) => {
+      return savedAppId !== appId && this.tvInputIdentifiers[savedAppId] === reclaimedIdentifier;
+    });
+
+    if (reservedAppId) {
+      delete this.tvInputIdentifiers[reservedAppId];
+      this.logDebug(`Reclaiming input identifier ${reclaimedIdentifier} from appId: ${reservedAppId}`);
+    }
+
+    return inputSourceService;
+  }
+
+  saveInputIdentifiersToFile() {
+    fs.writeFile(this.tvInputIdentifiersFile, JSON.stringify(this.tvInputIdentifiers), (err) => {
+      if (err) {
+        this.logWarn('Error occured, could not write input identifiers file: %s', err);
+      } else {
+        this.logDebug('Input identifiers successfully saved!');
+      }
+    });
+  }
 
   getActiveInputId() {
     if (this.isTvOn()) {
