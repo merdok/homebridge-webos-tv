@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Honor `forceSsl` when creating the TV connection so initial connections and automatic retries use SSL.
+
 ## [2.5.1] - 2026-11-01
 ### Added
 - Persist the HomeKit input identifiers by appId so they remain stable across restarts and changes in the input order reported by the TV. Thanks @Baggio94 for the contribution!
