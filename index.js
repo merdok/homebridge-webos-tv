@@ -7,7 +7,7 @@ let Service, Characteristic, Homebridge, Accessory, HapStatusError, HAPStatus, H
 
 const PLUGIN_NAME = 'homebridge-webos-tv';
 const PLATFORM_NAME = 'webostv';
-const PLUGIN_VERSION = '2.5.1';
+const PLUGIN_VERSION = '2.5.2';
 
 // General constants
 const NOT_EXISTING_INPUT = 999999;

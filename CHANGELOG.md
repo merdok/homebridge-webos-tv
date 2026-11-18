@@ -6,8 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+## [2.5.2] - 2026-11-19
 ### Fixed
 - Honor `forceSsl` when creating the TV connection so initial connections and automatic retries use SSL.
+
 
 ## [2.5.1] - 2026-11-01
 ### Added
