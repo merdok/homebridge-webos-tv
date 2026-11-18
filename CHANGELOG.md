@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Retry when a TV connection or registration stalls, and prevent overlapping connection attempts.
 
 ## [2.5.2] - 2026-11-19
 ### Fixed
