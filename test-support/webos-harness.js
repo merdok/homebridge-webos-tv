@@ -35,12 +35,12 @@ export async function createHarness(entry = 'socket', options = {}) {
       this.close();
     }
 
-    reply(payload) {
+    reply(payload, type = payload?.['client-key'] ? 'registered' : 'response', error) {
       const registration = this.sent.find(message => message.type === 'register');
       assert.ok(registration, 'registration must be sent before a TV reply');
       this.emit('message', {
         type: 'utf8',
-        utf8Data: JSON.stringify({ id: registration.id, payload })
+        utf8Data: JSON.stringify({ id: registration.id, type, payload, error })
       });
     }
   }

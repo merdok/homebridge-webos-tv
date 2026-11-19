@@ -42,7 +42,7 @@ test('duplicate connect calls do not create parallel attempts or registrations',
   h.subject.disconnect();
 });
 
-test('a pairing prompt allows time for confirmation before retrying', async () => {
+test('a pairing prompt waits for confirmation beyond two minutes on the same connection', async () => {
   const h = await createHarness();
   h.advance(0);
   const connection = h.clients[0].open();
@@ -50,13 +50,14 @@ test('a pairing prompt allows time for confirmation before retrying', async () =
   h.subject.on('prompt', () => prompts++);
   connection.reply({ pairingType: 'PROMPT' });
   assert.equal(prompts, 1);
-  h.advance(119999);
+  assert.deepEqual(h.pendingDelays(), []);
+  h.advance(180000);
   assert.equal(connection.drops, 0);
   assert.equal(h.attempts.length, 1);
-  h.advance(1);
-  assert.equal(connection.drops, 1);
-  h.advance(5000);
-  assert.equal(h.attempts.length, 2);
+  connection.reply({ 'client-key': 'accepted-key' });
+  assert.equal(h.subject.connection, true);
+  assert.deepEqual(h.savedKeys, ['accepted-key']);
+  assert.equal(connection.sent.length, 1);
   h.subject.disconnect();
 });
 
@@ -73,6 +74,9 @@ test('successful registration cancels the deadline and reports connected state',
   assert.equal(connected, 1);
   assert.deepEqual(h.savedKeys, ['accepted-key']);
   assert.deepEqual(h.pendingDelays(), []);
+  connection.reply(undefined, 'error', '403 Late duplicate registration reply');
+  assert.equal(h.subject.connection, true);
+  assert.equal(h.errors.length, 0);
   h.advance(180000);
   assert.equal(connection.connected, true);
   assert.equal(h.attempts.length, 1);
@@ -124,17 +128,83 @@ test('an explicit reconnect consumes the pending automatic retry', async () => {
   h.subject.disconnect();
 });
 
-test('configured attempt and pairing deadlines are respected', async () => {
-  const h = await createHarness('socket', { connectTimeout: 1000, pairingTimeout: 3000 });
+test('other registration replies keep the original configured deadline', async () => {
+  const replies = [
+    { payload: {}, type: 'response' },
+    { payload: { pairingType: 'PIN' }, type: 'response' },
+    { payload: { pairingType: 'PROMPT' }, type: 'registered' }
+  ];
+  for (const { payload, type } of replies) {
+    const h = await createHarness('socket', { connectTimeout: 1000 });
+    h.advance(0);
+    const connection = h.clients[0].open();
+    let prompts = 0;
+    h.subject.on('prompt', () => prompts++);
+    h.advance(500);
+    connection.reply(payload, type);
+    assert.equal(prompts, 0);
+    assert.deepEqual(h.pendingDelays(), [500]);
+    h.advance(499);
+    assert.equal(connection.drops, 0);
+    h.advance(1);
+    assert.equal(connection.drops, 1);
+    assert.equal(h.errors.at(-1).code, 'ETIMEDOUT');
+    h.subject.disconnect();
+  }
+});
+
+const rejectedReplies = [
+  { type: 'error', error: '403 User rejected pairing' },
+  {
+    type: 'response',
+    payload: { returnValue: false, pairingType: 'PROMPT', errorText: '403 User rejected pairing' }
+  }
+];
+for (const { type, payload, error } of rejectedReplies) {
+  for (const prompted of [false, true]) {
+    test(`a rejected registration (${type}) fails and retries with prompted=${prompted}`, async () => {
+      const h = await createHarness();
+      h.advance(0);
+      const connection = h.clients[0].open();
+      if (prompted) {
+        connection.reply({ pairingType: 'PROMPT' });
+        h.advance(180000);
+      }
+      connection.reply(payload, type, error);
+      assert.equal(connection.drops, 1);
+      assert.equal(h.errors.length, 1);
+      assert.match(h.errors[0].message, /403 User rejected pairing/);
+      assert.deepEqual(h.pendingDelays(), [5000]);
+      h.advance(5000);
+      assert.equal(h.attempts.length, 2);
+      h.subject.disconnect();
+    });
+  }
+}
+
+test('a transport close while awaiting pairing retries normally', async () => {
+  const h = await createHarness();
   h.advance(0);
   const connection = h.clients[0].open();
-  h.advance(500);
   connection.reply({ pairingType: 'PROMPT' });
-  h.advance(2999);
-  assert.equal(connection.drops, 0);
-  h.advance(1);
-  assert.equal(connection.drops, 1);
+  h.advance(180000);
+  connection.close();
+  assert.deepEqual(h.pendingDelays(), [5000]);
+  h.advance(5000);
+  assert.equal(h.attempts.length, 2);
   h.subject.disconnect();
+});
+
+test('disconnect cancels a prompted pairing without reconnecting', async () => {
+  const h = await createHarness();
+  h.advance(0);
+  const connection = h.clients[0].open();
+  connection.reply({ pairingType: 'PROMPT' });
+  h.subject.disconnect();
+  assert.equal(connection.connected, false);
+  assert.deepEqual(h.pendingDelays(), []);
+  h.advance(180000);
+  assert.equal(h.attempts.length, 1);
 });
 
 test('synchronous abort errors cannot create a second retry', async () => {
