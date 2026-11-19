@@ -50,14 +50,41 @@ test('a pairing prompt waits for confirmation beyond two minutes on the same con
   h.subject.on('prompt', () => prompts++);
   connection.reply({ pairingType: 'PROMPT' });
   assert.equal(prompts, 1);
-  assert.deepEqual(h.pendingDelays(), []);
+  assert.deepEqual(h.pendingDelays(), [300000]);
   h.advance(180000);
   assert.equal(connection.drops, 0);
   assert.equal(h.attempts.length, 1);
   connection.reply({ 'client-key': 'accepted-key' });
   assert.equal(h.subject.connection, true);
+  assert.deepEqual(h.pendingDelays(), []);
   assert.deepEqual(h.savedKeys, ['accepted-key']);
   assert.equal(connection.sent.length, 1);
+  h.subject.disconnect();
+});
+
+test('a healthy prompted connection has one bounded deadline that repeated prompts cannot extend', async () => {
+  const h = await createHarness();
+  h.advance(0);
+  const connection = h.clients[0].open();
+  connection.reply({ pairingType: 'PROMPT' });
+  h.advance(60000);
+  connection.reply({ pairingType: 'PROMPT' });
+  assert.deepEqual(h.pendingDelays(), [240000]);
+  h.advance(239999);
+  assert.equal(connection.connected, true);
+  assert.equal(connection.drops, 0);
+  assert.equal(h.errors.length, 0);
+  h.advance(1);
+  assert.equal(connection.drops, 1);
+  assert.equal(h.errors.length, 1);
+  assert.equal(h.errors[0].code, 'ETIMEDOUT');
+  assert.equal(h.errors[0].message, 'TV pairing confirmation timed out');
+  assert.deepEqual(h.pendingDelays(), [5000]);
+  connection.reply({ 'client-key': 'late-key' });
+  assert.deepEqual(h.savedKeys, []);
+  h.advance(5000);
+  assert.equal(h.attempts.length, 2);
+  assert.deepEqual(h.pendingDelays(), [15000]);
   h.subject.disconnect();
 });
 
@@ -128,28 +155,32 @@ test('an explicit reconnect consumes the pending automatic retry', async () => {
   h.subject.disconnect();
 });
 
-test('other registration replies keep the original configured deadline', async () => {
+test('unexpected registration replies fail immediately with clear registration errors', async () => {
   const replies = [
-    { payload: {}, type: 'response' },
-    { payload: { pairingType: 'PIN' }, type: 'response' },
-    { payload: { pairingType: 'PROMPT' }, type: 'registered' }
+    { payload: {}, type: 'response', reason: /Unexpected TV registration response/ },
+    { payload: { pairingType: 'PIN' }, type: 'response', reason: /PIN/ },
+    { payload: { pairingType: 'PROMPT' }, type: 'registered', reason: /Unexpected TV registration response/ }
   ];
-  for (const { payload, type } of replies) {
-    const h = await createHarness('socket', { connectTimeout: 1000 });
-    h.advance(0);
-    const connection = h.clients[0].open();
-    let prompts = 0;
-    h.subject.on('prompt', () => prompts++);
-    h.advance(500);
-    connection.reply(payload, type);
-    assert.equal(prompts, 0);
-    assert.deepEqual(h.pendingDelays(), [500]);
-    h.advance(499);
-    assert.equal(connection.drops, 0);
-    h.advance(1);
-    assert.equal(connection.drops, 1);
-    assert.equal(h.errors.at(-1).code, 'ETIMEDOUT');
-    h.subject.disconnect();
+  for (const { payload, type, reason } of replies) {
+    for (const prompted of [false, true]) {
+      const h = await createHarness('socket', { connectTimeout: 1000 });
+      h.advance(0);
+      const connection = h.clients[0].open();
+      let prompts = 0;
+      h.subject.on('prompt', () => prompts++);
+      if (prompted) connection.reply({ pairingType: 'PROMPT' });
+      h.advance(500);
+      connection.reply(payload, type);
+      assert.equal(prompts, prompted ? 1 : 0);
+      assert.equal(connection.drops, 1);
+      assert.equal(h.errors.length, 1);
+      assert.equal(h.errors[0].code, 'EREGISTRATION');
+      assert.match(h.errors[0].message, reason);
+      assert.deepEqual(h.pendingDelays(), [5000]);
+      h.advance(5000);
+      assert.equal(h.attempts.length, 2);
+      h.subject.disconnect();
+    }
   }
 });
 
@@ -173,6 +204,7 @@ for (const { type, payload, error } of rejectedReplies) {
       connection.reply(payload, type, error);
       assert.equal(connection.drops, 1);
       assert.equal(h.errors.length, 1);
+      assert.equal(h.errors[0].code, 'EREGISTRATION');
       assert.match(h.errors[0].message, /403 User rejected pairing/);
       assert.deepEqual(h.pendingDelays(), [5000]);
       h.advance(5000);
@@ -203,8 +235,9 @@ test('disconnect cancels a prompted pairing without reconnecting', async () => {
   h.subject.disconnect();
   assert.equal(connection.connected, false);
   assert.deepEqual(h.pendingDelays(), []);
-  h.advance(180000);
+  h.advance(360000);
   assert.equal(h.attempts.length, 1);
+  assert.equal(h.errors.length, 0);
 });
 
 test('synchronous abort errors cannot create a second retry', async () => {
